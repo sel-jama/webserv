@@ -21,6 +21,10 @@ class location
         void setReturn(std::vector<std::string>::const_iterator &, int &);
         void setRoot(std::vector<std::string>::const_iterator &, int &);
         void setCgi(std::vector<std::string>::const_iterator &);
+        std::string location_n();
+        std::string upl();
+        std::map <std::string, int> http_m();
+        std::map <std::string, std::string> cg();
 
         location();
         ~location();

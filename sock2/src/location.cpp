@@ -10,6 +10,20 @@ location::location()
 
 location::~location(){}
 
+std::string location::location_n()
+{
+    return location_name;}
+
+std::string location::upl()
+{
+    return(upload);}
+
+std::map <std::string, int> location::http_m(){
+    return(http_methods);}
+
+std::map<std::string, std::string> location::cg(){return cgi;};
+
+
 void location::setuplocationName(const std::string &name)
 {
     //check path ?

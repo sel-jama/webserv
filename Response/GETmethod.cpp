@@ -12,17 +12,78 @@
 
 #include "GETmethod.hpp"
 
-void handle_get_request(int client_socket) {
-    // Here, you would implement the logic to retrieve the requested resource
-    // This could involve reading files from the server, querying a database, etc.
-    // For simplicity, let's just send back a static response
+void HTTPServer::handleClient(int clientSocket) {
+    char buffer[1024] = {0};
+    int bytesRead = recv(clientSocket, buffer, sizeof(buffer), 0);
+    if (bytesRead == -1) {
+        std::cerr << "Error: Failed to read from client socket\n";
+        return;
+    }
 
-    std::string response = "HTTP/1.1 200 OK\r\nContent-Type: text/plain\r\n\r\n";
+    std::istringstream request(buffer);
+    std::string method, uri, httpVersion;
+    request >> method >> uri >> httpVersion;
 
-    send(client_socket, response.c_str(), response.length(), 0);
+    if (method != "GET") {
+        std::cerr << "Error: Unsupported HTTP method\n";
+        return;
+    }
 
-    // Close the connection
-    close(client_socket);
+    // Remove leading '/' from URI
+    if (uri.length() > 0 && uri[0] == '/') {
+        uri = uri.substr(1);
+    }
+
+    std::string fileName = uri.empty() ? "index.html" : uri;
+    std::string mimeType = getMimeType(fileName);
+    std::string content = readFile(fileName);
+
+    std::ostringstream response;
+    response << "HTTP/1.1 200 OK\r\n"
+             << "Content-Type: " << mimeType << "\r\n"
+             << "Content-Length: " << content.length() << "\r\n"
+             << "\r\n"
+             << content;
+
+    if (send(clientSocket, response.str().c_str(), response.str().length(), 0) == -1) {
+        std::cerr << "Error: Failed to send response to client\n";
+    }
+}
+
+std::string HTTPServer::getMimeType(const std::string& fileName) {
+    size_t dotPos = fileName.find_last_of('.');
+    if (dotPos != std::string::npos) {
+        std::string extension = fileName.substr(dotPos + 1);
+        if (extension == "html" || extension == "htm") {
+            return "text/html";
+        } else if (extension == "css") {
+            return "text/css";
+        } else if (extension == "js") {
+            return "application/javascript";
+        } else if (extension == "jpg" || extension == "jpeg") {
+            return "image/jpeg";
+        } else if (extension == "png") {
+            return "image/png";
+        } else if (extension == "gif") {
+            return "image/gif";
+        } else if (extension == "txt") {
+            return "text/plain";
+        }
+    }
+    return "application/octet-stream";
+}
+
+std::string HTTPServer::readFile(const std::string& fileName) {
+    std::ifstream file(fileName, std::ios::binary);
+    if (!file.is_open()) {
+        std::cerr << "Error: Failed to open file " << fileName << "\n";
+        return "";
+    }
+
+    std::ostringstream content;
+    content << file.rdbuf();
+    file.close();
+    return content.str();
 }
 
 int sameUntilIndex(const std::string &uri, const std::string &locationName){

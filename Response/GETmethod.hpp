@@ -24,6 +24,13 @@
 #include "Request/Request.hpp"
 
 class GETmethod {
+    private:
+    int _code;
+    std::string _path;
+    std::string _response;
+    std::string _type;
+    //bool _isAutoIndex;
+
     public:
         void handleClient(server &, Request &, int &);
         void handleGetRequest(int clientSocket);

@@ -6,7 +6,7 @@
 /*   By: sel-jama <sel-jama@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/03/24 15:33:33 by sel-jama          #+#    #+#             */
-/*   Updated: 2024/03/29 00:57:29 by sel-jama         ###   ########.fr       */
+/*   Updated: 2024/03/29 23:50:36 by sel-jama         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -42,7 +42,7 @@ std::string readRequest(int fdSocket) {
 }
 
 // Function to parse HTTP request
-void Request::requestPartitioning(Request &saver, const std::string& request) {
+void Request::requestPartitioning(Request &saver, std::string& request) {
     std::istringstream iss(request);
 
     iss >> saver.method >> saver.uri;
@@ -73,13 +73,14 @@ void Request::requestPartitioning(Request &saver, const std::string& request) {
     }
 }
 
-void Request::isReqWellFormed(Request &req) const{
+void Request::isReqWellFormed(Request &req, long long maxBodySize) const{
     ParseRequest parse;
 
     parse.parseMethod(req.method);
     parse.parseHeaders(req.headers, req.method);
     parse.parseUri(req.uri);
-    
+    parse.parseVersion(req.version);
+    parse.parseBody(req.body, maxBodySize);
     /*if => Request body larger than client max body size in config file*/
 
 }
@@ -113,17 +114,19 @@ void Request::locateMatchingRequestURI(const server& use) const {
 }
 
 //start here
-void    Request::getCheckRequest(const server &serve, int &fdSock){
+Request     &Request::getCheckRequest(server &serve, int &fdSock) {
     std::string reqStr;
     Request reqObj;
-
+    
     reqStr = readRequest(fdSock);
     requestPartitioning(reqObj, reqStr);
     try {
-        isReqWellFormed(reqObj);
+        isReqWellFormed(reqObj, serve.getClientMaxBodySize());
         locateMatchingRequestURI(serve);
     }
     catch(std::runtime_error &e){
         std::cout << e.what() << std::endl;
     }
+    
+    return reqObj;
 }

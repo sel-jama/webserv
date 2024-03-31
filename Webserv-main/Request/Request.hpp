@@ -20,7 +20,7 @@
 #include <fstream>
 #include <unistd.h>
 #include "ParseRequest.hpp"
-#include "sock2/includes/server.hpp"
+#include "../sock2/includes/server.hpp"
 
 class Request {
     private:

@@ -6,7 +6,7 @@
 /*   By: sel-jama <sel-jama@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/03/24 11:13:12 by sel-jama          #+#    #+#             */
-/*   Updated: 2024/03/29 23:49:37 by sel-jama         ###   ########.fr       */
+/*   Updated: 2024/03/31 02:27:53 by sel-jama         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -21,6 +21,7 @@
 #include <unistd.h>
 #include "ParseRequest.hpp"
 #include "sock2/includes/server.hpp"
+#include "sys/stat.h"
 
 class Request {
     private:
@@ -29,8 +30,15 @@ class Request {
         std::string version;
         std::map<std::string, std::string> headers;
         std::string body;
-    
+
+        const server serverInfo;
     public:
+        //additioanal
+        std::string path;
+        std::string fileName;
+        struct stat fileStatus;
+        int contentLength;
+
         Request();
         ~Request();
 
@@ -46,6 +54,13 @@ class Request {
 
         Request &getCheckRequest(server &serve, int &fdSock);
         std::string &getLocation(location &location) const;
+
+        const location &getMatchingLocation(server &serve) ;
+        void retreiveRequestedResource(server &serve) ;
+        void isFileAvailable();
+
+        const server &getServerInfo(void) const;
+        void setContentLength(const std::map<std::string, std::string> &headers);
 };
 
 #endif

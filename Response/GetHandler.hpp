@@ -1,17 +1,17 @@
 /* ************************************************************************** */
 /*                                                                            */
 /*                                                        :::      ::::::::   */
-/*   GETmethod.hpp                                      :+:      :+:    :+:   */
+/*   GetHandler.hpp                                     :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
 /*   By: sel-jama <sel-jama@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/03/29 16:13:16 by sel-jama          #+#    #+#             */
-/*   Updated: 2024/03/30 01:14:09 by sel-jama         ###   ########.fr       */
+/*   Updated: 2024/03/31 02:30:19 by sel-jama         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
-#ifndef GETMETHOD_HPP
-#define GETMETHOD_HPP
+#ifndef GETHANDLER_HPP
+#define GETHANDLER_HPP
 
 #include <iostream>
 #include <cstring>
@@ -23,19 +23,25 @@
 #include <unistd.h>
 #include "Request/Request.hpp"
 
-class GETmethod {
+class GetHandler {
     private:
-    int _code;
-    std::string _path;
-    std::string _response;
-    std::string _type;
-    //bool _isAutoIndex;
+    int code;
+    std::string path;
+    std::string response;
+    std::string type;
+    bool isAutoIndex;
 
     public:
-        void handleClient(server &, Request &, int &);
+        void GetDataForClient(const server &, Request &, int &);
         void handleGetRequest(int clientSocket);
         void retreiveRequestedResource(server &, Request &) const;
         const location &getMatchingLocation(server &, Request &);
+        std::string getMimeType(const std::string& fileName);
+        std::string readContent(Request &req);
+
+        //setters
+
+        void defineResourceType(const Request &);
 };
 
 #endif

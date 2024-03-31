@@ -6,7 +6,7 @@
 /*   By: sel-jama <sel-jama@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/03/26 14:13:04 by sel-jama          #+#    #+#             */
-/*   Updated: 2024/03/29 21:46:22 by sel-jama         ###   ########.fr       */
+/*   Updated: 2024/03/31 02:28:00 by sel-jama         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -72,8 +72,11 @@ void ParseRequest::parseHeaders(std::map<std::string, std::string> &headers, std
     if (headers.find("Transfer-Encoding") != headers.end()
         && headers["Transfer-Encoding"] != "chunked")
             throw std::runtime_error("501 Not Implemented : Transfer-Encoding must be chuncked");
-    else if (headers.find("Content-Length") == headers.end() && method == "POST")
+    else if ((headers.find("Content-Length") == headers.end() || atoi(headers.at("Content-Length").c_str())) && method == "POST")
         throw std::runtime_error("400 Bad Request : Messing headers");
+    
+    //setContentLength(headers);
+
 }
 
 void ParseRequest::parseUri(std::string &uri) const {

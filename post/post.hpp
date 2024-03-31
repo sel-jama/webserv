@@ -4,9 +4,11 @@
 #include <iostream>
 #include <strstream>
 #include <sys/_types/_size_t.h>
+#include <map>
 
 class Post{
     private:
+        std::map<std::string, std::string> extension;
         bool post_indicate;
         bool chunked_indicate;
         std::string string_saver;
@@ -25,6 +27,7 @@ class Post{
     std::string get_path();
     size_t get_last_read();
     size_t get_content_lenght();
+    void load_extension();
     Post();
     ~Post();
 };

@@ -6,7 +6,7 @@
 /*   By: sel-jama <sel-jama@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/03/26 14:13:04 by sel-jama          #+#    #+#             */
-/*   Updated: 2024/03/31 02:28:00 by sel-jama         ###   ########.fr       */
+/*   Updated: 2024/03/31 06:58:54 by sel-jama         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -110,6 +110,6 @@ void ParseRequest::parseVersion(std::string &version) const{
 }
 
 void ParseRequest::parseBody(std::string &body, long long &maxBodySize) const{
-    if (body.length() > maxBodySize)
+    if (static_cast<long long>(body.length()) > maxBodySize)
         throw std::runtime_error("413 Request Entity Too Large");
 }

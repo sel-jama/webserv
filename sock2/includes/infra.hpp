@@ -27,7 +27,8 @@ class infra
         fd_set fd_r, fd_rcopy, fd_w, fd_wcopy;
         int maxfd;
         struct timeval timeout;
-        const std::vector<server> &getServer()const;
+        const std::vector<server> &getServer()const{return servers;}
+        const std::vector<client> &getClients()const{return clients;}
         
         //canonical form
         ~infra();

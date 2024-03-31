@@ -6,7 +6,7 @@
 /*   By: sel-jama <sel-jama@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/03/31 00:38:43 by sel-jama          #+#    #+#             */
-/*   Updated: 2024/03/31 01:11:15 by sel-jama         ###   ########.fr       */
+/*   Updated: 2024/03/31 07:06:40 by sel-jama         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -14,8 +14,9 @@
 #define RESPONSE_HPP
 
 #include <string>
-#include "Request/Request.hpp"
+#include "../Request/Request.hpp"
 #include "GetHandler.hpp"
+#include "../sock2/includes/infra.hpp"
 
 class Response
 {
@@ -23,12 +24,13 @@ private:
     std::string response;
 
 public:
-    Response();
-    ~Response();
+    Response(){}
+    ~Response(){}
 
-    static void handleMethod(Request &req);
-    void handleGET(Request &req);
+    static void handleMethod(Request &req, const infra &infras);
+    void handleGET(Request &req, int);
 };
 
+int main2(const infra &infra);
 
 #endif

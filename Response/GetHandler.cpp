@@ -6,27 +6,28 @@
 /*   By: sel-jama <sel-jama@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/03/29 16:13:01 by sel-jama          #+#    #+#             */
-/*   Updated: 2024/03/31 02:31:49 by sel-jama         ###   ########.fr       */
+/*   Updated: 2024/03/31 06:49:49 by sel-jama         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "GetHandler.hpp"
 
-void GetHandler::GetDataForClient(const server &serve, Request &req, int &clientSocket) {
+void GetHandler::GetDataForClient(Request &req, int &clientSocket) {
     defineResourceType(req);
+    std::string content;
     if (type == "file"){
         //if location does not have cgi
-        readContent(req);
+        content = readContent(req);
     }
-    // std::string mimeType = getMimeType(req.fileName);
+    std::string mimeType = getMimeType(req.fileName);
     // std::string content = readContent(req.fileName);
 
-    // std::ostringstream response;
-    // response << "HTTP/1.1 200 OK\r\n"
-    //          << "Content-Type: " << mimeType << "\r\n"
-    //          << "Content-Length: " << content.length() << "\r\n"
-    //          << "\r\n"
-    //          << content;
+    std::ostringstream response;
+    response << "HTTP/1.1 200 OK\r\n"
+             << "Content-Type: " << mimeType << "\r\n"
+             << "Content-Length: " << content.length() << "\r\n"
+             << "\r\n"
+             << content;
 
     if (send(clientSocket, response.str().c_str(), response.str().length(), 0) == -1) {
         std::cerr << "Error: Failed to send response to client\n";
@@ -57,17 +58,22 @@ std::string GetHandler::getMimeType(const std::string& fileName) {
 }
 
 std::string GetHandler::readContent(Request &req) {
-    std::ifstream file(req.fileName, std::ios::binary);
+    std::ifstream file(req.path, std::ios::binary);
+    const size_t chunkSize = 1024; // 1 KB
+    char buffer[chunkSize];
+    
     if (!file.is_open()) {
         std::cerr << "Error: Failed to open file " << req.fileName << "\n";
         return "";
     }
 
     std::ostringstream content;
-    size_t contentSize = 0;
-    while (contentSize != req.contentLength) {
-        content << file.rdbuf();
-        contentSize+=1024;
+    size_t contentSize = req.contentLength;
+    while (contentSize >= 0) {
+        file.read(buffer, chunkSize);
+        content << buffer;
+        memset(buffer, 0, chunkSize);
+        contentSize -= chunkSize;
     }
     file.close();
     return content.str();

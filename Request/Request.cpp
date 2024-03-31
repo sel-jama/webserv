@@ -6,7 +6,7 @@
 /*   By: sel-jama <sel-jama@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/03/24 15:33:33 by sel-jama          #+#    #+#             */
-/*   Updated: 2024/03/31 01:10:16 by sel-jama         ###   ########.fr       */
+/*   Updated: 2024/03/31 07:05:31 by sel-jama         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -32,7 +32,7 @@ const std::map<std::string, std::string>& Request::getHeaders() const{
     return this->headers;
 }
 
-std::string &readRequest(int fdSocket) {
+std::string readRequest(int fdSocket) {
     char buffer[BUFFER_SIZE] = {0};
     int bytesRead = recv(fdSocket, buffer, sizeof(buffer), 0);
     if (bytesRead == -1)
@@ -95,17 +95,17 @@ bool Request::allowedMethod(location& location) const {
 }
 
 //start here
-Request     &Request::getCheckRequest(server &serve, int &fdSock) {
+void     Request::getCheckRequest(Request &reqObj, server &serve, int &fdSock) {
     std::string reqStr;
-    Request reqObj;
+    // Request use
     
     reqStr = readRequest(fdSock);
-    requestPartitioning(reqObj, reqStr);
+    reqObj.requestPartitioning(reqObj, reqStr);
     
-    isReqWellFormed(reqObj, serve.getClientMaxBodySize());
-    retreiveRequestedResource(serve);
+    reqObj.isReqWellFormed(reqObj, serve.getClientMaxBodySize());
+    reqObj.retreiveRequestedResource(serve);
     
-    return reqObj;
+    // return reqObj;
 }
 
 // void Request::locateMatchingRequestURI(const server& use) const {

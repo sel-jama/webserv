@@ -6,7 +6,7 @@
 /*   By: sel-jama <sel-jama@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/03/29 16:13:16 by sel-jama          #+#    #+#             */
-/*   Updated: 2024/03/31 02:30:19 by sel-jama         ###   ########.fr       */
+/*   Updated: 2024/03/31 06:49:27 by sel-jama         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -21,18 +21,18 @@
 #include <sys/socket.h>
 #include <netinet/in.h>
 #include <unistd.h>
-#include "Request/Request.hpp"
+#include "../Request/Request.hpp"
 
 class GetHandler {
     private:
     int code;
     std::string path;
-    std::string response;
+    // std::string response;
     std::string type;
     bool isAutoIndex;
 
     public:
-        void GetDataForClient(const server &, Request &, int &);
+        void GetDataForClient(Request &, int &);
         void handleGetRequest(int clientSocket);
         void retreiveRequestedResource(server &, Request &) const;
         const location &getMatchingLocation(server &, Request &);

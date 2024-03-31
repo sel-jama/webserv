@@ -6,7 +6,7 @@
 /*   By: sel-jama <sel-jama@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/03/24 11:13:12 by sel-jama          #+#    #+#             */
-/*   Updated: 2024/03/31 02:27:53 by sel-jama         ###   ########.fr       */
+/*   Updated: 2024/03/31 07:04:04 by sel-jama         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -20,12 +20,8 @@
 #include <fstream>
 #include <unistd.h>
 #include "ParseRequest.hpp"
-<<<<<<< HEAD
-#include "sock2/includes/server.hpp"
-#include "sys/stat.h"
-=======
 #include "../sock2/includes/server.hpp"
->>>>>>> f1b017ee84b8d59bccfcf0bf4bde7bc4197d8c0e
+#include "sys/stat.h"
 
 class Request {
     private:
@@ -56,7 +52,7 @@ class Request {
         void locateMatchingRequestURI(const server &use) const;
         bool allowedMethod(location &location) const;
 
-        Request &getCheckRequest(server &serve, int &fdSock);
+        static void getCheckRequest(Request &req, server &serve, int &fdSock);
         std::string &getLocation(location &location) const;
 
         const location &getMatchingLocation(server &serve) ;

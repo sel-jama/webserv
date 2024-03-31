@@ -20,8 +20,12 @@
 #include <fstream>
 #include <unistd.h>
 #include "ParseRequest.hpp"
+<<<<<<< HEAD
 #include "sock2/includes/server.hpp"
 #include "sys/stat.h"
+=======
+#include "../sock2/includes/server.hpp"
+>>>>>>> f1b017ee84b8d59bccfcf0bf4bde7bc4197d8c0e
 
 class Request {
     private:

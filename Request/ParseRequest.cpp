@@ -6,7 +6,7 @@
 /*   By: sel-jama <sel-jama@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/03/26 14:13:04 by sel-jama          #+#    #+#             */
-/*   Updated: 2024/03/31 06:58:54 by sel-jama         ###   ########.fr       */
+/*   Updated: 2024/04/01 01:21:49 by sel-jama         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -100,13 +100,13 @@ void ParseRequest::parseVersion(std::string &version) const{
     double v = strtod(vers.c_str(), &endptr);
   
     if (http != "HTTP" || *endptr != '\0')
-        throw std::runtime_error("400 Bad Request : Error occured in http version");
+        throw std::runtime_error("400 Bad Request : Error occured in Http version");
     
     if (v == 0.9 || v == 2.0 || v == 1.0 || v == 3.0)
         throw std::runtime_error("501 Not Implemented : Error occured in http version");
     
     if (v != 1.1)
-        throw std::runtime_error("400 Bad Request : Error occured in http version");
+        throw std::runtime_error("400 Bad Request : Error occured in Http version");
 }
 
 void ParseRequest::parseBody(std::string &body, long long &maxBodySize) const{

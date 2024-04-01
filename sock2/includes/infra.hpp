@@ -17,7 +17,7 @@ class infra
         std::vector<client> clients;
         std::vector<std::string> server_name_list;
         std::vector<int> socket_lstn;
-        infra();
+        infra(){}
         infra(const infra &);
         const infra &operator=(const infra &);
 

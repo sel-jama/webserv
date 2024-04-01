@@ -1,35 +1,33 @@
 /* ************************************************************************** */
 /*                                                                            */
 /*                                                        :::      ::::::::   */
-/*   Response.hpp                                       :+:      :+:    :+:   */
+/*   global.hpp                                         :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
 /*   By: sel-jama <sel-jama@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
-/*   Created: 2024/03/31 00:38:43 by sel-jama          #+#    #+#             */
-/*   Updated: 2024/04/01 01:26:56 by sel-jama         ###   ########.fr       */
+/*   Created: 2024/04/01 01:20:25 by sel-jama          #+#    #+#             */
+/*   Updated: 2024/04/01 01:25:33 by sel-jama         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
-#ifndef RESPONSE_HPP
-#define RESPONSE_HPP
+#ifndef GLOBAL_HPP
+#define GLOBAL_HPP
 
+#include <iostream>
+#include <sstream>
 #include <string>
-#include "method.hpp"
-#include "../sock2/includes/infra.hpp"
-
-class Response
-{
-private:
-    std::string response;
-
-public:
-    Response(){}
-    ~Response(){}
-
-    static std::string handleMethod(Request &req, const infra &infras);
-    void handleGET(Request &req, int);
-};
-
-std::string main2(const infra &infra);
+#include <map>
+#include <fstream>
+#include <unistd.h>
+#include "../sock2/includes/server.hpp"
+#include "sys/stat.h"
+#include <cstring>
+#include <cstdlib>
+#include <cerrno>
+#include <sys/types.h>
+#include <sys/socket.h>
+#include <netinet/in.h>
+#include <iomanip>
+#include <vector>
 
 #endif

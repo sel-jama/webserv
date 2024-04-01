@@ -1,6 +1,6 @@
 SRCS = main.cpp server/Socket.cpp
 
-OBJS = main.o server/Socket.o
+OBJS = $(SRCS:.cpp=.o)
 
 NAME = client
 

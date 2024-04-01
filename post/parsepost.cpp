@@ -1,9 +1,13 @@
 #include "post.hpp"
 #include "../Request/Request.hpp"
 #include <ios>
+#include <sstream>
 #include <string.h>
+#include <string>
 #include <sys/_types/_size_t.h>
-
+#include <fstream>
+#include <iostream>
+#include <sstream>
 
 bool Post::getpost_i(){
     return post_indicate;
@@ -64,69 +68,24 @@ int hexa_to_num(std::string ptr)
 
 void Post::load_extension()
 {
-    extension["audio/aac"] = ".aac";
-    extension["application/x-abiword"] = ".abw";
-    extension["application/octet-stream"] = ".arc";
-    extension["video/x-msvideo"] = ".avi";
-    extension["application/vnd.amazon.ebook"] = ".azw";
-    extension["application/octet-stream"] = ".bin";
-    extension["image/bmp"] = ".bmp";
-    extension["application/x-bzip"] = ".bz";
-    extension["application/x-bzip2"] = ".bz2";
-    extension["application/x-csh"] = ".csh";
-    extension["text/css"] = ".css";
-    extension["text/csv"] = ".csv";
-    extension["application/msword"] = ".doc";
-    extension["application/vnd.openxmlformats-officedocument.wordprocessingml.document"] = ".docx";
-    extension["application/vnd.ms-fontobject"] = ".eot";
-    extension["application/epub+zip"] = ".epub";
-    extension["image/gif"] = ".gif";
-    extension["text/html"] = ".html";
-    extension["image/x-icon"] = ".ico";
-    extension["text/calendar"] = ".ics";
-    extension["application/java-archive"] = ".jar";
-    extension["image/jpeg"] = ".jpeg";
-    extension["application/javascript"] = ".js";
-    extension["application/json"] = ".json";
-    extension["audio/midi"] = ".midi";
-    extension["video/mpeg"] = ".mpeg";
-    extension["application/vnd.apple.installer+xml"] = ".mpkg";
-    extension["application/vnd.oasis.opendocument.presentation"] = ".odp";
-    extension["application/vnd.oasis.opendocument.spreadsheet"] = ".ods";
-    extension["application/vnd.oasis.opendocument.text"] = ".odt";
-    extension["audio/ogg"] = ".oga";
-    extension["video/ogg"] = ".ogv";
-    extension["application/ogg"] = ".ogx";
-    extension["font/otf"] = ".otf";
-    extension["image/png"] = ".png";
-    extension["application/pdf"] = ".pdf";
-    extension["application/vnd.ms-powerpoint"] = ".ppt";
-    extension["application/vnd.openxmlformats-officedocument.presentationml.presentation"] = ".pptx";
-    extension["application/x-rar-compressed"] = ".rar";
-    extension["application/rtf"] = ".rtf";
-    extension["application/x-sh"] = ".sh";
-    extension["image/svg+xml"] = ".svg";
-    extension["application/x-shockwave-flash"] = ".swf";
-    extension["application/x-tar"] = ".tar";
-    extension["image/tiff"] = ".tiff";
-    extension["application/typescript"] = ".ts";
-    extension["font/ttf"] = ".ttf";
-    extension["application/vnd.visio"] = ".vsd";
-    extension["audio/x-wav"] = ".wav";
-    extension["audio/webm"] = ".weba";
-    extension["video/webm"] = ".webm";
-    extension["image/webp"] = ".webp";
-    extension["font/woff"] = ".woff";
-    extension["font/woff2"] = ".woff2";
-    extension["application/xhtml+xml"] = ".xhtml";
-    extension["application/vnd.ms-excel"] = ".xls";
-    extension["application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"] = ".xlsx";
-    extension["application/xml"] = ".xml";
-    extension["application/vnd.mozilla.xul+xml"] = ".xul";
-    extension["application/zip"] = ".zip";
-    extension["audio/3gpp"] = ".3gp";
-    extension["video/3gpp"] = ".3gp";
-    extension["audio/3gpp2"] = ".3gp2";
-    extension["video/3gpp2"] = ".3gp2";
-    extension["application/x-7z-compressed"] = ".7z";
+    std::ifstream file("MIME.conf");
+    std::string buffer;
+    std::string secbuffer;
+    std::string forvalue;
+    std::string forkey;
+    if (!file.is_open()) {
+        while(std::getline(file, buffer))
+        {
+                std::stringstream ss(buffer);
+                for (int i = 0; getline(ss, secbuffer, ' '); i++) {
+                    if (i == 0)
+                        forkey = secbuffer;
+                    if(i == 1)
+                    {
+                            extension[forkey] = secbuffer;
+                            break;
+                    }
+                }
+        }
+    }
 }

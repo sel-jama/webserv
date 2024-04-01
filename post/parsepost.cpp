@@ -1,9 +1,13 @@
 #include "post.hpp"
 #include "../Request/Request.hpp"
 #include <ios>
+#include <sstream>
 #include <string.h>
+#include <string>
 #include <sys/_types/_size_t.h>
-
+#include <fstream>
+#include <iostream>
+#include <sstream>
 
 bool Post::getpost_i(){
     return post_indicate;
@@ -60,4 +64,28 @@ int hexa_to_num(std::string ptr)
     std::stringstream str(ptr);
     str >> std::hex >> value;
     return (value);
+}
+
+void Post::load_extension()
+{
+    std::ifstream file("MIME.conf");
+    std::string buffer;
+    std::string secbuffer;
+    std::string forvalue;
+    std::string forkey;
+    if (!file.is_open()) {
+        while(std::getline(file, buffer))
+        {
+                std::stringstream ss(buffer);
+                for (int i = 0; getline(ss, secbuffer, ' '); i++) {
+                    if (i == 0)
+                        forkey = secbuffer;
+                    if(i == 1)
+                    {
+                            extension[forkey] = secbuffer;
+                            break;
+                    }
+                }
+        }
+    }
 }

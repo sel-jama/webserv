@@ -6,7 +6,7 @@
 /*   By: sel-jama <sel-jama@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/03/31 00:38:49 by sel-jama          #+#    #+#             */
-/*   Updated: 2024/04/01 00:03:45 by sel-jama         ###   ########.fr       */
+/*   Updated: 2024/04/02 01:50:24 by sel-jama         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -14,7 +14,7 @@
 #include "Response.hpp"
 
 
-std::string main2(const infra &infras){
+void main2(const infra &infras, Request &req){
     
     // Socket s;
     // // s.clientConnect(av);
@@ -24,7 +24,6 @@ std::string main2(const infra &infras){
     int fd = infras.getClients().at(0).ssocket;
     (void)fd;
 
-    Request req;
     Request::getCheckRequest(req, serve, fd);
-    return (Response::handleMethod(req, infras));
+    // return (Response::handleMethod(req, infras));
 }

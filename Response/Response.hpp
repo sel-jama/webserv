@@ -6,7 +6,7 @@
 /*   By: sel-jama <sel-jama@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/03/31 00:38:43 by sel-jama          #+#    #+#             */
-/*   Updated: 2024/04/01 01:26:56 by sel-jama         ###   ########.fr       */
+/*   Updated: 2024/04/02 01:50:57 by sel-jama         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -30,6 +30,6 @@ public:
     void handleGET(Request &req, int);
 };
 
-std::string main2(const infra &infra);
+void main2(const infra &infra, Request &req);
 
 #endif

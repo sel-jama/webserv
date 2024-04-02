@@ -12,7 +12,8 @@ int main(int ac, char **av)
         infra InfraStruct((configFile(av[1]).getConfigfile()));
         // InfraStruct.printInfra();
         // InfraStruct.initservers();
-        main2(InfraStruct);
+        Request req;
+        main2(InfraStruct, req);
     }
     catch(const std::exception &e)
     {

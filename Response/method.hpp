@@ -19,11 +19,13 @@
 class method {
     private:
         // int code;
-        std::string path;
-        std::string response;
-        std::string type;
+        std::string path;   //path to dir or file
+        std::string response; 
+        std::string type;  //file or dir
         bool isAutoIndex;
         std::map<std::string, std::string> mimeTypes;
+
+        std::string content;  //retreived content
         
 
     public:

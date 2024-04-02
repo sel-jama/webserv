@@ -15,14 +15,12 @@
 
 void method::GetDataForClient(Request &req, int &clientSocket) {
     defineResourceType(req); //file or dir
-    std::string content;
     if (type == "file"){
         //if location does not have cgi
         content = readContent(req);
     }
-    else {
+    else 
         handleDirectory(req);
-    }
     // std::string mimeType = getMimeType(req.fileName);
     // std::string content = readContent(req.fileName);
 
@@ -102,7 +100,7 @@ void method::handleDirectory(Request &req)  {
             autoIndexing(req);
         //no index files and no cgi
         else if (req.getMatchedLocation().cgi.size() == 0)
-            this->response = readContent(req);
+            this->content = readContent(req);
 
 
     }

@@ -6,7 +6,7 @@
 /*   By: sel-jama <sel-jama@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/03/31 00:38:49 by sel-jama          #+#    #+#             */
-/*   Updated: 2024/04/02 01:50:24 by sel-jama         ###   ########.fr       */
+/*   Updated: 2024/04/02 01:59:51 by sel-jama         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -25,5 +25,5 @@ void main2(const infra &infras, Request &req){
     (void)fd;
 
     Request::getCheckRequest(req, serve, fd);
-    // return (Response::handleMethod(req, infras));
+    Response::handleMethod(req, infras);
 }

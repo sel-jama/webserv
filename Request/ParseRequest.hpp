@@ -6,7 +6,7 @@
 /*   By: sel-jama <sel-jama@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/03/26 14:13:24 by sel-jama          #+#    #+#             */
-/*   Updated: 2024/03/29 21:44:28 by sel-jama         ###   ########.fr       */
+/*   Updated: 2024/04/01 01:24:40 by sel-jama         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -16,10 +16,7 @@
 #define BUFFER_SIZE 1024
 #define MAX_SIZE 2048
 
-#include <iomanip>
-#include <vector>
-#include <map>
-#include <sstream>
+#include "Global.hpp"
 
 class ParseRequest {
     private:

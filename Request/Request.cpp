@@ -6,7 +6,7 @@
 /*   By: sel-jama <sel-jama@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/03/24 15:33:33 by sel-jama          #+#    #+#             */
-/*   Updated: 2024/03/31 07:05:31 by sel-jama         ###   ########.fr       */
+/*   Updated: 2024/04/01 01:51:04 by sel-jama         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -33,8 +33,10 @@ const std::map<std::string, std::string>& Request::getHeaders() const{
 }
 
 std::string readRequest(int fdSocket) {
+    fdSocket = open("../req.txt", R_OK);
     char buffer[BUFFER_SIZE] = {0};
-    int bytesRead = recv(fdSocket, buffer, sizeof(buffer), 0);
+    // int bytesRead = recv(fdSocket, buffer, sizeof(buffer), 0);
+    int bytesRead = read(fdSocket, buffer, sizeof(buffer));
     if (bytesRead == -1)
         throw std::runtime_error("Error reading request from socket");
     std::string request(buffer);
@@ -104,6 +106,7 @@ void     Request::getCheckRequest(Request &reqObj, server &serve, int &fdSock) {
     
     reqObj.isReqWellFormed(reqObj, serve.getClientMaxBodySize());
     reqObj.retreiveRequestedResource(serve);
+    // reqObj.setContentLength
     
     // return reqObj;
 }

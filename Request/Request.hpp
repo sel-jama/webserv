@@ -6,22 +6,14 @@
 /*   By: sel-jama <sel-jama@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/03/24 11:13:12 by sel-jama          #+#    #+#             */
-/*   Updated: 2024/03/31 07:04:04 by sel-jama         ###   ########.fr       */
+/*   Updated: 2024/04/01 01:22:33 by sel-jama         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #ifndef REQUEST_HPP
 #define REQUEST_HPP
 
-#include <iostream>
-#include <sstream>
-#include <string>
-#include <map>
-#include <fstream>
-#include <unistd.h>
 #include "ParseRequest.hpp"
-#include "../sock2/includes/server.hpp"
-#include "sys/stat.h"
 
 class Request {
     private:

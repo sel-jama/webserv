@@ -1,7 +1,7 @@
 #include "includes/WebServer.hpp"
 #include "includes/infra.hpp"
-
 #include "../Response/Response.hpp"
+#include "../post/post.hpp"
 // #include "../Request/Request.hpp"
 
 int main(int ac, char **av)
@@ -13,6 +13,8 @@ int main(int ac, char **av)
         // InfraStruct.printInfra();
         // InfraStruct.initservers();
         Request req;
+        Post pos;
+
         main2(InfraStruct, req);
     }
     catch(const std::exception &e)

@@ -1,13 +1,13 @@
 #include "post.hpp"
 #include "../Request/Request.hpp"
-#include <ios>
 #include <sstream>
 #include <string.h>
 #include <string>
-#include <sys/_types/_size_t.h>
 #include <fstream>
 #include <iostream>
 #include <sstream>
+#include <unistd.h>
+#include <fcntl.h>
 
 bool Post::getpost_i(){
     return post_indicate;
@@ -88,4 +88,35 @@ void Post::load_extension()
                 }
         }
     }
+}
+
+void Post::load_data(int file)
+{
+    //if(!file.is_open())
+    //{
+        //moving data normally with content_lenght;
+    //}
+}
+
+void Post::support_upload(Request obj){
+    int check = 0;
+    location capt = obj.getMatchedLocation();
+    std::string  ptr = capt.upl();
+    if(ptr.empty())
+        throw Except();
+    else
+    {
+        const char* ptr= obj.path.c_str();  
+        check = access(ptr, F_OK);
+        if (check == -1) {
+            throw Except();
+        }
+        else {
+           std::ofstream file(obj.fileName);
+           if (!file.is_open()) {
+               load_data(check); 
+           }
+        }
+    }
+        
 }

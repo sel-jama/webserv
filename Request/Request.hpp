@@ -6,7 +6,7 @@
 /*   By: sel-jama <sel-jama@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/03/24 11:13:12 by sel-jama          #+#    #+#             */
-/*   Updated: 2024/04/01 01:22:33 by sel-jama         ###   ########.fr       */
+/*   Updated: 2024/04/01 21:42:27 by sel-jama         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -23,12 +23,13 @@ class Request {
         std::map<std::string, std::string> headers;
         std::string body;
 
-        const server serverInfo;
+        server serverInfo;
+        location matchedLocation;
     public:
         //additioanal
         std::string path;
         std::string fileName;
-        struct stat fileStatus;
+        struct stat pathStatus;
         int contentLength;
 
         Request();
@@ -52,7 +53,9 @@ class Request {
         void isFileAvailable();
 
         const server &getServerInfo(void) const;
+        const location &getMatchedLocation(void) const;
         void setContentLength(const std::map<std::string, std::string> &headers);
+
 };
 
 #endif

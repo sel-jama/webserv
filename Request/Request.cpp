@@ -6,7 +6,7 @@
 /*   By: sel-jama <sel-jama@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/03/24 15:33:33 by sel-jama          #+#    #+#             */
-/*   Updated: 2024/04/01 01:51:04 by sel-jama         ###   ########.fr       */
+/*   Updated: 2024/04/01 21:43:23 by sel-jama         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -155,21 +155,25 @@ const location &Request::getMatchingLocation(server &serve) {
 }
 
 void Request::retreiveRequestedResource(server &serve){
-    const location &locate = getMatchingLocation(serve);
+    matchedLocation = getMatchingLocation(serve);
     //see the root of the location retrieved and join it with the uri then look for it using access
     std::string url = getUri().substr(1);
     fileName = url.empty() ? "index.html" : url;
     
-    path = locate.location_name + fileName;
+    path = matchedLocation.location_name + fileName;
     isFileAvailable();
 }
 
 void Request::isFileAvailable(){
     
-    if (stat(path.c_str(), &fileStatus) != 0)
+    if (stat(path.c_str(), &pathStatus) != 0)
         throw std::runtime_error("404 Not found : Requested Resource not found");
 }
 
 const server &Request::getServerInfo(void) const {
     return this->serverInfo;
+}
+
+const location &Request::getMatchedLocation(void) const {
+    return this->matchedLocation;
 }

@@ -21,7 +21,7 @@ void method::GetDataForClient(Request &req, int &clientSocket) {
         content = readContent(req);
     }
     else {
-        
+        handleDirectory(req);
     }
     // std::string mimeType = getMimeType(req.fileName);
     // std::string content = readContent(req.fileName);
@@ -63,7 +63,7 @@ void method::GetDataForClient(Request &req, int &clientSocket) {
 // //     return "application/octet-stream";
 // // }
 
-std::string method::readContent(Request &req) {
+std::string method::readContent(Request &req){
     std::ifstream file(req.path, std::ios::binary);
     const size_t chunkSize = 1024; // 1 KB
     char buffer[chunkSize];
@@ -89,9 +89,25 @@ std::string method::readContent(Request &req) {
 
 void method::defineResourceType(const Request &req) {
     const std::string uri = req.getUri();
-    if (uri.at(uri.length() - 1) == '/')
+    if (S_ISDIR(req.pathStatus.st_mode))
         type = "directory";
-    type = "file";
+    else
+        type = "file";
+}
+
+void method::handleDirectory(Request &req)  {
+    size_t uriLength = req.getUri().length() - 1;
+    if (req.getUri().at(uriLength) == '/'){
+        if (isDirHasIndexFiles(req) == false)
+            autoIndexing(req);
+        //no index files and no cgi
+        else if (req.getMatchedLocation().cgi.size() == 0)
+            this->response = readContent(req);
+
+
+    }
+    //else : make a 301 redirection to request uri with “/ addeed at the end
+
 }
 
 // void method::handleClient(server &serve, Request &req, int &clientSocket) {
@@ -106,3 +122,36 @@ void method::defineResourceType(const Request &req) {
 
 //     handle_get_request(clientSocket);
 // }
+
+bool isDirHasIndexFiles(const Request &req) {
+    DIR *dir;
+    struct dirent *ent;
+
+    // Open directory
+    if ((dir = opendir(req.path.c_str()))) {
+        // Iterate through directory entries
+        while ((ent = readdir(dir)) != NULL) {
+            std::string filename = ent->d_name;
+            size_t pos = filename.find('.');
+
+            filename.substr(0, pos);
+            if (filename == "index") {
+                closedir(dir);
+                return true;
+            }
+        }
+        closedir(dir);
+    } else {
+        // Unable to open directory
+        std::cerr << "Unable to open directory: " << req.path << std::endl;
+    }
+
+    // No index file found
+    return false;
+}
+
+void method::autoIndexing(Request &req) const {
+    if (req.getMatchedLocation().autoindex == "on")
+        listDir(req);
+    throw std::runtime_error("403 Forbiden");
+}

@@ -14,6 +14,7 @@
 #define METHOD_HPP
 
 #include "../Request/Request.hpp"
+#include "dirent.h"
 
 class method {
     private:
@@ -31,11 +32,13 @@ class method {
         void retreiveRequestedResource(server &, Request &) const;
         const location &getMatchingLocation(server &, Request &);
         // std::string getMimeType(const std::string& fileName);
-        std::string readContent(Request &req);
+        std::string readContent(Request &req) ;
 
         //setters
 
         void defineResourceType(const Request &);
+        void handleDirectory(Request &) ;
+        void autoIndexing(Request &) const ;
 };
 
 #endif

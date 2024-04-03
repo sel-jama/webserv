@@ -6,6 +6,7 @@
 #include <fstream>
 #include <iostream>
 #include <sstream>
+#include <sys/stat.h>
 #include <unistd.h>
 #include <fcntl.h>
 
@@ -90,12 +91,25 @@ void Post::load_extension()
     }
 }
 
-void Post::load_data(int file)
+void Post::get_Request_resource(Request obj)
 {
-    //if(!file.is_open())
-    //{
-        //moving data normally with content_lenght;
-    //}
+    struct stat buffer;
+    location resource = obj.getMatchedLocation();
+    std::string url = obj.getUri();
+    std::string data = obj.getBody();
+    std::string Encoding;
+    std::map<std::string, std::string>::const_iterator value = obj.getHeaders().find("Transfer-Encoding"); 
+    Encoding = value->second;
+    const char *ptr = path.c_str();
+    int check = access(ptr, F_OK);
+    if (check  == -1) {
+        throw Except();
+    }
+    int val = stat(ptr, &buffer);
+    if(S_ISDIR(buffer.st_mode))
+       Type = "Directory";
+    else
+        Type = "File";
 }
 
 void Post::support_upload(Request obj){
@@ -106,15 +120,18 @@ void Post::support_upload(Request obj){
         throw Except();
     else
     {
-        const char* ptr= obj.path.c_str();  
-        check = access(ptr, F_OK);
+        const char* ptr2= ptr.c_str();
+        check = access(ptr2, F_OK);
         if (check == -1) {
             throw Except();
         }
         else {
            std::ofstream file(obj.fileName);
            if (!file.is_open()) {
-               load_data(check); 
+               if (obj.getBody().size() != obj.contentLength) {
+                        throw Except(); 
+               }
+               file << obj.getBody() << std::endl;
            }
         }
     }

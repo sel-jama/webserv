@@ -55,7 +55,6 @@ class Request {
         const server &getServerInfo(void) const;
         const location &getMatchedLocation(void) const;
         void setContentLength(const std::map<std::string, std::string> &headers);
-
 };
 
 #endif

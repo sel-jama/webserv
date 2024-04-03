@@ -19,6 +19,7 @@ class Post{
         size_t content_lenght;
     public:
         Post(){};
+        std::string Type;
         void set_saver(std::string); 
         void set_post_i(bool value);
         void set_count(size_t value);
@@ -33,7 +34,7 @@ class Post{
         size_t get_content_lenght();
         void load_extension();
         void support_upload(Request obj);
-        void load_data(int file);
+        void get_Request_resource(Request obj);
         ~Post();
 };
 class Except : std::exception{

@@ -35,6 +35,9 @@ class Post{
         void load_extension();
         void support_upload(Request obj);
         void get_Request_resource(Request obj);
+        void After_geting_resource(Request obj);
+        void Work_with_file(Request obj);
+        void Work_with_Directory(Request obj);
         ~Post();
 };
 class Except : std::exception{

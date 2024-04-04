@@ -112,6 +112,13 @@ void Post::get_Request_resource(Request obj)
         Type = "File";
 }
 
+void Post::After_geting_resource(Request obj){
+    if (Type == "File")
+        Work_with_file(obj); 
+    else
+        Work_with_Directory(obj);
+}
+
 void Post::support_upload(Request obj){
     int check = 0;
     location capt = obj.getMatchedLocation();
@@ -136,4 +143,9 @@ void Post::support_upload(Request obj){
         }
     }
         
+}
+
+void Post::Work_with_file(Request obj){
+    location capt = obj.getMatchedLocation();
+
 }

@@ -6,7 +6,7 @@
 /*   By: sel-jama <sel-jama@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/03/24 11:13:12 by sel-jama          #+#    #+#             */
-/*   Updated: 2024/04/02 01:45:55 by sel-jama         ###   ########.fr       */
+/*   Updated: 2024/04/03 01:41:20 by sel-jama         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -55,6 +55,8 @@ class Request {
         const server &getServerInfo(void) const;
         const location &getMatchedLocation(void) const;
         void setContentLength(const std::map<std::string, std::string> &headers);
+
+        std::string readRequest(int fdSocket);
 };
 
 #endif

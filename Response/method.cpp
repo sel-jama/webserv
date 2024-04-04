@@ -121,7 +121,7 @@ void method::handleDirectory(Request &req)  {
 //     handle_get_request(clientSocket);
 // }
 
-bool isDirHasIndexFiles(const Request &req) {
+bool method::isDirHasIndexFiles(Request &req) const{
     DIR *dir;
     struct dirent *ent;
 
@@ -150,6 +150,10 @@ bool isDirHasIndexFiles(const Request &req) {
 
 void method::autoIndexing(Request &req) const {
     if (req.getMatchedLocation().autoindex == "on")
-        listDir(req);
+        directoryListing(req);
     throw std::runtime_error("403 Forbiden");
+}
+
+void method::directoryListing(Request &req) const{
+    (void)req;
 }

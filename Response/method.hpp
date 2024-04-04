@@ -19,7 +19,7 @@
 class method {
     private:
         // int code;
-        std::string path;   //path to dir or file
+        //std::string path;   //path to dir or file
         std::string response; 
         std::string type;  //file or dir
         bool isAutoIndex;
@@ -40,7 +40,9 @@ class method {
 
         void defineResourceType(const Request &);
         void handleDirectory(Request &) ;
+        bool isDirHasIndexFiles(Request &) const;
         void autoIndexing(Request &) const ;
+        void directoryListing(Request &) const;
 };
 
 #endif

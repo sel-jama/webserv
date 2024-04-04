@@ -6,7 +6,7 @@
 /*   By: sel-jama <sel-jama@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/03/26 14:13:24 by sel-jama          #+#    #+#             */
-/*   Updated: 2024/04/01 01:24:40 by sel-jama         ###   ########.fr       */
+/*   Updated: 2024/04/04 10:25:13 by sel-jama         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -22,6 +22,7 @@ class ParseRequest {
     private:
         std::vector<std::string> methods;
         std::string uriAllowedChars;
+        std::deque<std::string> ngxHttpHeaders;
     
     public:
         //utils
@@ -39,6 +40,10 @@ class ParseRequest {
         void parseVersion(std::string &version) const;
         void parseHeaders(std::map<std::string, std::string> &headers, std::string &method) const;
         void parseBody(std::string &body, long long &maxBodySize) const;
+
+        void setHttpHeaders();
+        std::deque<std::string> &getHttpHeaders() const;
+        void checkUnknownHeader(std::map<std::string, std::string &) const; 
 };
 
 #endif

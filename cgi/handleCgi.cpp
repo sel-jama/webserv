@@ -6,35 +6,47 @@
 /*   By: sel-jama <sel-jama@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/04/04 07:40:50 by sel-jama          #+#    #+#             */
-/*   Updated: 2024/04/04 07:45:58 by sel-jama         ###   ########.fr       */
+/*   Updated: 2024/04/05 11:50:13 by sel-jama         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "handleCig.hpp"
 
-void execute_cgi(const char* script_path, const char* request_method, const char* query_string, const char* content_length, const char* content_type) {
-    char buf[MAX_BUF_SIZE];
-    FILE* script_output;
-    int content_length_int = atoi(content_length);
-
-    // Set up environment variables
-    setenv("REQUEST_METHOD", request_method, 1);
-    setenv("QUERY_STRING", query_string, 1);
-    setenv("CONTENT_LENGTH", content_length, 1);
-    setenv("CONTENT_TYPE", content_type, 1);
-
-    // Execute CGI script
-    
-    script_output = popen(script_path, "r");
-    if (!script_output) {
-        cerr << "Failed to execute CGI script." << endl;
+void handleCGI(const std::string& cgiPath) {
+    int sockfd[2];
+    if (socketpair(AF_UNIX, SOCK_STREAM, 0, sockfd) == -1) {
+        std::cerr << "Error creating socket pair" << std::endl;
         return;
     }
 
-    // Read script output and send to client
-    while (fgets(buf, sizeof(buf), script_output) != NULL) {
-        cout << buf;
+    pid_t pid = fork();
+    if (pid == -1) {
+        std::cerr << "Error forking process" << std::endl;
+        return;
     }
 
-    pclose(script_output);
+    if (pid == 0){
+        close(sockfd[0]);
+
+        dup2(sockfd[1], STDOUT_FILENO);
+        close(sockfd[1]);
+
+        // Execute CGI script
+        if (execve(cgiPath.c_str(), NULL, NULL) == -1) {
+            std::cerr << "Error executing CGI script" << std::endl;
+            exit(EXIT_FAILURE);
+        }
+    }else{
+        close(sockfd[1]);
+
+        // Send output back to client
+        std::cout << "Content-Type: text/html\r\n\r\n"; // HTTP header
+        char buffer[1024];
+        ssize_t bytesRead;
+        while ((bytesRead = read(sockfd[0], buffer, sizeof(buffer))) > 0) {
+            std::cout.write(buffer, bytesRead);
+        }
+
+        close(sockfd[0]);
+    }
 }

@@ -11,11 +11,9 @@ int main(int ac, char **av)
         validArg(ac, av);
         infra InfraStruct((configFile(av[1]).getConfigfile()));
         // InfraStruct.printInfra();
-        // InfraStruct.initservers();
+        InfraStruct.initservers();
         Request req;
-        Post pos;
-
-        main2(InfraStruct, req);
+        // Post pos;
     }
     catch(const std::exception &e)
     {

@@ -6,7 +6,7 @@
 /*   By: sel-jama <sel-jama@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/03/24 15:33:33 by sel-jama          #+#    #+#             */
-/*   Updated: 2024/04/03 02:01:43 by sel-jama         ###   ########.fr       */
+/*   Updated: 2024/04/10 23:14:00 by sel-jama         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -32,15 +32,83 @@ const std::map<std::string, std::string>& Request::getHeaders() const{
     return this->headers;
 }
 
-std::string Request::readRequest(int fdSocket){
-    char buffer[BUFFER_SIZE] = {0};
-    // int bytesRead = recv(fdSocket, buffer, sizeof(buffer), 0);
-    int bytesRead = read(fdSocket, buffer, sizeof(buffer));
-    if (bytesRead == -1)
-        throw std::runtime_error("Error reading request from socket");
-    std::string request(buffer);
+// using namespace std;
+// char *bin2hex(const unsigned char *input, size_t len){
+//     char *res;
+//     std::string hexa = "0123456789QBCDEF";
+
+//     const char *hex = hexa.c_str();
+
+//     if (!input || len <= 0)
+//         return NULL;
+
+//     int reslen = len * 3 + 1;
+//     // res = new char[reslen];
+//     res = (char*)malloc(reslen);
+//     bzero(res, reslen);
+
+//     for(size_t i =0; i<len; i++){
+//         res[i*3]=hex[input[i] >> 4];
+//         res[(i*3)+1] = hex[input[i] & 0x0F];
+//         res[(i*3)+2] = ' ';
+//     }   
+//     return res;
+// }
+
+// std::string Request::readRequest(int &fdSocket){
+//     // char buffer[BUFFER_SIZE] = {0};
+//     std::stringstream buff("");
+
+//     // // Use recv to read from the socket
+//     // int bytesRead = recv(fdSocket, buffer, sizeof(buffer), 0);
+//     // if (bytesRead == -1)
+//     //     throw std::runtime_error("Error reading request from socket");
+
+//     uint8_t recvline[BUFFER_SIZE+1];
+//     int n;
+//     while (( n = read(fdSocket, recvline, BUFFER_SIZE-1) ) > 0){
+//             // fprintf(stdout, "\n%s\n\n%s", bin2hex(recvline, n), recvline);
+
+//             //detect end of message (change it later)
+//             if (recvline[n-1] == '\n')
+//                 break;
+//             memset(recvline, 0, BUFFER_SIZE);
+//             buff << recvline << "\n";
+            
+//         }
+//         if (n < 0){
+//             std::cerr << "read failed" << std::endl;
+//             exit(EXIT_FAILURE);
+//         }
+    
+//     std::string request(buff.str());
+//     return request;
+// }
+
+std::string Request::readRequest(int &fdSocket) {
+    std::stringstream buff("");
+
+    uint8_t recvline[BUFFER_SIZE + 1];
+    int n;
+    while ((n = read(fdSocket, recvline, BUFFER_SIZE - 1)) > 0) {
+        if (recvline[n - 1] == '\n')
+            break;
+        memset(recvline, 0, BUFFER_SIZE);
+        buff << recvline << "\n";
+    }
+
+    if (n < 0) {
+        std::cerr << "Error reading from socket: " << strerror(errno) << std::endl;
+        exit(EXIT_FAILURE);
+    } else if (n == 0) {
+        std::cerr << "Peer closed the connection" << std::endl;
+        exit(EXIT_FAILURE);
+    }
+    
+    std::string request(buff.str());
     return request;
 }
+
 
 // Function to parse HTTP request
 void Request::requestPartitioning(Request &saver, std::string& request) {
@@ -101,6 +169,9 @@ void     Request::getCheckRequest(Request &reqObj, server &serve, int &fdSock) {
     // Request use
     
     reqStr = reqObj.readRequest(fdSock);
+    //handling one client only 
+    // reqObj.client.state = 1;
+    close(fdSock);
     reqObj.requestPartitioning(reqObj, reqStr);
     
     reqObj.isReqWellFormed(reqObj, serve.getClientMaxBodySize());

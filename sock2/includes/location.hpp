@@ -32,6 +32,6 @@ class location
         void printlocation();
         void checklocation();
 
-};  
+};
 
 #endif

@@ -62,6 +62,7 @@ void method::GetDataForClient(Request &req, int &clientSocket) {
 // // }
 
 std::string method::readContent(Request &req){
+    
     std::ifstream file(req.path, std::ios::binary);
     const size_t chunkSize = 1024; // 1 KB
     char buffer[chunkSize];
@@ -149,11 +150,39 @@ bool method::isDirHasIndexFiles(Request &req) const{
 }
 
 void method::autoIndexing(Request &req) const {
-    if (req.getMatchedLocation().autoindex == "on")
-        directoryListing(req);
-    throw std::runtime_error("403 Forbiden");
+    (void)req;
+    // if (req.getMatchedLocation().autoindex == "on")
+    //     directoryListing(req);
+    // throw std::runtime_error("403 Forbiden");
 }
 
-void method::directoryListing(Request &req) const{
-    (void)req;
-}
+// void method::directoryListing(Request &req) const{
+
+//     const std::string& path, const std::string& host, int port;
+//     std::vector<std::string> fileList = getFileList(path);
+//     if (fileList.empty()) {
+//         std::cerr << "Error: could not open [" << path << "]" << std::endl;
+//         return "";
+//     }
+
+//     std::stringstream page;
+//     page << "<!DOCTYPE html>\n"
+//          << "<html>\n"
+//          << "<head>\n"
+//          << "    <title>Index of " << path << "</title>\n"
+//          << "</head>\n"
+//          << "<body>\n"
+//          << "<h1>Index of " << path << "</h1>\n"
+//          << "<ul>\n";
+
+//     for (const std::string& file : fileList) {
+//         page << "    <li><a href=\"http://" << host << ":" << port << "/" << file << "\">" << file << "</a></li>\n";
+//     }
+
+//     page << "</ul>\n"
+//          << "</body>\n"
+//          << "</html>\n";
+
+//     return page.str();
+
+// }

@@ -6,7 +6,7 @@
 /*   By: sel-jama <sel-jama@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/03/26 14:13:24 by sel-jama          #+#    #+#             */
-/*   Updated: 2024/04/04 10:25:13 by sel-jama         ###   ########.fr       */
+/*   Updated: 2024/04/10 21:38:00 by sel-jama         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -42,8 +42,8 @@ class ParseRequest {
         void parseBody(std::string &body, long long &maxBodySize) const;
 
         void setHttpHeaders();
-        std::deque<std::string> &getHttpHeaders() const;
-        void checkUnknownHeader(std::map<std::string, std::string &) const; 
+        const std::deque<std::string> &getHttpHeaders() const;
+        void checkUnknownHeader(std::map<std::string, std::string> & ) const; 
 };
 
 #endif

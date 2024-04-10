@@ -6,7 +6,7 @@
 /*   By: sel-jama <sel-jama@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/03/26 14:13:04 by sel-jama          #+#    #+#             */
-/*   Updated: 2024/04/04 10:42:26 by sel-jama         ###   ########.fr       */
+/*   Updated: 2024/04/10 21:49:10 by sel-jama         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -28,14 +28,26 @@ void ParseRequest::setHttpHeaders() {
     ngxHttpHeaders.push_back("Referer"); //The URL of the web page that linked to the resource being requested
     ngxHttpHeaders.push_back("Content-Length"); //The size of the message body in bytes
     ngxHttpHeaders.push_back("Content-Range");  //Specifies the range of bytes in the message body being sent or requested.
-    ngxHttpHeaders.push_back("Content-Typ"); //Specifies the media type of the message body.
+    ngxHttpHeaders.push_back("Content-Type"); //Specifies the media type of the message body.
     ngxHttpHeaders.push_back("Range");  //Specifies the range of bytes being requested in a GET request
     ngxHttpHeaders.push_back("If-Range"); //Specifies conditions for successful resource retrieval based on entity tags or modification dates
     ngxHttpHeaders.push_back("Transfer-Encoding");  //Specifies the encoding mechanisms used to transfer the message body
     ngxHttpHeaders.push_back("TE");  //Specifies the transfer codings that are acceptable in the response
     ngxHttpHeaders.push_back("Expect"); //Specifies expectations that need to be met by the server
     ngxHttpHeaders.push_back("Upgrade");  //Specifies additional communication protocols that the client supports
-    //HTTP_GZIP || HTTP_HEADERS
+    
+    ngxHttpHeaders.push_back("Allow");
+    ngxHttpHeaders.push_back("Auth-Scheme");
+    ngxHttpHeaders.push_back("Content-Language");
+    ngxHttpHeaders.push_back("Content-Length");
+    ngxHttpHeaders.push_back("Content-Location");
+    ngxHttpHeaders.push_back("Last-Modified");
+    ngxHttpHeaders.push_back("Location");
+    ngxHttpHeaders.push_back("Retry-After");
+    ngxHttpHeaders.push_back("Server");
+    ngxHttpHeaders.push_back("Www-Authenticate");
+  
+    //HTTP_GZIP || HTTP_HEADeRS
     ngxHttpHeaders.push_back("Accept-Encoding");  //Specifies the compression algorithms supported by the client
     ngxHttpHeaders.push_back("Via");   //Specifies intermediate proxies or gateways through which the request was forwarded
     
@@ -154,12 +166,12 @@ void ParseRequest::parseBody(std::string &body, long long &maxBodySize) const{
         throw std::runtime_error("413 Request Entity Too Large");
 }
 
-std::deque<std::string> &getHttpHeaders() const { retur this->ngxHttpHeaders; }
+const std::deque<std::string> &ParseRequest::getHttpHeaders() const { return this->ngxHttpHeaders; }
 
-void ParseRequest::checkUnknownHeader(std::map<std::string, std::string> &headers) {
+void ParseRequest::checkUnknownHeader(std::map<std::string, std::string> &headers) const{
     std::map<std::string, std::string>::iterator it = headers.begin();
     for (; it != headers.end(); it++) {
-        if(this->ngxHttpHeaders.find(it->first) == ngxHttpHeaders.end())
-            throw std::runtime_error("400 bad Request : unknown headers");
+        // if(ngxHttpHeaders.find(it->first) == ngxHttpHeaders.end())
+        //     throw std::runtime_error("400 bad Request : unknown headers");
     }
 }

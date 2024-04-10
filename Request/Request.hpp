@@ -6,7 +6,7 @@
 /*   By: sel-jama <sel-jama@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/03/24 11:13:12 by sel-jama          #+#    #+#             */
-/*   Updated: 2024/04/03 01:41:20 by sel-jama         ###   ########.fr       */
+/*   Updated: 2024/04/10 23:10:22 by sel-jama         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -14,6 +14,7 @@
 #define REQUEST_HPP
 
 #include "ParseRequest.hpp"
+#include "../sock2/includes/client.hpp"
 
 class Request {
     private:
@@ -24,7 +25,13 @@ class Request {
         std::string body;
 
         server serverInfo;
+        client client;
         location matchedLocation;
+        // infra Infra;
+
+        //more to set up 
+        std::map<std::string, std::string> cgiEnv;
+        std::string query;
     public:
         //additioanal
         std::string path;
@@ -56,7 +63,7 @@ class Request {
         const location &getMatchedLocation(void) const;
         void setContentLength(const std::map<std::string, std::string> &headers);
 
-        std::string readRequest(int fdSocket);
+        std::string readRequest(int &fdSocket);
 };
 
 #endif

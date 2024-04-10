@@ -1,5 +1,6 @@
 #include "../includes/infra.hpp"
 #include <sys/socket.h>
+#include "../../Response/Response.hpp"
 
 //---------init servers -> socket->fcntrl->setsocketopt->bind->listen->select->accept
 
@@ -47,7 +48,7 @@ void infra::accept_new_connection(int fd)
     tmp.state = 0;
     if ((tmp.ssocket = accept(fd, (struct sockaddr *)&tmp.cdata_socket, &len)) == -1) 
         throw(std::runtime_error("Error: init clients : accept()"));
-    if (fcntl(tmp.ssocket, O_NONBLOCK) == -1)      throw(std::runtime_error("Error: init clients : fcntl()"));                                                   throw(std::runtime_error("Error: init clients : fcntl()"));
+    if (fcntl(tmp.ssocket, O_NONBLOCK) == -1)      throw(std::runtime_error("Error: init clients : fcntl()"));
     FD_SET(tmp.ssocket , &fd_r);
     gettimeofday(&tmp.clientTime, NULL);
     clients.push_back(tmp);
@@ -87,25 +88,30 @@ void infra::selecttoinfinity()
     // int slct;
     while (1)
     {
+        Request req;
         fd_rcopy = fd_r;
         fd_wcopy = fd_w;
-        std::cout << "Waiting for connection... " << std::endl; 
+        std::cout << "Waiting for connection... " << std::endl;
         int slct = select(maxfd + 1, &fd_rcopy, &fd_wcopy, NULL, &timeout);
         if (slct == -1) throw(std::runtime_error("Error : select : lanch"));
-        if (slct == 0)  
-        {
-            //close sleeping clients // no data in the specefic timeout
-            throw(std::runtime_error("Error : select : timeout"));
-        }
+        //added by sel-jama
+        std::vector<server>::iterator it = servers.begin();
+        if (FD_ISSET((*it).ssocket, &fd_rcopy))
+            main2(*this, req, (*it).ssocket);
+        // if (slct == 0)
+        // {
+        //     //close sleeping clients // no data in the specefic timeout
+        //     throw(std::runtime_error("Error : select : timeout"));
+        // }
         // for (std::vector<server>::iterator it = servers.begin(); it !=servers.end(); ++it)
         // {
-        //     if (FD_ISSET((*it).ssocket, &fd_r))
-        //     {
-        //         accept_new_connection(i);
-        //         continue;
-        //     }
-        //     else
-        //         handle_connection(i);
+            // if (FD_ISSET((*it).ssocket, &fd_r))
+            // {
+            //     accept_new_connection(slct);
+            //     continue;
+            // }
+            // else
+            //     handle_connection(slct);
         // }
 
     }

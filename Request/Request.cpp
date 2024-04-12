@@ -6,7 +6,7 @@
 /*   By: sel-jama <sel-jama@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/03/24 15:33:33 by sel-jama          #+#    #+#             */
-/*   Updated: 2024/04/10 23:14:00 by sel-jama         ###   ########.fr       */
+/*   Updated: 2024/04/12 18:39:27 by sel-jama         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -88,13 +88,13 @@ const std::map<std::string, std::string>& Request::getHeaders() const{
 std::string Request::readRequest(int &fdSocket) {
     std::stringstream buff("");
 
-    uint8_t recvline[BUFFER_SIZE + 1];
+    uint8_t recvline[BUFFER_SIZE];
     int n;
-    while ((n = read(fdSocket, recvline, BUFFER_SIZE - 1)) > 0) {
-        if (recvline[n - 1] == '\n')
+    while ((n = read(fdSocket, recvline, BUFFER_SIZE)) > 0) {
+        if (recvline[n - 1] == '\n')  //change later >> break when content len is all served
             break;
-        memset(recvline, 0, BUFFER_SIZE);
         buff << recvline << "\n";
+        memset(recvline, 0, BUFFER_SIZE);
     }
 
     if (n < 0) {
@@ -104,7 +104,6 @@ std::string Request::readRequest(int &fdSocket) {
         std::cerr << "Peer closed the connection" << std::endl;
         exit(EXIT_FAILURE);
     }
-    
     std::string request(buff.str());
     return request;
 }
@@ -227,6 +226,7 @@ const location &Request::getMatchingLocation(server &serve) {
 void Request::retreiveRequestedResource(server &serve){
     matchedLocation = getMatchingLocation(serve);
     //see the root of the location retrieved and join it with the uri then look for it using access
+    //pass "/"
     std::string url = getUri().substr(1);
     fileName = url.empty() ? "index.html" : url;
     

@@ -6,7 +6,7 @@
 /*   By: sel-jama <sel-jama@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/03/24 15:33:33 by sel-jama          #+#    #+#             */
-/*   Updated: 2024/04/12 18:39:27 by sel-jama         ###   ########.fr       */
+/*   Updated: 2024/04/13 15:22:45 by sel-jama         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -85,29 +85,35 @@ const std::map<std::string, std::string>& Request::getHeaders() const{
 //     return request;
 // }
 
+void Request::cutOffBodySegment(std::string &request){
+    size_t pos = request.find("\n\r\n\r");
+
+    if(pos != std::string::npos){
+        bodySaver = request.substr(pos);
+    }
+}
+
 std::string Request::readRequest(int &fdSocket) {
     std::stringstream buff("");
 
     uint8_t recvline[BUFFER_SIZE];
-    int n;
-    while ((n = read(fdSocket, recvline, BUFFER_SIZE)) > 0) {
-        if (recvline[n - 1] == '\n')  //change later >> break when content len is all served
+    while ((readbytes = read(fdSocket, recvline, BUFFER_SIZE)) > 0) {
+        if (recvline.find("\n\r\n\r"))  //change later >> break when content len is all served
             break;
-        buff << recvline << "\n";
+        buff << recvline;
         memset(recvline, 0, BUFFER_SIZE);
     }
 
-    if (n < 0) {
-        std::cerr << "Error reading from socket: " << strerror(errno) << std::endl;
-        exit(EXIT_FAILURE);
-    } else if (n == 0) {
-        std::cerr << "Peer closed the connection" << std::endl;
-        exit(EXIT_FAILURE);
-    }
+    if (n < 0)
+        throw std::runtime_error("Error reading from socket: socket failed");
+        
+    else if (n == 0)
+        throw std::runtime_error("Peer closed the connection");
+    
     std::string request(buff.str());
+    cutOffBodySegment(request);
     return request;
 }
-
 
 // Function to parse HTTP request
 void Request::requestPartitioning(Request &saver, std::string& request) {

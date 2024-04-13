@@ -6,7 +6,7 @@
 /*   By: sel-jama <sel-jama@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/04/04 07:40:50 by sel-jama          #+#    #+#             */
-/*   Updated: 2024/04/12 23:10:33 by sel-jama         ###   ########.fr       */
+/*   Updated: 2024/04/13 14:47:10 by sel-jama         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -163,7 +163,7 @@ std::string executeCgiScript(const Request &req) {
     if (!outputFile.is_open())
         throw std::runtime_error("Failed to open random file for writing");
 
-    pid_t pid = fork();
+    pid_t pid = fork();---
     if (pid == -1)
         throw std::runtime_error("Fork failed");
     

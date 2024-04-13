@@ -6,7 +6,7 @@
 /*   By: sel-jama <sel-jama@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/03/24 11:13:12 by sel-jama          #+#    #+#             */
-/*   Updated: 2024/04/12 20:04:32 by sel-jama         ###   ########.fr       */
+/*   Updated: 2024/04/13 15:19:51 by sel-jama         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -37,7 +37,9 @@ class Request {
         std::string path;
         std::string fileName;
         struct stat pathStatus;
-        int contentLength;
+        int contentLength; 
+        int readbytes;
+        std::string bodySaver;
 
         Request();
         ~Request();
@@ -64,6 +66,7 @@ class Request {
         void setContentLength(const std::map<std::string, std::string> &headers);
 
         std::string readRequest(int &fdSocket);
+        void cutOffBodySegment(std::string &request);
 };
 
 #endif

@@ -15,6 +15,7 @@
 
 #include "ParseRequest.hpp"
 #include "../sock2/includes/client.hpp"
+#include <algorithm>
 
 class Request {
     private:
@@ -22,16 +23,16 @@ class Request {
         std::string uri;
         std::string version;
         std::map<std::string, std::string> headers;
-        std::string body;
+        // std::string body;
 
         server serverInfo;
-        client client;
-        location matchedLocation;
+        client user;
+        location matchedLocation;  // v
         // infra Infra;
 
         //more to set up 
-        std::map<std::string, std::string> cgiEnv;
-        std::string query;
+        // std::map<std::string, std::string> cgiEnv;
+        // std::string query;
     public:
         //additioanal
         std::string path;
@@ -54,11 +55,11 @@ class Request {
         void locateMatchingRequestURI(const server &use) const;
         bool allowedMethod(location &location) const;
 
-        static void getCheckRequest(Request &req, server &serve, int &fdSock);
+        static void getCheckRequest(Request &req, const server &serve, int &fdSock);
         std::string &getLocation(location &location) const;
 
-        const location &getMatchingLocation(server &serve) ;
-        void retreiveRequestedResource(server &serve) ;
+        const location &getMatchingLocation(const server &serve) ;
+        void retreiveRequestedResource(const server &serve) ;
         void isFileAvailable();
 
         const server &getServerInfo(void) const;

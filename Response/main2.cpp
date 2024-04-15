@@ -20,7 +20,7 @@ void main2(const infra &infras, Request &req, int fd){
     // // s.clientConnect(av);
     // s.serverConnect();
     // Request req;
-    server  serve = infras.getServer().at(0);
+    const server  &serve = infras.getServer().at(0);
     // int fd = infras.getClients().at(0).ssocket;
 
     Request::getCheckRequest(req, serve, fd);

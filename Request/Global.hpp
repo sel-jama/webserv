@@ -20,7 +20,7 @@
 #include <fstream>
 #include <unistd.h>
 #include "../sock2/includes/server.hpp"
-#include "sys/stat.h"
+#include <sys/stat.h>
 #include <cstring>
 #include <cstdlib>
 #include <cerrno>
@@ -29,5 +29,6 @@
 #include <netinet/in.h>
 #include <iomanip>
 #include <vector>
+#include <deque>
 
 #endif

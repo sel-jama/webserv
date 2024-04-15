@@ -13,13 +13,19 @@
 #include "method.hpp"
 //handle GET method
 
+void method::validateAll(Request &req) const{
+    if (!(req.pathStatus.st_mode& S_IRUSR))
+        throw std::runtime_error("forbiden : permission denied");
+}
+
 void method::GetDataForClient(Request &req, int &clientSocket) {
     defineResourceType(req); //file or dir
-    if (type == "file"){
+    if (type == "file") {
         //if location does not have cgi
+        validateAll(req);
         content = readContent(req);
     }
-    else 
+    else
         handleDirectory(req);
     // std::string mimeType = getMimeType(req.fileName);
     // std::string content = readContent(req.fileName);
@@ -66,7 +72,7 @@ std::string method::readContent(Request &req){
     std::ifstream file(req.path, std::ios::binary);
     const size_t chunkSize = 1024; // 1 KB
     char buffer[chunkSize];
-    
+
     if (!file.is_open()) {
         std::cerr << "Error: Failed to open file " << req.fileName << "\n";
         return "";
@@ -86,7 +92,7 @@ std::string method::readContent(Request &req){
     return content.str();
 }
 
-void method::defineResourceType(const Request &req) {
+void method::defineResourceType(const Request &req){
     const std::string uri = req.getUri();
     if (S_ISDIR(req.pathStatus.st_mode))
         type = "directory";
@@ -94,7 +100,7 @@ void method::defineResourceType(const Request &req) {
         type = "file";
 }
 
-void method::handleDirectory(Request &req)  {
+void method::handleDirectory(Request &req) {
     size_t uriLength = req.getUri().length() - 1;
     if (req.getUri().at(uriLength) == '/'){
         if (isDirHasIndexFiles(req) == false)
@@ -102,7 +108,6 @@ void method::handleDirectory(Request &req)  {
         //no index files and no cgi
         else if (req.getMatchedLocation().cgi.size() == 0)
             this->content = readContent(req);
-
 
     }
     //else : make a 301 redirection to request uri with “/ addeed at the end

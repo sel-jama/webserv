@@ -12,7 +12,8 @@
 
 #include "Request.hpp"
 
-Request::Request(){}
+Request::Request(client &user) : method(""), uri(""), version(""), user(user){
+}
 
 Request::~Request(){}
 
@@ -64,7 +65,7 @@ const std::map<std::string, std::string>& Request::getHeaders() const{
 //     // if (bytesRead == -1)
 //     //     throw std::runtime_error("Error reading request from socket");
 
-//     uint8_t recvline[BUFFER_SIZE+1];
+//     uint8_t recvline[BUcutOffBodySegmentFFER_SIZE+1];
 //     int n;
 //     while (( n = read(fdSocket, recvline, BUFFER_SIZE-1) ) > 0){
 //             // fprintf(stdout, "\n%s\n\n%s", bin2hex(recvline, n), recvline);
@@ -85,29 +86,31 @@ const std::map<std::string, std::string>& Request::getHeaders() const{
 //     return request;
 // }
 
-void Request::cutOffBodySegment(std::string &request){
+void Request::(std::string &request){
     size_t pos = request.find("\n\r\n\r");
 
     if(pos != std::string::npos){
         bodySaver = request.substr(pos);
+        // int num = request.length() - pos;
+        request.erase(pos, request.length() - 1);
     }
 }
 
 std::string Request::readRequest(int &fdSocket) {
     std::stringstream buff("");
 
-    uint8_t recvline[BUFFER_SIZE];
-    while ((readbytes = read(fdSocket, recvline, BUFFER_SIZE)) > 0) {
-        if (recvline.find("\n\r\n\r"))  //change later >> break when content len is all served
+    char recvline[BUFFER_SIZE];
+    while ((readbytes = read(fdSocket, recvline, BUFFER_SIZE)) > 0){
+        if (strstr(recvline, "\n\r\n\r"))  //change later >> break when content len is all served
             break;
         buff << recvline;
         memset(recvline, 0, BUFFER_SIZE);
     }
 
-    if (n < 0)
+    if (readbytes < 0)
         throw std::runtime_error("Error reading from socket: socket failed");
         
-    else if (n == 0)
+    else if (readbytes == 0)
         throw std::runtime_error("Peer closed the connection");
     
     std::string request(buff.str());
@@ -139,22 +142,23 @@ void Request::requestPartitioning(Request &saver, std::string& request) {
     // Parse body if Content-Length header is present
     std::map<std::string, std::string>::const_iterator it = saver.headers.find("Content-Length");
     if (it != saver.headers.end()) {
-        int contentLength = atoi(it->second.c_str());
-        char bodyBuffer[contentLength + 1];
-        iss.read(bodyBuffer, contentLength);
-        bodyBuffer[contentLength] = '\0';
-        saver.body = bodyBuffer;
+        contentLength = atoi(it->second.c_str());
+        // char bodyBuffer[contentLength + 1];
+        // iss.read(bodyBuffer, contentLength);
+        // bodyBuffer[contentLength] = '\0';
+        // saver.body = bodyBuffer;
     }
 }
 
 void Request::isReqWellFormed(Request &req, long long maxBodySize) const{
     ParseRequest parse;
+    (void)maxBodySize;
 
     parse.parseMethod(req.method);
     parse.parseHeaders(req.headers, req.method);
     parse.parseUri(req.uri);
     parse.parseVersion(req.version);
-    parse.parseBody(req.body, maxBodySize);
+    // parse.parseBody(req.body, maxBodySize);
     /*if => Request body larger than client max body size in config file*/
 
 }
@@ -169,16 +173,17 @@ bool Request::allowedMethod(location& location) const {
 }
 
 //start here
-void     Request::getCheckRequest(Request &reqObj, server &serve, int &fdSock) {
+void     Request::getCheckRequest(Request &reqObj, const server &serve, int &fdSock) {
     std::string reqStr;
     // Request use
     
     reqStr = reqObj.readRequest(fdSock);
     //handling one client only 
     // reqObj.client.state = 1;
-    close(fdSock);
     reqObj.requestPartitioning(reqObj, reqStr);
-    
+    //done reading from socket if method is GET or DELETE 
+    if (reqObj.method != "POST")
+        reqObj.user.r_done = 1;
     reqObj.isReqWellFormed(reqObj, serve.getClientMaxBodySize());
     reqObj.retreiveRequestedResource(serve);
     // reqObj.setContentLength
@@ -209,7 +214,7 @@ int sameUntilIndex(const std::string &uri, const std::string &locationName){
     return i;
 }
 
-const location &Request::getMatchingLocation(server &serve) {
+const location &Request::getMatchingLocation(const server &serve) {
     int counter;
 
     size_t i = 0;
@@ -229,7 +234,7 @@ const location &Request::getMatchingLocation(server &serve) {
     return serve.getLocations().at(i);
 }
 
-void Request::retreiveRequestedResource(server &serve){
+void Request::retreiveRequestedResource(const server &serve){
     matchedLocation = getMatchingLocation(serve);
     //see the root of the location retrieved and join it with the uri then look for it using access
     //pass "/"

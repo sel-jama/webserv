@@ -46,8 +46,5 @@ class Except : std::exception{
     }
 };
 
-int hexa_to_num(std::string ptr);
-
-
 #endif
 

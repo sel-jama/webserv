@@ -23,6 +23,7 @@ void method::GetDataForClient(Request &req, int &clientSocket) {
     if (type == "file") {
         //if location does not have cgi
         validateAll(req);
+        //cgi
         content = readContent(req);
     }
     else
@@ -69,24 +70,27 @@ void method::GetDataForClient(Request &req, int &clientSocket) {
 
 std::string method::readContent(Request &req){
     
-    std::ifstream file(req.path, std::ios::binary);
-    const size_t chunkSize = 1024; // 1 KB
-    char buffer[chunkSize];
+    std::ifstream file(req.path.c_str());
+    if (file.fail())
+        throw std::runtime_error("set error page : failed to read requested content");
+    // const size_t chunkSize = 1024; // 1 KB
+    // char buffer[chunkSize];
 
-    if (!file.is_open()) {
-        std::cerr << "Error: Failed to open file " << req.fileName << "\n";
-        return "";
-    }
+    // if (!file.is_open()) {
+    //     std::cerr << "Error: Failed to open file " << req.fileName << "\n";
+    //     return "";
+    // }
 
     std::ostringstream content;
+    content << file.rdbuf();
     //content length is not set yet !!!!!!!
-    size_t contentSize = req.contentLength;
-    while (contentSize > 0) {
-        file.read(buffer, chunkSize);
-        content << buffer;
-        memset(buffer, 0, chunkSize);
-        contentSize -= chunkSize;
-    }
+    // size_t contentSize = req.contentLength;
+    // while (contentSize > 0) {
+    //     file.read(buffer, chunkSize);
+    //     content << buffer;
+    //     memset(buffer, 0, chunkSize);
+    //     contentSize -= chunkSize;
+    // }
     file.close();
     //set reading state to false 
     return content.str();
@@ -156,9 +160,9 @@ bool method::isDirHasIndexFiles(Request &req) const{
 
 void method::autoIndexing(Request &req) const {
     (void)req;
-    // if (req.getMatchedLocation().autoindex == "on")
-    //     directoryListing(req);
-    // throw std::runtime_error("403 Forbiden");
+    if (req.getMatchedLocation().autoindex == "on")
+        directoryListing(req);
+    throw std::runtime_error("403 Forbiden");
 }
 
 // void method::directoryListing(Request &req) const{
@@ -191,3 +195,4 @@ void method::autoIndexing(Request &req) const {
 //     return page.str();
 
 // }
+

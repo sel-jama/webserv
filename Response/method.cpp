@@ -18,7 +18,6 @@ void method::validateAll(Request &req) const{
         throw std::runtime_error("forbiden : permission denied");
 }
 
-//handle GET
 void method::GetDataForClient(Request &req, int &clientSocket) {
     defineResourceType(req); //file or dir
     if (type == "file") {
@@ -46,6 +45,31 @@ void method::GetDataForClient(Request &req, int &clientSocket) {
     }
 }
 
+
+void method::setErrorPages() const {
+    //html error pages
+    errorPage[400] = "Bad Request";
+    errorPage[401] = "Unquthorized";
+    errorPage[403] = "Forbidden";
+    errorPage[404] = "Not Found";
+    errorPage[405] = "Method Not Allowed";
+    errorPage[406] = "Not Acceptable";
+    errorPage[407] = "Proxy Authentication Required";
+    errorPage[408] = "Request Timeout";
+    errorPage[409] = "Conflict";
+    errorPage[410] = "Gone";
+    errorPage[411] = "Length Required";
+    errorPage[412] = "Precondition Failed";
+    errorPage[413] = "Request Entity Too Large";
+    errorPage[414] = "Request-URI Too Long";
+    errorPage[415] = "Unsupported Media Type";
+    errorPage[416] = "Requested Range Not Satisfiable";
+    errorPage[417] = "Expectation Failed";
+    errorPage[500] = "Internal Server Error";
+    errorPage[501] = "Not Implemented";
+    errorPage[502] = "Bad Gateway";
+    errorPage[503] = "Service Unavailable";
+}
 // // std::string method::getMimeType(const std::string& fileName) {
 // //     size_t dotPos = fileName.find_last_of('.');
 // //     if (dotPos != std::string::npos){
@@ -105,7 +129,7 @@ void method::defineResourceType(const Request &req){
         type = "file";
 }
 
-void method::handleDirectory(Request &req) {
+void method::handleDirectory(Request &req){
     size_t uriLength = req.getUri().length() - 1;
     if (req.getUri().at(uriLength) == '/'){
         if (isDirHasIndexFiles(req) == false)

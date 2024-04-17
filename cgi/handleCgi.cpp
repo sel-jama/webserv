@@ -163,16 +163,14 @@ std::string executeCgiScript(const Request &req) {
     if (!outputFile.is_open())
         throw std::runtime_error("Failed to open random file for writing");
 
-    pid_t pid = fork();---
+    pid_t pid = fork();
     if (pid == -1)
         throw std::runtime_error("Fork failed");
     
     else if (pid == 0) {
         // Redirect stdout to the random file
-        if (freopen(random.c_str(), "w", stdout) == NULL) {
+        if (freopen(random.c_str(), "w", stdout) == NULL)
             throw std::runtime_error("Failed to redirect stdout");
-        }
-
         // Execute the CGI script
         char *const arr[] = createArr();
         execve(cgiPath.c_str(), arr, NULL);

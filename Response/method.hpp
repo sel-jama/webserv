@@ -30,6 +30,8 @@ class method {
         
 
     public:
+        std::map<int, std::string> errorPage;
+        
         void GetDataForClient(Request &, int &);
         void handleGetRequest(int clientSocket);
         void retreiveRequestedResource(server &, Request &) const;

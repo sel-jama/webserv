@@ -45,8 +45,7 @@ void method::GetDataForClient(Request &req, int &clientSocket) {
     }
 }
 
-
-void method::setErrorPages() const {
+void method::setErrorPages(){
     //html error pages
     errorPage[400] = "Bad Request";
     errorPage[401] = "Unquthorized";

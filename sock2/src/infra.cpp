@@ -94,12 +94,12 @@ void infra::selecttoinfinity()
         int slct = select(maxfd + 1, &fd_rcopy, &fd_wcopy, NULL, &timeout);
         if (slct == -1) throw(std::runtime_error("Error : select : lanch"));
         //added by sel-jama
-        std::vector<server>::iterator it = servers.begin();
+        // std::vector<server>::iterator it = servers.begin();
         client c;
-        
+        c.ssocket=slct;
         Request req(c);
-        if (FD_ISSET((*it).ssocket, &fd_rcopy))
-            main2(*this, req, (*it).ssocket);
+        if (FD_ISSET(slct, &fd_rcopy))
+            main2(*this, req, slct);
         // if (slct == 0)
         // {
         //     //close sleeping clients // no data in the specefic timeout

@@ -7,7 +7,7 @@ class client
     private:
 
     public:
-        client(const client &){}
+        client(const client &other){ this->ssocket = other.ssocket; cdata_socket=other.cdata_socket; clientTime=other.clientTime; state=other.state;}
         const client &operator=(const client &);
         // client(int fd, fd_set &fd_r, int &maxfd)
         client();

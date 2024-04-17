@@ -46,6 +46,7 @@ class method {
         void autoIndexing(const Request &) ;
         void directoryListing(const Request &) ;
         void validateAll(Request &req) const;
+        void setErrorPages();
 };
 
 #endif

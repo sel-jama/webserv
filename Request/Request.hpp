@@ -6,7 +6,7 @@
 /*   By: sel-jama <sel-jama@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/03/24 11:13:12 by sel-jama          #+#    #+#             */
-/*   Updated: 2024/04/13 15:19:51 by sel-jama         ###   ########.fr       */
+/*   Updated: 2024/04/17 22:53:29 by sel-jama         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -40,6 +40,7 @@ class Request {
         struct stat pathStatus;
         int contentLength; 
         int readbytes;
+        int readBody;
         std::string bodySaver;
 
         Request(client &user);

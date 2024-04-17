@@ -18,6 +18,7 @@ void method::validateAll(Request &req) const{
         throw std::runtime_error("forbiden : permission denied");
 }
 
+//handle GET
 void method::GetDataForClient(Request &req, int &clientSocket) {
     defineResourceType(req); //file or dir
     if (type == "file") {
@@ -143,7 +144,7 @@ bool method::isDirHasIndexFiles(Request &req) const{
             size_t pos = filename.find('.');
 
             filename.substr(0, pos);
-            if (filename == "index") {
+            if (filename == "index")  { //compare with index files in location later
                 closedir(dir);
                 return true;
             }
@@ -158,41 +159,33 @@ bool method::isDirHasIndexFiles(Request &req) const{
     return false;
 }
 
-void method::autoIndexing(Request &req) const {
+void method::autoIndexing(const Request &req){
     (void)req;
     if (req.getMatchedLocation().autoindex == "on")
         directoryListing(req);
     throw std::runtime_error("403 Forbiden");
 }
 
-// void method::directoryListing(Request &req) const{
+void method::directoryListing(const Request &req){
+    std::stringstream page;
 
-//     const std::string& path, const std::string& host, int port;
-//     std::vector<std::string> fileList = getFileList(path);
-//     if (fileList.empty()) {
-//         std::cerr << "Error: could not open [" << path << "]" << std::endl;
-//         return "";
-//     }
+    DIR* directory = opendir(req.path.c_str());
+    if (directory == NULL)
+        throw std::runtime_error("serve page: Error opening directory");
 
-//     std::stringstream page;
-//     page << "<!DOCTYPE html>\n"
-//          << "<html>\n"
-//          << "<head>\n"
-//          << "    <title>Index of " << path << "</title>\n"
-//          << "</head>\n"
-//          << "<body>\n"
-//          << "<h1>Index of " << path << "</h1>\n"
-//          << "<ul>\n";
+    page << "<html><head><title>Index of " << req.path.c_str() << "</title></head><body><h1>Index of " << req.path.c_str() << "</h1><ul>" << std::endl;
 
-//     for (const std::string& file : fileList) {
-//         page << "    <li><a href=\"http://" << host << ":" << port << "/" << file << "\">" << file << "</a></li>\n";
-//     }
+    struct dirent* entry;
+    while ((entry = readdir(directory)) != NULL) {
+        if (strcmp(entry->d_name, ".") != 0 && strcmp(entry->d_name, "..") != 0) {
+            page << "<li><a href=\"" << entry->d_name << "\">" << entry->d_name << "</a></li>" << std::endl;
+        }
+    }
 
-//     page << "</ul>\n"
-//          << "</body>\n"
-//          << "</html>\n";
+    page << "</ul></body></html>" << std::endl;
+    closedir(directory);
+    this->autoindexPage = page.str();
+}
 
-//     return page.str();
 
-// }
 

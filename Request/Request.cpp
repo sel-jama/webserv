@@ -25,9 +25,9 @@ const std::string& Request::getUri() const{
     return this->uri;
 }
 
-const std::string& Request::getBody() const{
-    return this->body;
-}
+// const std::string& Request::getBody() const{
+//     return this->body;
+// }
 
 const std::map<std::string, std::string>& Request::getHeaders() const{
     return this->headers;
@@ -86,7 +86,7 @@ const std::map<std::string, std::string>& Request::getHeaders() const{
 //     return request;
 // }
 
-void Request::(std::string &request){
+void Request::cutOffBodySegment(std::string &request){
     size_t pos = request.find("\n\r\n\r");
 
     if(pos != std::string::npos){

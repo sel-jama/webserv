@@ -5,10 +5,10 @@
 class client
 {
     private:
-        // client(const client &);
-        const client &operator=(const client &);
 
     public:
+        client(const client &){}
+        const client &operator=(const client &);
         // client(int fd, fd_set &fd_r, int &maxfd)
         client();
         ~client();

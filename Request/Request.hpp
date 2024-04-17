@@ -26,7 +26,7 @@ class Request {
         // std::string body;
 
         server serverInfo;
-        client user;
+        client &user;
         location matchedLocation;  // v
         // infra Infra;
 
@@ -42,7 +42,7 @@ class Request {
         int readbytes;
         std::string bodySaver;
 
-        Request();
+        Request(client &user);
         ~Request();
 
         const std::string& getMethod(void) const;

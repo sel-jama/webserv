@@ -26,6 +26,7 @@ class method {
         std::map<std::string, std::string> mimeTypes;
 
         std::string content;  //retreived content
+        std::string autoindexPage;
         
 
     public:
@@ -35,14 +36,14 @@ class method {
         const location &getMatchingLocation(server &, Request &);
         // std::string getMimeType(const std::string& fileName);
         std::string readContent(Request &req) ;
-
         //setters
 
         void defineResourceType(const Request &);
         void handleDirectory(Request &) ;
         bool isDirHasIndexFiles(Request &) const;
-        void autoIndexing(Request &) const ;
-        void directoryListing(Request &) const;
+        void autoIndexing(const Request &) ;
+        void directoryListing(const Request &) ;
+        void validateAll(Request &req) const;
 };
 
 #endif

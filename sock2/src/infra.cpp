@@ -88,7 +88,6 @@ void infra::selecttoinfinity()
     // int slct;
     while (1)
     {
-        Request req;
         fd_rcopy = fd_r;
         fd_wcopy = fd_w;
         std::cout << "Waiting for connection... " << std::endl;
@@ -96,6 +95,9 @@ void infra::selecttoinfinity()
         if (slct == -1) throw(std::runtime_error("Error : select : lanch"));
         //added by sel-jama
         std::vector<server>::iterator it = servers.begin();
+        client c;
+        
+        Request req(c);
         if (FD_ISSET((*it).ssocket, &fd_rcopy))
             main2(*this, req, (*it).ssocket);
         // if (slct == 0)

@@ -141,11 +141,68 @@ void Post::support_upload(Request obj){
                file << obj.getBody() << std::endl;
            }
         }
+    }   
+}
+
+void Post::Work_with_Directory(Request obj)
+{
+    
+    location capt = obj.getMatchedLocation();
+    std::map<std::string, std::string> get = capt.cgi;
+    std::map<std::string, std::string>::iterator iter = get.begin();
+    std::string search;
+    std::string tmp;
+    int integ = 0;
+    std::vector<std::string>index ;
+    std::vector<std::string>::iterator for_index = index.begin();
+
+    for(iter = get.begin(); iter != get.end(); iter++)
+    {
+        search = iter->first;
+        search = "." + search;
+        if(for_index != index.end())
+              tmp = *for_index;
+        tmp = tmp.find(search);
+        if(!tmp.empty()){
+            integ = 1;
+            break;
+        }
+        for_index++;
     }
-        
+    if(integ == 1){
+        //found it;
+        //do cgi work
+    }
+    else{
+        //403 forbiden
+        throw Except();
+    }
 }
 
 void Post::Work_with_file(Request obj){
-    location capt = obj.getMatchedLocation();
+   location capt = obj.getMatchedLocation();
+    std::map<std::string, std::string> get = capt.cgi;
+    std::map<std::string, std::string>::iterator iter = get.begin();
+    std::string search;
+    std::string tmp;
+    int integ = 0;
 
+    for(iter = get.begin(); iter != get.end(); iter++)
+    {
+        search = iter->first;
+        search = "." + search;
+        tmp = obj.fileName.find(search);
+        if(!tmp.empty()){
+            integ = 1;
+            break;
+        }
+    }
+    if(integ == 1){
+
+    }
+    else{
+        //403 forbiden
+        throw Except();
+    }
+    if()
 }

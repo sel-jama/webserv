@@ -47,7 +47,6 @@ std::string Request::readRequest(int &fdSocket){
     std::stringstream buff("");
     if (readBody)
         std::stringstream buff(bodySaver);
-
     char recvline[BUFFER_SIZE];
     while ((readbytes = read(fdSocket, recvline, BUFFER_SIZE)) > 0){
         buff << recvline;
@@ -55,13 +54,10 @@ std::string Request::readRequest(int &fdSocket){
             break;
         memset(recvline, 0, BUFFER_SIZE);
     }
-
     if (readbytes < 0)
         throw std::runtime_error("Error reading from socket: socket failed");
-        
     else if (readbytes == 0)
         throw std::runtime_error("Peer closed the connection");
-    
     std::string request(buff.str());
     if (!readBody)
         cutOffBodySegment(request);
@@ -101,6 +97,7 @@ void Request::requestPartitioning(Request &saver, std::string& request) {
         // saver.body = bodyBuffer;
     }
 }
+
 
 void Request::isReqWellFormed(Request &req, long long maxBodySize) const{
     ParseRequest parse;

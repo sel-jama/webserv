@@ -179,6 +179,19 @@ void Post::Work_with_Directory(Request obj)
     }
 }
 
+void Post::body(Request obj){
+
+}
+
+void Post::chunked_body(Request obj){
+    std::string capt = obj.readRequest(fdsock);
+    const char *str = capt.c_str();
+    str = const_cast<char *>(str);
+    for(int i = 0; str[i]; i++){
+        if(str[i])
+    }
+}
+
 void Post::Work_with_file(Request obj){
    location capt = obj.getMatchedLocation();
     std::map<std::string, std::string> get = capt.cgi;
@@ -204,5 +217,4 @@ void Post::Work_with_file(Request obj){
         //403 forbiden
         throw Except();
     }
-    if()
 }

@@ -20,6 +20,7 @@ class Post{
     public:
         Post(){};
         std::string Type;
+        int fdsock;
         void set_saver(std::string); 
         void set_post_i(bool value);
         void set_count(size_t value);
@@ -38,6 +39,8 @@ class Post{
         void After_geting_resource(Request obj);
         void Work_with_file(Request obj);
         void Work_with_Directory(Request obj);
+        void body(Request obj);
+        void chunked_body(Request obj);
         ~Post();
 };
 class Except : std::exception{

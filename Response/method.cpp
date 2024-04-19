@@ -23,7 +23,6 @@ void method::GetDataForClient(Request &req, int &clientSocket) {
     if (type == "file") {
         //if location does not have cgi
         validateAll(req);
-        //cgi
         content = readContent(req);
     }
     else

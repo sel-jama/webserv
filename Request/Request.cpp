@@ -6,7 +6,7 @@
 /*   By: sel-jama <sel-jama@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/03/24 15:33:33 by sel-jama          #+#    #+#             */
-/*   Updated: 2024/04/17 23:37:04 by sel-jama         ###   ########.fr       */
+/*   Updated: 2024/04/18 20:08:23 by sel-jama         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -43,7 +43,7 @@ void Request::cutOffBodySegment(std::string &request){
     }
 }
 
-std::string Request::readRequest(int &fdSocket) {
+std::string Request::readRequest(int &fdSocket){
     std::stringstream buff("");
     if (readBody)
         std::stringstream buff(bodySaver);

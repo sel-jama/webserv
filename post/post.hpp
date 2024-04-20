@@ -21,6 +21,7 @@ class Post{
         Post(){};
         std::string Type;
         int fdsock;
+        std::string Body;
         void set_saver(std::string); 
         void set_post_i(bool value);
         void set_count(size_t value);
@@ -41,7 +42,7 @@ class Post{
         void Work_with_Directory(Request obj);
         void body(Request obj);
         void chunked_body(Request obj);
-        ~Post();
+        ~Post(){};
 };
 class Except : std::exception{
     const char * what() const throw(){

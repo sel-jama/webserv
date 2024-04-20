@@ -153,7 +153,7 @@ void Post::Work_with_Directory(Request obj)
     std::string search;
     std::string tmp;
     int integ = 0;
-    std::vector<std::string>index ;
+    std::vector<std::string>index;
     std::vector<std::string>::iterator for_index = index.begin();
 
     for(iter = get.begin(); iter != get.end(); iter++)
@@ -174,22 +174,53 @@ void Post::Work_with_Directory(Request obj)
         //do cgi work
     }
     else{
-        //403 forbiden
+       //forbiden 403
         throw Except();
     }
 }
 
 void Post::body(Request obj){
-
+    std::string capt = obj.readRequest(fdsock);
+    if(obj.contentLength != capt.length())
+        throw Except();
+    Body = capt;
 }
 
 void Post::chunked_body(Request obj){
     std::string capt = obj.readRequest(fdsock);
-    const char *str = capt.c_str();
-    str = const_cast<char *>(str);
-    for(int i = 0; str[i]; i++){
-        if(str[i])
+    capt = capt + obj.bodySaver;
+    int counter = 0;
+    int length = 0;
+    int save = 0;
+    int begin = 0;
+    while(1){
+        if(counter == 0)
+            begin = capt.find("/r/n");
+        else
+        {
+            save = begin;
+            if(save == 0)
+                break;
+            begin = capt.find("/r/n", begin);
+        }
+        if(counter % 2 == 0)
+        {
+            std::string to_h = capt.substr(save, begin);
+            length = hexa_to_num(to_h);
+        }
+        else
+        {
+            std::string string = capt.substr(save, begin);
+            if(length != string.length())  
+                throw Except();
+            if(string.empty())
+                break;
+            Body = Body + string;
+        }
+        counter++;
     }
+    if(save != 0)
+        throw Except();
 }
 
 void Post::Work_with_file(Request obj){

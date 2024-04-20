@@ -24,11 +24,11 @@ void errorPage::HtmlErrorPage() {
         << "<head>"
         << "<style type=text/css>"
 
-    ss << "</style>"
-    ss << "</head>"
+        << "</style>"
+        << "</head>"
 
-    ss << "<body>"
+        << "<body>"
 
-    ss << "</body>"
-    ss << "</html>"
+        << "</body>"
+        << "</html>"
 }

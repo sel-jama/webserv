@@ -122,19 +122,25 @@ bool Request::allowedMethod(location& location) const {
 }
 
 //start here
-void     Request::getCheckRequest(Request &reqObj, const server &serve, int &fdSock) {
+int    Request::getCheckRequest(client &client, const server &serve) {
     std::string reqStr;
     // Request use
     
-    reqStr = reqObj.readRequest(fdSock);
-    //handling one client only 
-    // reqObj.client.state = 1;
-    reqObj.requestPartitioning(reqObj, reqStr);
-    //done reading from socket if method is GET or DELETE 
-    if (reqObj.method != "POST")
-        reqObj.user.r_done = 1;
-    reqObj.isReqWellFormed(reqObj, serve.getClientMaxBodySize());
-    reqObj.retreiveRequestedResource(serve);
+    try{
+        reqStr = client.reqObj.readRequest(client.ssocket);
+        //handling one client only 
+        // reqObj.client.state = 1;
+        client.reqObj.requestPartitioning(client.reqObj, reqStr);
+        //done reading from socket if method is GET or DELETE 
+        client.reqObj.isReqWellFormed(client.reqObj, serve.getClientMaxBodySize());
+        if (clinet.reqObj.method != "POST")
+            client.r_done = 1;
+        client.reqObj.retreiveRequestedResource(serve);
+    }
+    catch(const std::runtime_error &e){
+        return 0;
+    }
+    return 1;
     // reqObj.setContentLength
     
     // return reqObj;

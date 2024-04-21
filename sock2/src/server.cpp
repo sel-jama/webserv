@@ -233,6 +233,8 @@ void server::accept_new_connection(fd_set &fd_r, int &maxfd)
 	if (fcntl(tmp.ssocket, O_NONBLOCK) == -1)											throw(std::runtime_error("Error: init clients : fcntl()"));
 	FD_SET(tmp.ssocket , &fd_r);
 	gettimeofday(&tmp.clientTime, NULL);
+	//--------------mid-merge
+	
 	clients.push_back(tmp);
 	maxfd = tmp.ssocket;
 }
@@ -251,7 +253,7 @@ void server::handle_old_cnx(fd_set &fd_r, fd_set &fd_w, fd_set &fd_rcopy, fd_set
 	{
 		if (FD_ISSET((*it).ssocket, &fd_rcopy))
 		{
-			if (!(*it).read_request()) 
+			if (!((*it).reqq).getcheckRequest((*it, *this))) 
 			{
 				clientdown(*it, fd_r, fd_w, maxfd);
 				continue;

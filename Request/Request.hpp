@@ -15,6 +15,7 @@
 
 #include "ParseRequest.hpp"
 #include "../sock2/includes/client.hpp"
+#include "../sock2/includes/server.hpp"
 #include <algorithm>
 
 class Request {
@@ -25,8 +26,8 @@ class Request {
         std::map<std::string, std::string> headers;
         // std::string body;
 
-        server serverInfo;
-        client &user;
+        // server serverInfo;
+        // client &user;
         location matchedLocation;  // v
         // infra Infra;
 
@@ -43,7 +44,7 @@ class Request {
         int readBody;
         std::string bodySaver;
 
-        Request(client &user);
+        Request();
         ~Request();
 
         const std::string& getMethod(void) const;
@@ -56,7 +57,9 @@ class Request {
         void locateMatchingRequestURI(const server &use) const;
         bool allowedMethod(location &location) const;
 
-        static void getCheckRequest(Request &req, const server &serve, int &fdSock);
+        // static void getCheckRequest(Request &req, const server &serve, int &fdSock);
+        static int getCheckRequest(client &, const server &serve);
+
         std::string &getLocation(location &location) const;
 
         const location &getMatchingLocation(const server &serve) ;

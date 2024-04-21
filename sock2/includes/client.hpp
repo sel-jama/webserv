@@ -1,6 +1,7 @@
 #ifndef SCLIENT_HPP
 #define SCLIENT_HPP
 #include "WebServer.hpp"
+#include "../../Request/Request.hpp"
 
 class client
 {
@@ -23,10 +24,8 @@ class client
         //v1.1
         time_t wakt;
 
-        //added by sel-jama
-        int read_response(){
-            
-        }
+        //mid-merge
+        Request reqq;
         
 };
 

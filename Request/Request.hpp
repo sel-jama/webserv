@@ -28,7 +28,7 @@ class Request {
 
         // server serverInfo;
         // client &user;
-        location matchedLocation;  // v
+        location matchedLocation;
         // infra Infra;
 
         //more to set up 

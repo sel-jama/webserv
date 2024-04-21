@@ -12,11 +12,11 @@
 
 #include "Response.hpp"
 
-std::string Response::handleMethod(Request &req, const infra &infras){
+std::string Response::handleMethod(client &client){
     Response obj;
 
-    if (req.getMethod() == "GET")
-        obj.handleGET(req, infras.getClients().at(0).ssocket);
+    if (client.req.getMethod() == "GET")
+        obj.handleGET(client.req, client.ssocket);
     
     return obj.response;
 }

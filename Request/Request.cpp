@@ -213,3 +213,14 @@ const server &Request::getServerInfo(void) const {
 const location &Request::getMatchedLocation(void) const {
     return this->matchedLocation;
 }
+
+int Request::send_response(client &client){
+    try{
+        std::string res = handleMethod(client);
+        std::cout << res ;
+    }
+    catch (const std::runtime_error &e){
+        return 0;
+    }
+    return 1;
+}

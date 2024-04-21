@@ -40,7 +40,7 @@ void method::GetDataForClient(Request &req, int &clientSocket) {
     this->response = response.str();
     // std::cout << this->response << std::endl;
     if (send(clientSocket, response.str().c_str(), response.str().length(), 0) == -1) {
-        std::cerr << "Error: Failed to send response to client\n";
+        throw std::runtime_error("Error: Failed to send response to client");
     }
 }
 

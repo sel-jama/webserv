@@ -12,8 +12,7 @@ void infra::sockettolisten(std::vector<server>::iterator &it)
     if (fcntl((*it).ssocket, O_NONBLOCK) == -1)                                         throw(std::runtime_error("Error: init servers : fcntl()"));
     if (setsockopt((*it).ssocket, SOL_SOCKET, SO_REUSEPORT, &(opt), sizeof(opt)) == -1) throw(std::runtime_error("Error: init servers : setsockopt() SO_REUSPORT"));
     if (bind((*it).ssocket, (const sockaddr *)&((*it).data_socket), j) == -1)           throw(std::runtime_error("Error: init servers : bind()"));
-    if (listen((*it).ssocket, 10) == -1)                                                throw(std::runtime_error("Error: init servers : listen()"));
-
+    if (listen((*it).ssocket,10 ) == -1)                                                throw(std::runtime_error("Error: init servers : listen()"));
 }
 
 
@@ -22,12 +21,12 @@ void infra::initselect()
     maxfd = -1;
     FD_ZERO(&fd_r);
     FD_ZERO(&fd_w);
-    for (std::vector<int>::iterator it = socket_lstn.begin(); it != socket_lstn.end(); ++it)
+    for (std::vector<server>::iterator it = servers.begin(); it != servers.end(); ++it)
     {
-        FD_SET(*it, &fd_r);
-        if (*it > maxfd) maxfd = *it;
+        FD_SET((*it).ssocket, &fd_r);
+        if ((*it).ssocket > maxfd) maxfd = (*it).ssocket;
     }
-    timeout.tv_sec = 5;
+    timeout.tv_sec = 60;
 }
 
 
@@ -39,82 +38,48 @@ void infra::initdata(std::vector<server>::iterator &it)//to be modifed
 
 }
 
-void infra::accept_new_connection(int fd)
-{
-    //check if hit max fd
-    client tmp;
-    memset(&tmp.cdata_socket, 0, sizeof(tmp.cdata_socket));
-    socklen_t len = sizeof(tmp.cdata_socket);
-    tmp.state = 0;
-    if ((tmp.ssocket = accept(fd, (struct sockaddr *)&tmp.cdata_socket, &len)) == -1) 
-        throw(std::runtime_error("Error: init clients : accept()"));
-    if (fcntl(tmp.ssocket, O_NONBLOCK) == -1)      throw(std::runtime_error("Error: init clients : fcntl()"));
-    FD_SET(tmp.ssocket , &fd_r);
-    gettimeofday(&tmp.clientTime, NULL);
-    clients.push_back(tmp);
-    maxfd = tmp.ssocket;
-}
-
-// void infra::handle_old_cnx(int i)
+// void infra::accept_new_connection(int fd)
 // {
-//     //2cases : request or respond
-//     if (FD_ISSET(i, fd_r))
-//     {
-//         if (read_done(i)) // handle request
-//         {
-
-//             continue;
-//         }
-//         if (state == 1) // ssala read
-//         {
-
-//         }
-//     }
-//     else if (FD_ISSET(i, fd_w))
-//     {
-//         if (write_done(i)) // handle respond
-//         {
-
-//         }
-//         if (state == 0) // ssala write
-//         {
-            
-//         }
-//     }
+//     //check if hit max fd
+//     client tmp;
+//     memset(&tmp.cdata_socket, 0, sizeof(tmp.cdata_socket));
+//     socklen_t len = sizeof(tmp.cdata_socket);
+//     tmp.state = 0;
+//     if ((tmp.ssocket = accept(fd, (struct sockaddr *)&tmp.cdata_socket, &len)) == -1) 
+//         throw(std::runtime_error("Error: init clients : accept()"));
+//     if (fcntl(tmp.ssocket, O_NONBLOCK) == -1)      throw(std::runtime_error("Error: init clients : fcntl()"));
+//     FD_SET(tmp.ssocket , &fd_r);
+//     gettimeofday(&tmp.clientTime, NULL);
+//     clients.push_back(tmp);
+//     maxfd = tmp.ssocket;
 // }
+
 
 void infra::selecttoinfinity()
 {
-    // int slct;
+    signal(SIGPIPE, SIG_IGN);
     while (1)
     {
         fd_rcopy = fd_r;
         fd_wcopy = fd_w;
-        std::cout << "Waiting for connection... " << std::endl;
+        // std::cout << "Waiting for connection... " << std::endl;
         int slct = select(maxfd + 1, &fd_rcopy, &fd_wcopy, NULL, &timeout);
         if (slct == -1) throw(std::runtime_error("Error : select : lanch"));
-        //added by sel-jama
-        // std::vector<server>::iterator it = servers.begin();
-        client c;
-        c.ssocket=slct;
-        Request req(c);
-        if (FD_ISSET(slct, &fd_rcopy))
-            main2(*this, req, slct);
-        // if (slct == 0)
-        // {
-        //     //close sleeping clients // no data in the specefic timeout
-        //     throw(std::runtime_error("Error : select : timeout"));
-        // }
-        // for (std::vector<server>::iterator it = servers.begin(); it !=servers.end(); ++it)
-        // {
-            // if (FD_ISSET((*it).ssocket, &fd_r))
-            // {
-            //     accept_new_connection(slct);
-            //     continue;
-            // }
-            // else
-            //     handle_connection(slct);
-        // }
+        if (slct == 0)
+        {
+            std::cout << "jit hna" << std::endl;
+            for (std::vector<server>::iterator it = servers.begin(); it != servers.end(); ++it)
+                (*it).checktime(fd_r, fd_w, maxfd);
+            continue;
+        }
+        exit (16);
+        for (std::vector<server>::iterator it = servers.begin(); it !=servers.end(); ++it)
+        {
+            if (FD_ISSET((*it).ssocket, &fd_r))
+                (*it).accept_new_connection(fd_r, maxfd);
+            else
+                (*it).handle_old_cnx(fd_r, fd_w, fd_rcopy, fd_wcopy, maxfd);
+        }
 
     }
 }
@@ -125,7 +90,6 @@ void infra::initservers()
     {
         initdata(it);
         sockettolisten(it);
-        socket_lstn.push_back(it->ssocket);
     }
     initselect();
     selecttoinfinity();

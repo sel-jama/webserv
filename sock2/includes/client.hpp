@@ -8,7 +8,7 @@ class client
 
     public:
         client(const client &other){ this->ssocket = other.ssocket; cdata_socket=other.cdata_socket; clientTime=other.clientTime; state=other.state;}
-        const client &operator=(const client &);
+        // const client &operator=(const client &);
         // client(int fd, fd_set &fd_r, int &maxfd)
         client();
         ~client();
@@ -20,6 +20,14 @@ class client
         //added by sel-jama
         int r_done;
         int w_done;
+        //v1.1
+        time_t wakt;
+
+        //added by sel-jama
+        int read_response(){
+            
+        }
+        
 };
 
 

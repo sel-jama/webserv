@@ -37,9 +37,13 @@ void validNum(int ac, int num)
     if (ac != num) throw(std::runtime_error("wrong number of arguments !!"));
 }
 
-void validArg(int ac, char **av)
+const char *validArg(int ac, char **av)
 {
+    const char *default_conf = "configfiles/config2.conf";
+    if (ac == 1)
+        return (default_conf);
     validNum(ac, 2);
     validNaming(av[1]);
-    validPath(av[1]);   
+    validPath(av[1]);
+    return (av[1]);
 }

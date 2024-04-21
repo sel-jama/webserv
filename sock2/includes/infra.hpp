@@ -5,6 +5,7 @@
 #include "client.hpp"
 #include "WebServer.hpp"
 #include "utils.hpp"
+#include <signal.h>
 
 
 //parse the config file to servers
@@ -27,6 +28,7 @@ class infra
         fd_set fd_r, fd_rcopy, fd_w, fd_wcopy;
         int maxfd;
         struct timeval timeout;
+        
         const std::vector<server> &getServer()const{return servers;}
         const std::vector<client> &getClients()const{return clients;}
         
@@ -41,8 +43,8 @@ class infra
         void selecttoinfinity();
 
         //accept or else
-        void accept_new_connection(int i);
-        void handle_old_cnx(int i);
+        //void accept_new_connection(int i);
+        //void handle_old_cnx(int i);
 
         //check - debug
         void printInfra();

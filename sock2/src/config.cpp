@@ -2,7 +2,7 @@
 
 configFile::~configFile(){}
 
-configFile::configFile(char *str)
+configFile::configFile(const char *str)
 {
     std::ifstream name(str);
     std::string line, token;

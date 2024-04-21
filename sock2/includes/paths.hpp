@@ -5,7 +5,7 @@
 
 //check path/name
 
-void validArg(int , char **);
+const char *validArg(int , char **);
 void validPath(char *);
 void validNaming(char *);
 

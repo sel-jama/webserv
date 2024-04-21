@@ -14,7 +14,7 @@ class configFile
 
     public:
         ~configFile();
-        configFile(char *);
+        configFile(const char *);
 
         //getter
         const std::vector<std::string> &getConfigfile()const;

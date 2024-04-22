@@ -26,7 +26,7 @@ void infra::initselect()
         FD_SET((*it).ssocket, &fd_r);
         if ((*it).ssocket > maxfd) maxfd = (*it).ssocket;
     }
-    timeout.tv_sec = 60;
+    timeout.tv_sec = 10;
 }
 
 
@@ -37,22 +37,6 @@ void infra::initdata(std::vector<server>::iterator &it)//to be modifed
     (*it).data_socket.sin_family = AF_INET;
 
 }
-
-// void infra::accept_new_connection(int fd)
-// {
-//     //check if hit max fd
-//     client tmp;
-//     memset(&tmp.cdata_socket, 0, sizeof(tmp.cdata_socket));
-//     socklen_t len = sizeof(tmp.cdata_socket);
-//     tmp.state = 0;
-//     if ((tmp.ssocket = accept(fd, (struct sockaddr *)&tmp.cdata_socket, &len)) == -1) 
-//         throw(std::runtime_error("Error: init clients : accept()"));
-//     if (fcntl(tmp.ssocket, O_NONBLOCK) == -1)      throw(std::runtime_error("Error: init clients : fcntl()"));
-//     FD_SET(tmp.ssocket , &fd_r);
-//     gettimeofday(&tmp.clientTime, NULL);
-//     clients.push_back(tmp);
-//     maxfd = tmp.ssocket;
-// }
 
 
 void infra::selecttoinfinity()
@@ -67,7 +51,6 @@ void infra::selecttoinfinity()
         if (slct == -1) throw(std::runtime_error("Error : select : lanch"));
         if (slct == 0)
         {
-            std::cout << "jit hna" << std::endl;
             for (std::vector<server>::iterator it = servers.begin(); it != servers.end(); ++it)
                 (*it).checktime(fd_r, fd_w, maxfd);
             continue;

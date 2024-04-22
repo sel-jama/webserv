@@ -3,7 +3,7 @@
 
 #include "WebServer.hpp"
 #include "../../Request/Request.hpp"
-class Request;
+// class Request;
 
 class client
 {

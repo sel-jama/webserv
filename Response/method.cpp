@@ -11,6 +11,7 @@
 /* ************************************************************************** */
 
 #include "method.hpp"
+#include "../Request/Request.hpp"
 //handle GET method
 
 void method::validateAll(Request &req) const{

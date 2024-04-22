@@ -6,11 +6,14 @@
 /*   By: sel-jama <sel-jama@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/03/24 15:33:33 by sel-jama          #+#    #+#             */
-/*   Updated: 2024/04/22 03:16:51 by sel-jama         ###   ########.fr       */
+/*   Updated: 2024/04/22 05:11:40 by sel-jama         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "Request.hpp"
+#include "../sock2/includes/client.hpp"
+#include "../sock2/includes/server.hpp"
+#include "../Response/Response.hpp"
 
 Request::Request() : method(""), uri(""), version(""), readBody(0){
 }
@@ -127,15 +130,15 @@ int    Request::getCheckRequest(client &client, const server &serve) {
     // Request use
     
     try{
-        reqStr = client.reqObj.readRequest(client.ssocket);
+        reqStr = client.reqq.readRequest(client.ssocket);
         //handling one client only 
-        // reqObj.client.state = 1;
-        client.reqObj.requestPartitioning(client.reqObj, reqStr);
+        // reqq.client.state = 1;
+        client.reqq.requestPartitioning(client.reqq, reqStr);
         //done reading from socket if method is GET or DELETE 
-        client.reqObj.isReqWellFormed(client.reqObj, serve.getClientMaxBodySize());
-        if (clinet.reqObj.method != "POST")
+        client.reqq.isReqWellFormed(client.reqq, serve.getClientMaxBodySize());
+        if (client.reqq.method != "POST")
             client.r_done = 1;
-        client.reqObj.retreiveRequestedResource(serve);
+        client.reqq.retreiveRequestedResource(serve);
     }
     catch(const std::runtime_error &e){
         return 0;
@@ -206,9 +209,9 @@ void Request::isFileAvailable(){
         throw std::runtime_error("404 Not found : Requested Resource not found");
 }
 
-const server &Request::getServerInfo(void) const {
-    return this->serverInfo;
-}
+// const server &Request::getServerInfo(void) const {
+//     return this->serverInfo;
+// }
 
 const location &Request::getMatchedLocation(void) const {
     return this->matchedLocation;
@@ -216,7 +219,7 @@ const location &Request::getMatchedLocation(void) const {
 
 int Request::send_response(client &client){
     try{
-        std::string res = handleMethod(client);
+        std::string res = Response::handleMethod(client);
         std::cout << res ;
         client.w_done = 1;
     }

@@ -13,9 +13,12 @@
 #ifndef METHOD_HPP
 #define METHOD_HPP
 
-#include "../Request/Request.hpp"
+// #include "../Request/Request.hpp"
+#include "../Request/Global.hpp"
 #include "dirent.h"
 class Request;
+class server;
+class location;
 
 class method {
     private:

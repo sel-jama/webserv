@@ -6,7 +6,7 @@
 /*   By: sel-jama <sel-jama@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/03/24 11:13:12 by sel-jama          #+#    #+#             */
-/*   Updated: 2024/04/22 04:11:32 by sel-jama         ###   ########.fr       */
+/*   Updated: 2024/04/22 05:03:22 by sel-jama         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -14,13 +14,14 @@
 #define REQUEST_HPP
 
 #include "ParseRequest.hpp"
-#include "../sock2/includes/client.hpp"
-#include "../sock2/includes/client.hpp"
-#include "../sock2/includes/server.hpp"
+// #include "../sock2/includes/client.hpp"
+// #include "../sock2/includes/server.hpp"
+#include "../sock2/includes/location.hpp"
 #include <algorithm>
 
 class client;
 class server;
+// class location;
 
 class Request {
     private:
@@ -70,7 +71,7 @@ class Request {
         void retreiveRequestedResource(const server &serve) ;
         void isFileAvailable();
 
-        const server &getServerInfo(void) const;
+        // const server &getServerInfo(void) const;
         const location &getMatchedLocation(void) const;
         void setContentLength(const std::map<std::string, std::string> &headers);
 

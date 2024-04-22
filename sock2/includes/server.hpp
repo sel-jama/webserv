@@ -6,6 +6,7 @@
 #include "utils.hpp"
 #include "location.hpp"
 #include "client.hpp"
+class client;
 
 class server
 {

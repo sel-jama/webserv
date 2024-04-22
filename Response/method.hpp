@@ -15,6 +15,7 @@
 
 #include "../Request/Request.hpp"
 #include "dirent.h"
+class Request;
 
 class method {
     private:

@@ -1,12 +1,12 @@
 /* ************************************************************************** */
 /*                                                                            */
 /*                                                        :::      ::::::::   */
-/*   global.hpp                                         :+:      :+:    :+:   */
+/*   Global.hpp                                         :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
 /*   By: sel-jama <sel-jama@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/04/01 01:20:25 by sel-jama          #+#    #+#             */
-/*   Updated: 2024/04/01 01:25:33 by sel-jama         ###   ########.fr       */
+/*   Updated: 2024/04/22 02:50:31 by sel-jama         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -19,7 +19,7 @@
 #include <map>
 #include <fstream>
 #include <unistd.h>
-#include "../sock2/includes/server.hpp"
+// #include "../sock2/includes/server.hpp"
 #include <sys/stat.h>
 #include <cstring>
 #include <cstdlib>

@@ -6,7 +6,7 @@
 /*   By: sel-jama <sel-jama@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/03/24 11:13:12 by sel-jama          #+#    #+#             */
-/*   Updated: 2024/04/17 22:53:29 by sel-jama         ###   ########.fr       */
+/*   Updated: 2024/04/22 04:11:32 by sel-jama         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -15,8 +15,12 @@
 
 #include "ParseRequest.hpp"
 #include "../sock2/includes/client.hpp"
+#include "../sock2/includes/client.hpp"
 #include "../sock2/includes/server.hpp"
 #include <algorithm>
+
+class client;
+class server;
 
 class Request {
     private:
@@ -72,6 +76,7 @@ class Request {
 
         std::string readRequest(int &fdSocket);
         void cutOffBodySegment(std::string &request);
+        int send_response(client &);
 };
 
 #endif

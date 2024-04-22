@@ -6,13 +6,13 @@
 /*   By: sel-jama <sel-jama@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/03/24 15:33:33 by sel-jama          #+#    #+#             */
-/*   Updated: 2024/04/18 20:08:23 by sel-jama         ###   ########.fr       */
+/*   Updated: 2024/04/22 03:16:51 by sel-jama         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "Request.hpp"
 
-Request::Request(client &user) : method(""), uri(""), version(""), user(user), readBody(0){
+Request::Request() : method(""), uri(""), version(""), readBody(0){
 }
 
 Request::~Request(){}
@@ -218,6 +218,7 @@ int Request::send_response(client &client){
     try{
         std::string res = handleMethod(client);
         std::cout << res ;
+        client.w_done = 1;
     }
     catch (const std::runtime_error &e){
         return 0;

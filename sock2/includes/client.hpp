@@ -1,7 +1,9 @@
-#ifndef SCLIENT_HPP
-#define SCLIENT_HPP
+#ifndef CLIENT_HPP
+#define CLIENT_HPP
+
 #include "WebServer.hpp"
 #include "../../Request/Request.hpp"
+class Request;
 
 class client
 {

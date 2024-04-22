@@ -247,27 +247,28 @@ void server::ioswap(fd_set &y, fd_set &no, int fd)
 
 void server::handle_old_cnx(fd_set &fd_r, fd_set &fd_w, fd_set &fd_rcopy, fd_set &fd_wcopy, int &maxfd)
 {
-
+	(void)fd_w, (void)fd_r;
+	(void)maxfd;
 	(void)fd_wcopy, (void)fd_rcopy;
 	for (std::vector<client>::iterator it = clients.begin(); it != clients.end(); ++it)
 	{
 		if (FD_ISSET((*it).ssocket, &fd_rcopy))
 		{
-			if (!((*it).reqq).getcheckRequest((*it, *this))) 
+			if (!((*it).reqq).getCheckRequest(*it, *this)) 
 			{
-				clientdown(*it, fd_r, fd_w, maxfd);
+				// clientdown(*it, fd_r, fd_w, maxfd);
 				continue;
 			}
-			if ((*it).request_done) ioswap(&fd_r, &fd_w, (*it).ssocket);
+			// if ((*it).r_done) ioswap(&fd_r, &fd_w, (*it).ssocket);
 		}
-		else if (FD_ISSET((*it).ssocket, &fd_wcopy) && readisdone)//to recheck
+		else if (FD_ISSET((*it).ssocket, &fd_wcopy) && (*it).r_done)//to recheck
 		{
-			if (!((*it).reqq).send_response(*it, *this)) 
+			if (!((*it).reqq).send_response(*it)) 
 			{
-				clientdown(*it, fd_r, fd_w, maxfd);
+				// clientdown(*it, fd_r, fd_w, maxfd);
 				continue;
 			}
-			if ((*it).respond_done) ioswap(&fd_w, &fd_r, (*it).ssocket);
+			// if ((*it).w_done) ioswap(&fd_w, &fd_r, (*it).ssocket);
 		}
 	}
 }

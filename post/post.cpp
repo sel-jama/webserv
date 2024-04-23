@@ -156,6 +156,7 @@ void Post::Work_with_Directory(Request obj)
     std::vector<std::string>index;
     std::vector<std::string>::iterator for_index = index.begin();
 
+
     for(iter = get.begin(); iter != get.end(); iter++)
     {
         search = iter->first;
@@ -242,7 +243,7 @@ void Post::Work_with_file(Request obj){
         }
     }
     if(integ == 1){
-
+        
     }
     else{
         //403 forbiden

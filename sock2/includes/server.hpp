@@ -10,7 +10,8 @@ class client;
 
 class server
 {
-	private:
+	//tochange
+	public:
 		uint16_t                            port;
 		std::string                         adress;
 		std::vector<std::string>            serverName;

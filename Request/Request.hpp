@@ -6,7 +6,7 @@
 /*   By: sel-jama <sel-jama@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/03/24 11:13:12 by sel-jama          #+#    #+#             */
-/*   Updated: 2024/04/22 05:03:22 by sel-jama         ###   ########.fr       */
+/*   Updated: 2024/04/23 07:04:10 by sel-jama         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -24,7 +24,8 @@ class server;
 // class location;
 
 class Request {
-    private:
+    //tochange
+    public:
         std::string method;
         std::string uri;
         std::string version;
@@ -34,6 +35,7 @@ class Request {
         // server serverInfo;
         // client &user;
         location matchedLocation;
+        std::string reqStr;
         // infra Infra;
 
         //more to set up 

@@ -6,7 +6,7 @@
 /*   By: sel-jama <sel-jama@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/03/24 15:33:33 by sel-jama          #+#    #+#             */
-/*   Updated: 2024/04/22 05:11:40 by sel-jama         ###   ########.fr       */
+/*   Updated: 2024/04/23 07:07:18 by sel-jama         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -50,17 +50,27 @@ std::string Request::readRequest(int &fdSocket){
     std::stringstream buff("");
     if (readBody)
         std::stringstream buff(bodySaver);
-    char recvline[BUFFER_SIZE];
-    while ((readbytes = read(fdSocket, recvline, BUFFER_SIZE)) > 0){
-        buff << recvline;
-        if (!readBody && strstr(recvline, "\n\r\n\r"))  //change later >> break when content len is all served
-            break;
-        memset(recvline, 0, BUFFER_SIZE);
-    }
-    if (readbytes < 0)
+        
+    char buffer[BUFFER_SIZE];
+
+    readbytes = read(fdSocket, buffer, BUFFER_SIZE - 1);
+    if (readbytes < 0) {
         throw std::runtime_error("Error reading from socket: socket failed");
+    }
     else if (readbytes == 0)
         throw std::runtime_error("Peer closed the connection");
+    buffer[readbytes] = '\0';
+    buff << buffer;
+    
+    // char recvline[BUFFER_SIZE];
+    // while ((readbytes = read(fdSocket, recvline, BUFFER_SIZE)) > 0){
+    //     buff << recvline;
+    //     if (!readBody && strstr(recvline, "\n\r\n\r"))  //change later >> break when content len is all served
+    //         break;
+    //     memset(recvline, 0, BUFFER_SIZE);
+    // }
+    // if (readbytes < 0)
+    //     throw std::runtime_error("Error reading from socket: socket failed");
     std::string request(buff.str());
     if (!readBody)
         cutOffBodySegment(request);
@@ -126,14 +136,15 @@ bool Request::allowedMethod(location& location) const {
 
 //start here
 int    Request::getCheckRequest(client &client, const server &serve) {
-    std::string reqStr;
+    // std::string reqStr;
     // Request use
     
     try{
-        reqStr = client.reqq.readRequest(client.ssocket);
+        // std::cout << "got here" << std::endl;
+        client.reqq.reqStr = client.reqq.readRequest(client.ssocket);
         //handling one client only 
         // reqq.client.state = 1;
-        client.reqq.requestPartitioning(client.reqq, reqStr);
+        client.reqq.requestPartitioning(client.reqq, client.reqq.reqStr);
         //done reading from socket if method is GET or DELETE 
         client.reqq.isReqWellFormed(client.reqq, serve.getClientMaxBodySize());
         if (client.reqq.method != "POST")
@@ -180,8 +191,8 @@ const location &Request::getMatchingLocation(const server &serve) {
     counter = sameUntilIndex(getUri(), serve.getLocations().at(i).location_name);
     i++;
     for (; i < locationsSize; i++){
-        if (sameUntilIndex(getUri(), serve.getLocations().at(0).location_name) > counter)
-            counter = sameUntilIndex(getUri(), serve.getLocations().at(0).location_name);  
+        if (sameUntilIndex(getUri(), serve.getLocations().at(i).location_name) > counter)
+            counter = sameUntilIndex(getUri(), serve.getLocations().at(i).location_name);  
     }
     if (i >= locationsSize)
         throw std::runtime_error("404 Not found : No matching location");

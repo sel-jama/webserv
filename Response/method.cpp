@@ -40,9 +40,9 @@ void method::GetDataForClient(Request &req, int &clientSocket) {
 
     this->response = response.str();
     // std::cout << this->response << std::endl;
-    if (send(clientSocket, response.str().c_str(), response.str().length(), 0) == -1) {
+    if (send(clientSocket, this->response.c_str(), this->response.length(), 0) == -1)
         throw std::runtime_error("Error: Failed to send response to client");
-    }
+    
 }
 
 void method::setErrorPages(){
@@ -93,7 +93,8 @@ void method::setErrorPages(){
 // // }
 
 std::string method::readContent(Request &req){
-    
+    std::cout << req.path << std::endl;
+    req.path = "../error/page.html";
     std::ifstream file(req.path.c_str());
     if (file.fail())
         throw std::runtime_error("set error page : failed to read requested content");
@@ -104,7 +105,6 @@ std::string method::readContent(Request &req){
     //     std::cerr << "Error: Failed to open file " << req.fileName << "\n";
     //     return "";
     // }
-
     std::ostringstream content;
     content << file.rdbuf();
     //content length is not set yet !!!!!!!
@@ -115,7 +115,7 @@ std::string method::readContent(Request &req){
     //     memset(buffer, 0, chunkSize);
     //     contentSize -= chunkSize;
     // }
-    file.close();
+    // file.close();
     //set reading state to false 
     return content.str();
 }

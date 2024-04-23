@@ -34,6 +34,8 @@ class method {
         
 
     public:
+
+        const std::string &getResponse() const {return this->response;}
         std::map<int, std::string> errorPage;
         
         void GetDataForClient(Request &, int &);

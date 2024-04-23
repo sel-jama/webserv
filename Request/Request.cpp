@@ -230,8 +230,10 @@ const location &Request::getMatchedLocation(void) const {
 
 int Request::send_response(client &client){
     try{
+    // std::cout << "HI" << std::endl;
         std::string res = Response::handleMethod(client);
         std::cout << res ;
+        // write(client.ssocket, res.c_str(), res.length());
         client.w_done = 1;
     }
     catch (const std::runtime_error &e){

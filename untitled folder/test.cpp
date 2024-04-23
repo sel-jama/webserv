@@ -48,7 +48,8 @@ int main()
 
     // request += c.reqq.headers;
     std::cout << c.reqq.reqStr << std::endl;
-    write(newsock, response, strlen(response));
+    c.reqq.send_response(c);
+    // write(newsock, response, strlen(response));
     }
      catch(const std::exception &e)
     {

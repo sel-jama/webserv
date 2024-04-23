@@ -18,6 +18,7 @@ std::string Response::handleMethod(client &client){
     if (client.reqq.getMethod() == "GET")
         obj.handleGET(client.reqq, client.ssocket);
     
+    // std::cout << "now"<<obj.response << std::endl;
     return obj.response;
 }
 
@@ -25,4 +26,6 @@ void Response::handleGET(Request &req, int clientSocket) {
     method get;
 
     get.GetDataForClient(req, clientSocket);
+
+    this->response = get.getResponse();
 }

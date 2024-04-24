@@ -6,7 +6,7 @@
 /*   By: sel-jama <sel-jama@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/03/24 15:33:33 by sel-jama          #+#    #+#             */
-/*   Updated: 2024/04/23 07:07:18 by sel-jama         ###   ########.fr       */
+/*   Updated: 2024/04/24 04:41:43 by sel-jama         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -138,20 +138,21 @@ bool Request::allowedMethod(location& location) const {
 int    Request::getCheckRequest(client &client, const server &serve) {
     // std::string reqStr;
     // Request use
-    
     try{
-        // std::cout << "got here" << std::endl;
         client.reqq.reqStr = client.reqq.readRequest(client.ssocket);
         //handling one client only 
         // reqq.client.state = 1;
         client.reqq.requestPartitioning(client.reqq, client.reqq.reqStr);
         //done reading from socket if method is GET or DELETE 
-        client.reqq.isReqWellFormed(client.reqq, serve.getClientMaxBodySize());
+        // client.reqq.isReqWellFormed(client.reqq, serve.getClientMaxBodySize());
+        std::cout << "Request :\n"<< client.reqq.reqStr << std::endl;
         if (client.reqq.method != "POST")
             client.r_done = 1;
         client.reqq.retreiveRequestedResource(serve);
+        std::cout << "&&&&" << std::endl;
     }
     catch(const std::runtime_error &e){
+        std::cerr << e.what() << std::endl;
         return 0;
     }
     return 1;
@@ -183,25 +184,50 @@ int sameUntilIndex(const std::string &uri, const std::string &locationName){
     return i;
 }
 
-const location &Request::getMatchingLocation(const server &serve) {
-    int counter;
+const location& Request::getMatchingLocation(const server& serve) {
+    int maxCounter = -1; 
+    size_t maxIndex = 0;
 
-    size_t i = 0;
-    size_t locationsSize = serve.getLocations().size();
-    counter = sameUntilIndex(getUri(), serve.getLocations().at(i).location_name);
-    i++;
-    for (; i < locationsSize; i++){
-        if (sameUntilIndex(getUri(), serve.getLocations().at(i).location_name) > counter)
-            counter = sameUntilIndex(getUri(), serve.getLocations().at(i).location_name);  
+    for (size_t i = 0; i < serve.getLocations().size(); ++i) {
+        int counter = sameUntilIndex(getUri(), serve.getLocations().at(i).location_name);
+        if (counter > maxCounter) {
+            maxCounter = counter;
+            maxIndex = i;
+        }
     }
-    if (i >= locationsSize)
-        throw std::runtime_error("404 Not found : No matching location");
-    
-    if (!allowedMethod(const_cast<location &>(serve.getLocations().at(i))))
+
+    if (maxCounter == -1)
+        throw std::runtime_error("404 Not Found: No matching location");
+
+    const location& matchingLocation = serve.getLocations().at(maxIndex);
+
+    // Check if method is allowed for the matching location
+    if (!allowedMethod(const_cast<location&>(matchingLocation)))
         throw std::runtime_error("405 Method Not Allowed");
-    
-    return serve.getLocations().at(i);
+
+    return matchingLocation;
 }
+
+// const location &Request::getMatchingLocation(const server &serve) {
+//     int counter;
+
+//     size_t i = 0;
+//     size_t locationsSize = serve.getLocations().size();
+//     counter = sameUntilIndex(getUri(), serve.getLocations().at(i).location_name);
+//     i++;
+//     for (; i < locationsSize; i++){
+//         if (sameUntilIndex(getUri(), serve.getLocations().at(i).location_name) > counter)
+//             counter = sameUntilIndex(getUri(), serve.getLocations().at(i).location_name);  
+//     }
+//     if (i >= locationsSize)
+//         throw std::runtime_error("404 Not found : No matching location");
+    
+//     if (!allowedMethod(const_cast<location &>(serve.getLocations().at(i))))
+//         throw std::runtime_error("405 Method Not Allowed");
+//     std::cout << "*********" << std::endl;
+    
+//     return serve.getLocations().at(i);
+// }
 
 void Request::retreiveRequestedResource(const server &serve){
     matchedLocation = getMatchingLocation(serve);
@@ -210,15 +236,30 @@ void Request::retreiveRequestedResource(const server &serve){
     std::string url = getUri().substr(1);
     fileName = url.empty() ? "index.html" : url;
     
-    path = matchedLocation.location_name + fileName;
+    path = matchedLocation.root;
+    path += matchedLocation.location_name + fileName;
     isFileAvailable();
+    std::cout <<"path : " << path << std::endl;
 }
 
-void Request::isFileAvailable(){
-    
-    if (stat(path.c_str(), &pathStatus) != 0)
-        throw std::runtime_error("404 Not found : Requested Resource not found");
+void Request::isFileAvailable() {
+    struct stat Status;
+
+    if (stat(path.c_str(), &Status) != 0) {
+    // std::cout << "debug msg " << path << std::endl;
+        if (errno == ENOENT) {
+            throw std::runtime_error("404 Not Found: Requested Resource not found");
+        } else {
+            throw std::runtime_error("Error checking file availability");
+        }
+    }
 }
+
+// void Request::isFileAvailable(){
+    
+//     if (stat(path.c_str(), &pathStatus) != 0)
+//         throw std::runtime_error("404 Not found : Requested Resource not found");
+// }
 
 // const server &Request::getServerInfo(void) const {
 //     return this->serverInfo;
@@ -229,10 +270,11 @@ const location &Request::getMatchedLocation(void) const {
 }
 
 int Request::send_response(client &client){
+    std::cout << "heeeellllo" << std::endl;
     try{
     // std::cout << "HI" << std::endl;
         std::string res = Response::handleMethod(client);
-        std::cout << res ;
+        std::cout << res;
         // write(client.ssocket, res.c_str(), res.length());
         client.w_done = 1;
     }

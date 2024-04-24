@@ -93,11 +93,14 @@ void method::setErrorPages(){
 // // }
 
 std::string method::readContent(Request &req){
-    std::cout << req.path << std::endl;
-    req.path = "../error/page.html";
+    std::cout << "got here" << std::endl;
+    // req.path = "../error/page.html";
     std::ifstream file(req.path.c_str());
-    if (file.fail())
+    if (!file.is_open())
+    {
         throw std::runtime_error("set error page : failed to read requested content");
+        std::cerr << "failed to read content" << std::endl;
+    }
     // const size_t chunkSize = 1024; // 1 KB
     // char buffer[chunkSize];
 

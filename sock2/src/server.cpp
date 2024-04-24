@@ -257,6 +257,7 @@ void server::handle_old_cnx(fd_set &fd_r, fd_set &fd_w, fd_set &fd_rcopy, fd_set
 				clientdown(*it, fd_r, fd_w, maxfd);
 				continue;
 			}
+			std::cout << "In heeeere " << std::endl;
 			if ((*it).r_done) ioswap(fd_w, fd_r, (*it).ssocket);
 		}
 		else if (FD_ISSET((*it).ssocket, &fd_wcopy) && (*it).r_done)//to recheck

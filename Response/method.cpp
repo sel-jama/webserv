@@ -23,7 +23,7 @@ void method::GetDataForClient(Request &req, int &clientSocket) {
     defineResourceType(req); //file or dir
     if (type == "file") {
         //if location does not have cgi
-        validateAll(req);
+        // validateAll(req);  //toFix
         content = readContent(req);
     }
     else
@@ -93,7 +93,7 @@ void method::setErrorPages(){
 // // }
 
 std::string method::readContent(Request &req){
-    std::cout << "got here" << std::endl;
+    // std::cout << "got here" << std::endl;
     // req.path = "../error/page.html";
     std::ifstream file(req.path.c_str());
     if (!file.is_open())

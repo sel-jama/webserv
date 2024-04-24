@@ -6,7 +6,7 @@
 /*   By: sel-jama <sel-jama@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/03/24 15:33:33 by sel-jama          #+#    #+#             */
-/*   Updated: 2024/04/24 04:41:43 by sel-jama         ###   ########.fr       */
+/*   Updated: 2024/04/24 06:16:23 by sel-jama         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -270,7 +270,7 @@ const location &Request::getMatchedLocation(void) const {
 }
 
 int Request::send_response(client &client){
-    std::cout << "heeeellllo" << std::endl;
+    (void)client;
     try{
     // std::cout << "HI" << std::endl;
         std::string res = Response::handleMethod(client);

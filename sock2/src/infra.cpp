@@ -9,7 +9,7 @@ void infra::sockettolisten(std::vector<server>::iterator &it)
     int opt = 1;
     socklen_t j = sizeof((*it).data_socket);
     if (((*it).ssocket = socket(AF_INET, SOCK_STREAM, 0)) == -1)                        throw(std::runtime_error("Error: init servers : socket()"));
-    if (fcntl((*it).ssocket, O_NONBLOCK) == -1)                                         throw(std::runtime_error("Error: init servers : fcntl()"));
+    if (fcntl((*it).ssocket, F_SETFL, O_NONBLOCK, FD_CLOEXEC) == -1)                                         throw(std::runtime_error("Error: init servers : fcntl()"));
     if (setsockopt((*it).ssocket, SOL_SOCKET, SO_REUSEPORT, &(opt), sizeof(opt)) == -1) throw(std::runtime_error("Error: init servers : setsockopt() SO_REUSPORT"));
     if (bind((*it).ssocket, (const sockaddr *)&((*it).data_socket), j) == -1)           throw(std::runtime_error("Error: init servers : bind()"));
     if (listen((*it).ssocket,10 ) == -1)                                                throw(std::runtime_error("Error: init servers : listen()"));
@@ -33,7 +33,7 @@ void infra::initselect()
 void infra::initdata(std::vector<server>::iterator &it)//to be modifed
 {
     (*it).data_socket.sin_addr.s_addr = INADDR_ANY;
-    (*it).data_socket.sin_port = (*it).getPort();
+    (*it).data_socket.sin_port = htons((*it).getPort());
     (*it).data_socket.sin_family = AF_INET;
 
 }
@@ -55,10 +55,9 @@ void infra::selecttoinfinity()
                 (*it).checktime(fd_r, fd_w, maxfd);
             continue;
         }
-        exit (16);
         for (std::vector<server>::iterator it = servers.begin(); it !=servers.end(); ++it)
         {
-            if (FD_ISSET((*it).ssocket, &fd_r))
+            if (FD_ISSET((*it).ssocket, &fd_rcopy))
                 (*it).accept_new_connection(fd_r, maxfd);
             else
                 (*it).handle_old_cnx(fd_r, fd_w, fd_rcopy, fd_wcopy, maxfd);

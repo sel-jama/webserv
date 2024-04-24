@@ -116,7 +116,7 @@ void server::setlisten(std::vector<std::string>::const_iterator &it)
 		if (!alldigit(tokens.at(1))) throw(std::runtime_error("Error : config-file :bad config file\" listen => adjust ur port number Max : 65535\""));
 		int i = std::stoi(tokens.at(1));
 		if (i < 0 || i > 65535) throw(std::runtime_error("Error : config-file :bad config file\" listen => adjust ur port number Max : 65535\""));
-		port = htons(i);
+		port = i;
 	}
 	else throw(std::runtime_error("Error : config-file :bad config file\" listen => correct way to write listen \n @:port please :)\""));
 	++it;
@@ -239,36 +239,34 @@ void server::accept_new_connection(fd_set &fd_r, int &maxfd)
 	maxfd = tmp.ssocket;
 }
 
-void server::ioswap(fd_set &y, fd_set &no, int fd)
+void server::ioswap(fd_set &toadd, fd_set &toremove, int fd)
 {
-	FD_SET(fd, &y);
-	FD_CLR(fd, &no);
+	FD_SET(fd, &toadd);
+	FD_CLR(fd, &toremove);
 }
 
 void server::handle_old_cnx(fd_set &fd_r, fd_set &fd_w, fd_set &fd_rcopy, fd_set &fd_wcopy, int &maxfd)
 {
-	(void)fd_w, (void)fd_r;
-	(void)maxfd;
-	(void)fd_wcopy, (void)fd_rcopy;
+
 	for (std::vector<client>::iterator it = clients.begin(); it != clients.end(); ++it)
 	{
 		if (FD_ISSET((*it).ssocket, &fd_rcopy))
 		{
 			if (!((*it).reqq).getCheckRequest(*it, *this)) 
 			{
-				// clientdown(*it, fd_r, fd_w, maxfd);
+				clientdown(*it, fd_r, fd_w, maxfd);
 				continue;
 			}
-			// if ((*it).r_done) ioswap(&fd_r, &fd_w, (*it).ssocket);
+			if ((*it).r_done) ioswap(fd_w, fd_r, (*it).ssocket);
 		}
 		else if (FD_ISSET((*it).ssocket, &fd_wcopy) && (*it).r_done)//to recheck
 		{
 			if (!((*it).reqq).send_response(*it)) 
 			{
-				// clientdown(*it, fd_r, fd_w, maxfd);
+				clientdown(*it, fd_r, fd_w, maxfd);
 				continue;
 			}
-			// if ((*it).w_done) ioswap(&fd_w, &fd_r, (*it).ssocket);
+			if ((*it).w_done) ioswap(fd_r, fd_w, (*it).ssocket);
 		}
 	}
 }

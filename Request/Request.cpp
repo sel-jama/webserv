@@ -6,7 +6,7 @@
 /*   By: sel-jama <sel-jama@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/03/24 15:33:33 by sel-jama          #+#    #+#             */
-/*   Updated: 2024/04/25 09:02:34 by sel-jama         ###   ########.fr       */
+/*   Updated: 2024/04/25 10:57:09 by sel-jama         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -83,7 +83,7 @@ std::string Request::readRequest(int &fdSocket){
 void Request::requestPartitioning(Request &saver, std::string& request) {
     std::istringstream iss(request);
 
-    iss >> saver.method >> saver.uri;
+    iss >> saver.method >> saver.uri >> saver.version;
     // Parse header
     std::string headerLine;
     while (std::getline(iss, headerLine) && headerLine != "\r") {
@@ -129,9 +129,9 @@ bool Request::allowedMethod(location& location) const {
     std::map<std::string, int>::iterator it = location.http_methods.begin();
     for (; it != location.http_methods.end(); it++){
         if (it->first == this->method)
-            return true;
+            return false;
     }
-    return false;
+    return true;
 }
 
 //start here
@@ -140,11 +140,9 @@ int    Request::getCheckRequest(client &client, const server &serve) {
     // Request use
     try{
         client.reqq.reqStr = client.reqq.readRequest(client.ssocket);
-        //handling one client only 
-        // reqq.client.state = 1;
         client.reqq.requestPartitioning(client.reqq, client.reqq.reqStr);
         //done reading from socket if method is GET or DELETE 
-        // client.reqq.isReqWellFormed(client.reqq, serve.getClientMaxBodySize());
+        client.reqq.isReqWellFormed(client.reqq, serve.getClientMaxBodySize());
         std::cout << "Request :\n"<< client.reqq.reqStr << std::endl;
         if (client.reqq.method != "POST")
             client.r_done = 1;
@@ -237,7 +235,7 @@ void Request::retreiveRequestedResource(const server &serve){
     
     path = matchedLocation.root;
     path += matchedLocation.location_name + fileName;
-    isFileAvailable();
+    isFileAvailable(); 
     std::cout <<"path : " << path << std::endl;
 }
 

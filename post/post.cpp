@@ -135,10 +135,10 @@ void Post::support_upload(Request obj){
         else {
            std::ofstream file(obj.fileName);
            if (!file.is_open()) {
-               if (obj.getBody().size() != obj.contentLength) {
+               if (Body.size() != obj.contentLength) {
                         throw Except(); 
                }
-               file << obj.getBody() << std::endl;
+               file << Body << std::endl;
            }
         }
     }   

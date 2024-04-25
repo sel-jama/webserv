@@ -7,6 +7,7 @@
 #include <strstream>
 #include <map>
 #include "../Request/Request.hpp"
+#include "../sock2/includes/client.hpp"
 
 class Post{
     private:
@@ -20,7 +21,6 @@ class Post{
     public:
         Post(){};
         std::string Type;
-        int fdsock;
         std::string Body;
         void set_saver(std::string); 
         void set_post_i(bool value);
@@ -35,13 +35,13 @@ class Post{
         size_t get_last_read();
         size_t get_content_lenght();
         void load_extension();
-        void support_upload(Request obj);
+        void support_upload(Request &obj);
         void get_Request_resource(Request obj);
         void After_geting_resource(Request obj);
         void Work_with_file(Request obj);
         void Work_with_Directory(Request obj);
-        void body(Request obj);
-        void chunked_body(Request obj);
+        static void body(client &obj);
+        void chunked_body(Request &obj);
         ~Post(){};
 };
 class Except : std::exception{

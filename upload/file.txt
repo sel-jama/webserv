@@ -1,0 +1,11 @@
+--------------------------e964a6a9611901f4
+Content-Disposition: form-data; name="image"; filename="hek.txt"
+Content-Type: text/plain
+
+salma
+nodi
+tn3si
+la aji
+ghi kandhek
+--------------------------e964a6a9611901f4--
+m

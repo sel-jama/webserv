@@ -30,7 +30,7 @@ class Request {
         std::string uri;
         std::string version;
         std::map<std::string, std::string> headers;
-        // std::string body;
+        std::string body;
 
         // server serverInfo;
         // client &user;
@@ -49,6 +49,7 @@ class Request {
         int contentLength; 
         int readbytes;
         int readBody;
+        int firstRead;
         std::string bodySaver;
 
         Request();
@@ -80,6 +81,7 @@ class Request {
         std::string readRequest(int &fdSocket);
         void cutOffBodySegment(std::string &request);
         int send_response(client &);
+        int read_request(client &, server &);
 };
 
 #endif

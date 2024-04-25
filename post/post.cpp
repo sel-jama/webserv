@@ -119,8 +119,11 @@ void Post::After_geting_resource(Request obj){
         Work_with_Directory(obj);
 }
 
-void Post::support_upload(Request obj){
+void Post::support_upload(Request &obj){
     int check = 0;
+    std::cout << "+++++++++ Im writing " << std::endl;
+                    // std::cout << "......................" << std::endl;
+
     location capt = obj.getMatchedLocation();
     std::string  ptr = capt.upl();
     if(ptr.empty())
@@ -133,17 +136,23 @@ void Post::support_upload(Request obj){
             throw Except();
         }
         else {
-           std::ofstream file(obj.fileName);
-           if (file.is_open() == true) {
-               if (static_cast<int>(Body.length()) != obj.contentLength) {
-                        throw Except(); 
-               }
-               file << Body << std::endl;
-           }
-           else
-            throw Except();
-        }
-    }   
+                std::ofstream file(ptr + "/" + "file.txt", std::ios::trunc);
+                obj.path = ptr + "/" + "file.txt";
+                if (file.is_open() == true) 
+                {
+                    // if (static_cast<int>(Body.length()) != obj.contentLength) {
+                    //     throw Except(); 
+                    // }
+
+                    file << obj.body << std::endl;
+                    file.close();
+                    // std::cout << Body << std::endl;
+                    // std::cout << obj.body << std::endl;
+                }
+                else
+                    throw Except();
+        }   
+    }
 }
 
 void Post::Work_with_Directory(Request obj)
@@ -182,49 +191,52 @@ void Post::Work_with_Directory(Request obj)
     }
 }
 
-void Post::body(Request obj){
-    std::string capt = obj.readRequest(fdsock);
-    if(obj.contentLength != static_cast<int>(capt.length()))
-        throw Except();
-    Body = capt;
+void Post::body(client &obj){
+    std::cout << "----------------- reading " << std::endl;
+    obj.reqq.body += obj.reqq.readRequest(obj.ssocket);
+        // std::cout << "bodyyy ************ " << obj.reqq.body << std::endl; 
+    std::cout << static_cast<int>(obj.reqq.body.length()) << std::endl;
+    if(obj.reqq.contentLength <= static_cast<int>(obj.reqq.body.length())){
+        obj.r_done = 1;
+    }
 }
 
-void Post::chunked_body(Request obj){
-    std::string capt = obj.readRequest(fdsock);
-    capt = capt + obj.bodySaver;
-    int counter = 0;
-    int length = 0;
-    int save = 0;
-    int begin = 0;
-    while(1){
-        if(counter == 0)
-            begin = capt.find("/r/n");
-        else
-        {
-            save = begin;
-            if(save == 0)
-                break;
-            begin = capt.find("/r/n", begin);
-        }
-        if(counter % 2 == 0)
-        {
-            std::string to_h = capt.substr(save, begin);
-            length = hexa_to_num(to_h);
-        }
-        else
-        {
-            std::string string = capt.substr(save, begin);
-            if(length != static_cast<int>(string.length()))  
-                throw Except();
-            if(string.empty())
-                break;
-            Body = Body + string;
-        }
-        counter++;
-    }
-    if(save != 0)
-        throw Except();
-}
+// void Post::chunked_body(Request &obj){
+//     // std::string capt = obj.readRequest(obj.fdsock3);
+//     // capt = capt + obj.bodySaver;
+//     int counter = 0;
+//     int length = 0;
+//     int save = 0;
+//     int begin = 0;
+//     while(1){
+//         if(counter == 0)
+//             begin = capt.find("/r/n");
+//         else
+//         {
+//             save = begin;
+//             if(save == 0)
+//                 break;
+//             begin = capt.find("/r/n", begin);
+//         }
+//         if(counter % 2 == 0)
+//         {
+//             std::string to_h = capt.substr(save, begin);
+//             length = hexa_to_num(to_h);
+//         }
+//         else
+//         {
+//             std::string string = capt.substr(save, begin);
+//             if(length != static_cast<int>(string.length()))  
+//                 throw Except();
+//             if(string.empty())
+//                 break;
+//             Body = Body + string;
+//         }
+//         counter++;
+//     }
+//     if(save != 0)
+//         throw Except();
+// }
 
 void Post::Work_with_file(Request obj){
    location capt = obj.getMatchedLocation();

@@ -30,7 +30,7 @@ class method {
         std::map<std::string, std::string> mimeTypes;
 
         std::string content;  //retreived content
-        std::string autoindexPage;
+        // std::string autoindexPage;
         
 
     public:

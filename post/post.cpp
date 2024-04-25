@@ -96,7 +96,7 @@ void Post::get_Request_resource(Request obj)
     struct stat buffer;
     location resource = obj.getMatchedLocation();
     std::string url = obj.getUri();
-    std::string data = obj.getBody();
+    std::string data = Body;
     std::string Encoding;
     std::map<std::string, std::string>::const_iterator value = obj.getHeaders().find("Transfer-Encoding"); 
     Encoding = value->second;
@@ -105,7 +105,7 @@ void Post::get_Request_resource(Request obj)
     if (check  == -1) {
         throw Except();
     }
-    int val = stat(ptr, &buffer);
+    // int val = stat(ptr, &buffer);
     if(S_ISDIR(buffer.st_mode))
        Type = "Directory";
     else
@@ -134,12 +134,14 @@ void Post::support_upload(Request obj){
         }
         else {
            std::ofstream file(obj.fileName);
-           if (!file.is_open()) {
-               if (Body.size() != obj.contentLength) {
+           if (file.is_open() == true) {
+               if (static_cast<int>(Body.length()) != obj.contentLength) {
                         throw Except(); 
                }
                file << Body << std::endl;
            }
+           else
+            throw Except();
         }
     }   
 }
@@ -182,7 +184,7 @@ void Post::Work_with_Directory(Request obj)
 
 void Post::body(Request obj){
     std::string capt = obj.readRequest(fdsock);
-    if(obj.contentLength != capt.length())
+    if(obj.contentLength != static_cast<int>(capt.length()))
         throw Except();
     Body = capt;
 }
@@ -212,7 +214,7 @@ void Post::chunked_body(Request obj){
         else
         {
             std::string string = capt.substr(save, begin);
-            if(length != string.length())  
+            if(length != static_cast<int>(string.length()))  
                 throw Except();
             if(string.empty())
                 break;

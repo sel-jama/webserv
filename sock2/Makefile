@@ -3,7 +3,7 @@ CXXFLAGS = -Wall -Wextra -Werror -fsanitize=address
 Name = food.ma
 
 SRC = main.cpp src/config.cpp src/paths.cpp src/infra.cpp src/server.cpp src/utils.cpp src/client.cpp src/location.cpp \
-		../Response/method.cpp ../Response/Response.cpp ../Request/Request.cpp ../Request/ParseRequest.cpp
+		../Response/method.cpp ../Response/Response.cpp ../Request/Request.cpp ../Request/ParseRequest.cpp ../post/post.cpp
 
 OBJ = $(SRC:.cpp=.o)
 

@@ -6,7 +6,7 @@
 /*   By: sel-jama <sel-jama@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/03/24 15:33:33 by sel-jama          #+#    #+#             */
-/*   Updated: 2024/04/24 06:16:23 by sel-jama         ###   ########.fr       */
+/*   Updated: 2024/04/25 09:02:34 by sel-jama         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -54,7 +54,7 @@ std::string Request::readRequest(int &fdSocket){
     char buffer[BUFFER_SIZE];
 
     readbytes = read(fdSocket, buffer, BUFFER_SIZE - 1);
-    if (readbytes < 0) {
+    if (readbytes < 0){
         throw std::runtime_error("Error reading from socket: socket failed");
     }
     else if (readbytes == 0)
@@ -149,7 +149,6 @@ int    Request::getCheckRequest(client &client, const server &serve) {
         if (client.reqq.method != "POST")
             client.r_done = 1;
         client.reqq.retreiveRequestedResource(serve);
-        std::cout << "&&&&" << std::endl;
     }
     catch(const std::runtime_error &e){
         std::cerr << e.what() << std::endl;
@@ -243,9 +242,7 @@ void Request::retreiveRequestedResource(const server &serve){
 }
 
 void Request::isFileAvailable() {
-    struct stat Status;
-
-    if (stat(path.c_str(), &Status) != 0) {
+    if (stat(path.c_str(), &pathStatus) != 0) {
     // std::cout << "debug msg " << path << std::endl;
         if (errno == ENOENT) {
             throw std::runtime_error("404 Not Found: Requested Resource not found");
@@ -270,7 +267,6 @@ const location &Request::getMatchedLocation(void) const {
 }
 
 int Request::send_response(client &client){
-    (void)client;
     try{
     // std::cout << "HI" << std::endl;
         std::string res = Response::handleMethod(client);

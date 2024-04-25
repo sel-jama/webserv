@@ -12,15 +12,16 @@
 
 #include "method.hpp"
 #include "../Request/Request.hpp"
-//handle GET method
 
 void method::validateAll(Request &req) const{
     if (!(req.pathStatus.st_mode& S_IRUSR))
         throw std::runtime_error("forbiden : permission denied");
 }
 
+//handle GET method
 void method::GetDataForClient(Request &req, int &clientSocket) {
     defineResourceType(req); //file or dir
+    std::cout << "************ "<<type << std::endl;
     if (type == "file") {
         //if location does not have cgi
         // validateAll(req);  //toFix
@@ -132,15 +133,16 @@ void method::defineResourceType(const Request &req){
 }
 
 void method::handleDirectory(Request &req){
-    size_t uriLength = req.getUri().length() - 1;
-    if (req.getUri().at(uriLength) == '/'){
+    // size_t uriLength = req.getUri().length() - 1;
+    // if (req.getUri().at(uriLength) == '/'){
         if (isDirHasIndexFiles(req) == false)
             autoIndexing(req);
         //no index files and no cgi
-        else if (req.getMatchedLocation().cgi.size() == 0)
+        // else if (req.getMatchedLocation().cgi.size() == 0)
+        else
             this->content = readContent(req);
 
-    }
+    // }
     //else : make a 301 redirection to request uri with “/ addeed at the end
 
 }
@@ -172,6 +174,7 @@ bool method::isDirHasIndexFiles(Request &req) const{
             filename.substr(0, pos);
             if (filename == "index")  { //compare with index files in location later
                 closedir(dir);
+                // req.path += filename;
                 return true;
             }
         }
@@ -189,7 +192,8 @@ void method::autoIndexing(const Request &req){
     (void)req;
     if (req.getMatchedLocation().autoindex == "on")
         directoryListing(req);
-    throw std::runtime_error("403 Forbiden");
+    else
+        throw std::runtime_error("403 Forbiden");
 }
 
 void method::directoryListing(const Request &req){
@@ -210,7 +214,7 @@ void method::directoryListing(const Request &req){
 
     page << "</ul></body></html>" << std::endl;
     closedir(directory);
-    this->autoindexPage = page.str();
+    this->content = page.str();
 }
 
 

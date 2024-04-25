@@ -20,6 +20,7 @@ void method::validateAll(Request &req) const{
 
 //handle GET method
 void method::GetDataForClient(Request &req, int &clientSocket) {
+    (void)clientSocket;
     defineResourceType(req); //file or dir
     std::cout << "************ "<<type << std::endl;
     if (type == "file") {
@@ -41,8 +42,8 @@ void method::GetDataForClient(Request &req, int &clientSocket) {
 
     this->response = response.str();
     // std::cout << this->response << std::endl;
-    if (send(clientSocket, this->response.c_str(), this->response.length(), 0) == -1)
-        throw std::runtime_error("Error: Failed to send response to client");
+    // if (send(clientSocket, this->response.c_str(), this->response.length(), 0) == -1)
+    //     throw std::runtime_error("Error: Failed to send response to client");
     
 }
 

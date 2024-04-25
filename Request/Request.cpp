@@ -15,7 +15,7 @@
 #include "../sock2/includes/server.hpp"
 #include "../Response/Response.hpp"
 
-Request::Request() : method(""), uri(""), version(""), readBody(0){
+Request::Request() : method(""), uri(""), version(""), readBody(0), firstRead(1){
 }
 
 Request::~Request(){}
@@ -48,8 +48,10 @@ void Request::cutOffBodySegment(std::string &request){
 
 std::string Request::readRequest(int &fdSocket){
     std::stringstream buff("");
-    if (readBody)
+    if (readBody && firstRead){
         std::stringstream buff(bodySaver);
+        firstRead = 0;
+    }
         
     char buffer[BUFFER_SIZE];
 
@@ -59,8 +61,9 @@ std::string Request::readRequest(int &fdSocket){
     }
     else if (readbytes == 0)
         throw std::runtime_error("Peer closed the connection");
-    buffer[readbytes] = '\0';
+    // buffer[readbytes] = '\0';
     buff << buffer;
+    std::cout << buffer << std::endl;
     
     // char recvline[BUFFER_SIZE];
     // while ((readbytes = read(fdSocket, recvline, BUFFER_SIZE)) > 0){
@@ -72,8 +75,10 @@ std::string Request::readRequest(int &fdSocket){
     // if (readbytes < 0)
     //     throw std::runtime_error("Error reading from socket: socket failed");
     std::string request(buff.str());
-    if (!readBody)
+    if (!readBody){
         cutOffBodySegment(request);
+        std::cout << "segment " << bodySaver << std::endl;
+    }
     readBody = 1;
     //if readBody==1 the return is the body (for post)
     return request;
@@ -199,8 +204,8 @@ const location& Request::getMatchingLocation(const server& serve) {
     const location& matchingLocation = serve.getLocations().at(maxIndex);
 
     // Check if method is allowed for the matching location
-    if (!allowedMethod(const_cast<location&>(matchingLocation)))
-        throw std::runtime_error("405 Method Not Allowed");
+    // if (!allowedMethod(const_cast<location&>(matchingLocation)))
+    //     throw std::runtime_error("405 Method Not Allowed");
 
     return matchingLocation;
 }
@@ -220,7 +225,7 @@ const location& Request::getMatchingLocation(const server& serve) {
 //         throw std::runtime_error("404 Not found : No matching location");
     
 //     if (!allowedMethod(const_cast<location &>(serve.getLocations().at(i))))
-//         throw std::runtime_error("405 Method Not Allowed");
+//         throw std::runtime_error("4 Method Not Allowed");
 //     std::cout << "*********" << std::endl;
     
 //     return serve.getLocations().at(i);
@@ -240,6 +245,7 @@ void Request::retreiveRequestedResource(const server &serve){
 }
 
 void Request::isFileAvailable() {
+    std::cout << "proooooblamaaa >>>>> path: " << path << std::endl;
     if (stat(path.c_str(), &pathStatus) != 0) {
     // std::cout << "debug msg " << path << std::endl;
         if (errno == ENOENT) {
@@ -266,11 +272,27 @@ const location &Request::getMatchedLocation(void) const {
 
 int Request::send_response(client &client){
     try{
-    // std::cout << "HI" << std::endl;
         std::string res = Response::handleMethod(client);
-        std::cout << res;
+        std::cout << "&&& "<<res;
         // write(client.ssocket, res.c_str(), res.length());
+        if (send(client.ssocket, res.c_str(), res.length(), 0) == -1)
+            throw std::runtime_error("Error: Failed to send response to client");
         client.w_done = 1;
+    }
+    catch (const std::runtime_error &e){
+        return 0;
+    }
+    return 1;
+}
+
+int Request::read_request(client &client, server &server){
+    try{
+        if (!readBody)
+            getCheckRequest(client, server);
+        else{
+            Post::body(client);
+            std::cout << "sdiina " << std::endl;
+        }
     }
     catch (const std::runtime_error &e){
         return 0;

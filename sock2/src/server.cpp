@@ -252,7 +252,7 @@ void server::handle_old_cnx(fd_set &fd_r, fd_set &fd_w, fd_set &fd_rcopy, fd_set
 	{
 		if (FD_ISSET((*it).ssocket, &fd_rcopy))
 		{
-			if (!((*it).reqq).getCheckRequest(*it, *this)) 
+			if (!((*it).reqq).read_request(*it, *this)) 
 			{
 				clientdown(*it, fd_r, fd_w, maxfd);
 				continue;

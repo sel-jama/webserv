@@ -28,6 +28,8 @@ class client
 
         //mid-merge
         Request reqq;
+        void reset_client();
+
         
 };
 

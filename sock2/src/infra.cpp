@@ -4,8 +4,14 @@
 
 //---------init servers -> socket->fcntrl->setsocketopt->bind->listen->select->accept
 
+// int infra::check_port()
+// {
+//     if (port)
+// }
+
 void infra::sockettolisten(std::vector<server>::iterator &it)
 {
+    // check_port();
     int opt = 1;
     socklen_t j = sizeof((*it).data_socket);
     if (((*it).ssocket = socket(AF_INET, SOCK_STREAM, 0)) == -1)                        throw(std::runtime_error("Error: init servers : socket()"));
@@ -32,6 +38,7 @@ void infra::initselect()
 
 void infra::initdata(std::vector<server>::iterator &it)//to be modifed
 {
+
     (*it).data_socket.sin_addr.s_addr = INADDR_ANY;
     (*it).data_socket.sin_port = htons((*it).getPort());
     (*it).data_socket.sin_family = AF_INET;
@@ -49,12 +56,12 @@ void infra::selecttoinfinity()
         // std::cout << "Waiting for connection... " << std::endl;
         int slct = select(maxfd + 1, &fd_rcopy, &fd_wcopy, NULL, &timeout);
         if (slct == -1) throw(std::runtime_error("Error : select : lanch"));
-        // if (slct == 0)
-        // {
-            // for (std::vector<server>::iterator it = servers.begin(); it != servers.end(); ++it)
-            //     (*it).checktime(fd_r, fd_w, maxfd);
-        //     continue;
-        // }
+        if (slct == 0)
+        {
+            for (std::vector<server>::iterator it = servers.begin(); it != servers.end(); ++it)
+                (*it).checktime(fd_r, fd_w, maxfd);
+            continue;
+        }
         for (std::vector<server>::iterator it = servers.begin(); it !=servers.end(); ++it)
         {
             if (FD_ISSET((*it).ssocket, &fd_rcopy))
@@ -113,6 +120,7 @@ infra::infra(const std::vector<std::string> &tokens)
         }
         else throw(std::runtime_error("Error : config-file :bad config file server"));
     }
+    checkInfraData();
     // printInfra();
 }
 
@@ -123,6 +131,7 @@ infra::~infra(){}
 void infra::checkInfraData()
 {
     if (servers.empty()) throw(std::runtime_error("Error : config-file : ss ur servers !!"));
+    for (std::vector<server>::iterator it = servers.begin(); it != servers.end(); ++it){(*it).checkServerData();}
     //check wach chi haja na9ssa ou ila chi extra checks
 }
 

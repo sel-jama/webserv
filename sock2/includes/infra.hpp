@@ -52,6 +52,9 @@ class infra
 
         //constructr valid
         infra(const std::vector<std::string> &);
+        
+        int check_port();
+
 
 };
 

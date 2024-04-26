@@ -13,6 +13,7 @@ int main(int ac, char **av)
 			patho = validArg(ac, av);
 		else throw (std::runtime_error("give valid arguments please"));
 		infra InfraStruct((configFile(patho).getConfigfile()));
+		
 		InfraStruct.printInfra();
 		InfraStruct.initservers();
 	}

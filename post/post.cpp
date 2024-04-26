@@ -125,7 +125,7 @@ void Post::support_upload(Request &obj){
                     // std::cout << "......................" << std::endl;
 
     location capt = obj.getMatchedLocation();
-    std::string  ptr = capt.upl();
+    std::string  ptr = capt.upload_path;
     if(ptr.empty())
         throw Except();
     else

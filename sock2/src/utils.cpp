@@ -20,11 +20,13 @@ int iskey2(const std::string & key)
     std::string keys[]=
     {
         "upload",
+        "upload_path",
         "autoindex",
         "http_methods",
         "root",
         "cgi",
         "return",
+        "index",
     };
     size_t numKeys = sizeof(keys)/sizeof(keys[0]);
     for(size_t i = 0; i < numKeys; ++i)

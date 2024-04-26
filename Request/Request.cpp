@@ -287,8 +287,11 @@ int Request::send_response(client &client){
         std::string res = Response::handleMethod(client);
         std::cout << "Response: \n"<<res;
         // write(client.ssocket, res.c_str(), res.length());
-        if (send(client.ssocket, res.c_str(), res.length(), 0) == -1)
+        if (send(client.ssocket, res.c_str(), res.length(), 0) == -1){
+            std::cout << "failed to send"<< std::endl;
+            return 0;
             throw std::runtime_error("Error: Failed to send response to client");
+        }
         client.w_done = 1;
     }
     catch (const std::runtime_error &e){

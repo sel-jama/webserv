@@ -61,7 +61,6 @@ class server
 		void handle_old_cnx(fd_set &, fd_set &, fd_set &, fd_set &, int &);
 
 
-
 		//check - debug
 		void printServer();
 		void checkServerData();

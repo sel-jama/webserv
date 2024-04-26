@@ -5,6 +5,16 @@ client::client()
 {
     wakt = time(NULL);
     //handle other vars
+    r_done = 0;
+    w_done = 0;
     
 }
 client::~client(){}
+
+void client::reset_client()
+{
+    wakt = time(NULL);
+    //handle other vars
+    r_done = 0;
+    w_done = 0;
+}

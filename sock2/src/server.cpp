@@ -20,8 +20,13 @@ void server::setlocation(std::vector<std::string>::const_iterator &it, const std
 			else if (*it == "return")           tmp.setReturn(it, i);
 			else if (*it == "root")             tmp.setRoot(it, j);
 			else if (*it == "cgi")              tmp.setCgi(it);
+			else if (*it == "index")			tmp.setIndex(it);
+			else if (*it == "upload_path")		tmp.setUploadPath(it);
 		}
-		else throw(std::runtime_error("Error : config-file :bad config file in location not a key"));
+		else {
+			std::cout << "eror :" << *it << std::endl;
+			throw(std::runtime_error("Error : config-file :bad config file in location not a key"));
+			}
 	}
 	if (*it == "}") ++it ;
 	else throw(std::runtime_error("Error : config-file :bad config file\" location :add \"}\"at the end of the location\""));
@@ -141,7 +146,8 @@ server::server()
 	errorPages["504"] = "";
 	errorPages["505"] = "";
 	//client max body size
-	clientMaxBodySize = 2000000000000000000;
+	clientMaxBodySize = 0;
+
 
 }
 
@@ -168,8 +174,11 @@ void server::checkServerData()
 	//listen manda --> check what is manda and what is not
 	if (port == 0) throw(std::runtime_error("Error : config-file :bad config file\" empty port\""));
 	if (adress.empty()) throw(std::runtime_error("Error : config-file :bad config file\" empty adress\""));
+	if (serverName.empty())throw(std::runtime_error("Error : config-file :bad config file\" empty server_name\""));
+	if (!clientMaxBodySize)throw(std::runtime_error("Error : config-file :bad config file\" empty client max body size\""));
+	if (adress.empty()) throw(std::runtime_error("Error : config-file :bad config file\" empty location\""));
 	if (locations.empty()) throw(std::runtime_error("Error : config-file :bad config file\" empty location\""));
-
+	for (std::vector<location>::iterator it = locations.begin(); it != locations.end(); ++it){(*it).checklocation();}
 }
 
 void server::printServer()
@@ -252,7 +261,7 @@ void server::handle_old_cnx(fd_set &fd_r, fd_set &fd_w, fd_set &fd_rcopy, fd_set
 	{
 		if (FD_ISSET((*it).ssocket, &fd_rcopy))
 		{
-			if (!((*it).reqq).read_request(*it, *this)) 
+			if (!((*it).reqq).read_request(*it, *this))
 			{
 				clientdown(*it, fd_r, fd_w, maxfd);
 				continue;
@@ -266,7 +275,14 @@ void server::handle_old_cnx(fd_set &fd_r, fd_set &fd_w, fd_set &fd_rcopy, fd_set
 				clientdown(*it, fd_r, fd_w, maxfd);
 				continue;
 			}
-			if ((*it).w_done) ioswap(fd_r, fd_w, (*it).ssocket);
+			if ((*it).w_done) 
+			{
+				ioswap(fd_r, fd_w, (*it).ssocket);
+				if ((*it).reqq.headers["Connection"] == "keep-alive")
+					(*it).reset_client();
+				else
+					clientdown(*it, fd_r, fd_w, maxfd);
+			}
 		}
 	}
 }

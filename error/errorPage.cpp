@@ -6,7 +6,7 @@
 /*   By: sel-jama <sel-jama@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/04/18 20:58:59 by sel-jama          #+#    #+#             */
-/*   Updated: 2024/04/23 04:18:36 by sel-jama         ###   ########.fr       */
+/*   Updated: 2024/04/26 07:44:06 by sel-jama         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -105,15 +105,40 @@ void errorPage::HtmlErrorPage() {
     file << htmlCode.str();
 }
 
-int main() {
-    errorPage test("Oops! Looks like the page you're looking for is missing.", 500);
-
-    try {
-        test.HtmlErrorPage();
-    }
-    catch (const std::runtime_error &e)
-    {
-        std::cerr << e.what() << std::endl;
-    }
-    return 0;
+void errorPage::setErrorms(){
+    //html error pages
+    errorMsgs[400] = "Bad Request";
+    errorMsgs[401] = "Unquthorized";
+    errorMsgs[403] = "Forbidden";
+    errorMsgs[404] = "Not Found";
+    errorMsgs[405] = "Method Not Allowed";
+    errorMsgs[406] = "Not Acceptable";
+    errorMsgs[407] = "Proxy Authentication Required";
+    errorMsgs[408] = "Request Timeout";
+    errorMsgs[409] = "Conflict";
+    errorMsgs[410] = "Gone";
+    errorMsgs[411] = "Length Required";
+    errorMsgs[412] = "Precondition Failed";
+    errorMsgs[413] = "Request Entity Too Large";
+    errorMsgs[414] = "Request-URI Too Long";
+    errorMsgs[415] = "Unsupported Media Type";
+    errorMsgs[416] = "Requested Range Not Satisfiable";
+    errorMsgs[417] = "Expectation Failed";
+    errorMsgs[500] = "Internal Server Error";
+    errorMsgs[501] = "Not Implemented";
+    errorMsgs[502] = "Bad Gateway";
+    errorMsgs[503] = "Service Unavailable";
 }
+
+// int main() {
+//     errorPage test("Oops! Looks like the page you're looking for is missing.", 500);
+
+//     try {
+//         test.HtmlErrorPage();
+//     }
+//     catch (const std::runtime_error &e)
+//     {
+//         std::cerr << e.what() << std::endl;
+//     }
+//     return 0;
+// }

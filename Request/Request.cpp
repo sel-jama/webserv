@@ -6,7 +6,7 @@
 /*   By: sel-jama <sel-jama@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/03/24 15:33:33 by sel-jama          #+#    #+#             */
-/*   Updated: 2024/04/25 10:57:09 by sel-jama         ###   ########.fr       */
+/*   Updated: 2024/04/26 08:13:10 by sel-jama         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -15,7 +15,7 @@
 #include "../sock2/includes/server.hpp"
 #include "../Response/Response.hpp"
 
-Request::Request() : method(""), uri(""), version(""), readBody(0), firstRead(1){
+Request::Request() : method(""), uri(""), version(""), readBody(0), firstRead(1), headersDone(0), errorCode(0){
 }
 
 Request::~Request(){}
@@ -37,12 +37,14 @@ const std::map<std::string, std::string>& Request::getHeaders() const{
 }
 
 void Request::cutOffBodySegment(std::string &request){
-    size_t pos = request.find("\n\r\n\r");
+    size_t pos = request.find("\r\n\r\n");
 
     if(pos != std::string::npos){
+        pos += 4;
         bodySaver = request.substr(pos);
         // int num = request.length() - pos;
         request.erase(pos, request.length() - 1);
+        headersDone = 1;
     }
 }
 
@@ -61,7 +63,7 @@ std::string Request::readRequest(int &fdSocket){
     }
     else if (readbytes == 0)
         throw std::runtime_error("Peer closed the connection");
-    // buffer[readbytes] = '\0';
+    buffer[readbytes] = '\0';
     buff << buffer;
     std::cout << buffer << std::endl;
     
@@ -77,7 +79,6 @@ std::string Request::readRequest(int &fdSocket){
     std::string request(buff.str());
     if (!readBody){
         cutOffBodySegment(request);
-        std::cout << "segment " << bodySaver << std::endl;
     }
     readBody = 1;
     //if readBody==1 the return is the body (for post)
@@ -145,16 +146,18 @@ int    Request::getCheckRequest(client &client, const server &serve) {
     // Request use
     try{
         client.reqq.reqStr = client.reqq.readRequest(client.ssocket);
+        // if (client.reqq.reqStr.length() > BUFFER_SIZE)
         client.reqq.requestPartitioning(client.reqq, client.reqq.reqStr);
         //done reading from socket if method is GET or DELETE 
         client.reqq.isReqWellFormed(client.reqq, serve.getClientMaxBodySize());
         std::cout << "Request :\n"<< client.reqq.reqStr << std::endl;
-        if (client.reqq.method != "POST")
+        if (client.reqq.method != "POST" && client.reqq.headersDone)
             client.r_done = 1;
         client.reqq.retreiveRequestedResource(serve);
     }
     catch(const std::runtime_error &e){
         std::cerr << e.what() << std::endl;
+        client.reqq.errorMsg = e.what();
         return 0;
     }
     return 1;
@@ -245,12 +248,12 @@ void Request::retreiveRequestedResource(const server &serve){
 }
 
 void Request::isFileAvailable() {
-    std::cout << "proooooblamaaa >>>>> path: " << path << std::endl;
+    std::cout << ">>> path: " << path << std::endl;
     if (stat(path.c_str(), &pathStatus) != 0) {
     // std::cout << "debug msg " << path << std::endl;
         if (errno == ENOENT) {
             throw std::runtime_error("404 Not Found: Requested Resource not found");
-        } else {
+        } else{
             throw std::runtime_error("Error checking file availability");
         }
     }
@@ -273,7 +276,7 @@ const location &Request::getMatchedLocation(void) const {
 int Request::send_response(client &client){
     try{
         std::string res = Response::handleMethod(client);
-        std::cout << "&&& "<<res;
+        std::cout << "Response: \n"<<res;
         // write(client.ssocket, res.c_str(), res.length());
         if (send(client.ssocket, res.c_str(), res.length(), 0) == -1)
             throw std::runtime_error("Error: Failed to send response to client");

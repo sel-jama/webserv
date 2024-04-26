@@ -6,7 +6,7 @@
 /*   By: sel-jama <sel-jama@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/03/24 11:13:12 by sel-jama          #+#    #+#             */
-/*   Updated: 2024/04/25 12:03:07 by sel-jama         ###   ########.fr       */
+/*   Updated: 2024/04/26 08:02:23 by sel-jama         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -51,6 +51,10 @@ class Request {
         int readBody;
         int firstRead;
         std::string bodySaver;
+        int headersDone;
+        //error utils
+        int errorCode;
+        std::string errorMsg;
 
         Request();
         ~Request();
@@ -76,7 +80,7 @@ class Request {
 
         // const server &getServerInfo(void) const;
         const location &getMatchedLocation(void) const;
-        void setContentLength(const std::map<std::string, std::string> &headers)
+        void setContentLength(const std::map<std::string, std::string> &headers);
         std::string readRequest(int &fdSocket);
         void cutOffBodySegment(std::string &request);
         int send_response(client &);

@@ -6,7 +6,7 @@
 /*   By: sel-jama <sel-jama@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/03/26 14:13:24 by sel-jama          #+#    #+#             */
-/*   Updated: 2024/04/10 21:38:00 by sel-jama         ###   ########.fr       */
+/*   Updated: 2024/04/26 09:53:53 by sel-jama         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -35,15 +35,15 @@ class ParseRequest {
         bool    charOccured(char c) const;
 
         //parse
-        void parseMethod(std::string &method) const;
-        void parseUri(std::string &uri) const;
-        void parseVersion(std::string &version) const;
-        void parseHeaders(std::map<std::string, std::string> &headers, std::string &method) const;
-        void parseBody(std::string &body, long long &maxBodySize) const;
+        int parseMethod(std::string &method) const;
+        int parseUri(std::string &uri) const;
+        int parseVersion(std::string &version) const;
+        int parseHeaders(std::map<std::string, std::string> &headers, std::string &method) const;
+        // int parseBody(std::string &body, long long &maxBodySize) const;
 
         void setHttpHeaders();
         const std::deque<std::string> &getHttpHeaders() const;
-        void checkUnknownHeader(std::map<std::string, std::string> & ) const; 
+        int checkUnknownHeader(std::map<std::string, std::string> & ) const; 
 };
 
 #endif

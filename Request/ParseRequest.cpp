@@ -6,7 +6,7 @@
 /*   By: sel-jama <sel-jama@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/03/26 14:13:04 by sel-jama          #+#    #+#             */
-/*   Updated: 2024/04/25 10:02:39 by sel-jama         ###   ########.fr       */
+/*   Updated: 2024/04/26 09:59:58 by sel-jama         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -110,37 +110,47 @@ bool ParseRequest::checkUriAllowedChars(std::string &uri) const{
     return true;
 }
 
-void ParseRequest::parseMethod(std::string &method) const{
+int ParseRequest::parseMethod(std::string &method) const{
     if (unsupportedMethod(method))
-        throw std::runtime_error("501 Not Implemented : Method not supported");
+        // throw std::runtime_error("501 Not Implemented : Method not supported");
+        return 501;
     
     if (checkMethod(method) == false)
-        throw std::runtime_error("404 Not found : Method not found");
+        return 404;
+        // throw std::runtime_error("404 Not found : Method not found");
+    return 0;
 }
 
-void ParseRequest::parseHeaders(std::map<std::string, std::string> &headers, std::string &method) const{
-    checkUnknownHeader(headers);
+int ParseRequest::parseHeaders(std::map<std::string, std::string> &headers, std::string &method) const{
+    int ret = checkUnknownHeader(headers);
+    if (ret)
+        return ret;
     
     if (headers.find("Transfer-Encoding") != headers.end()
         && headers["Transfer-Encoding"] != "chunked")
-            throw std::runtime_error("501 Not Implemented : Transfer-Encoding must be chuncked");
+            // throw std::runtime_error("501 Not Implemented : Transfer-Encoding must be chuncked");
+            return 501;
     else if ((headers.find("Content-Length") == headers.end() || atoi(headers.at("Content-Length").c_str())) && method == "POST")
-        throw std::runtime_error("400 Bad Request : Messing headers");
+        // throw std::runtime_error("400 Bad Request : Messing headers");
+        return 400;
     
     //setContentLength(headers);
-
+    return 0;
 }
 
-void ParseRequest::parseUri(std::string &uri) const {
+int ParseRequest::parseUri(std::string &uri) const {
     /*if => Request uri contain a character not allowded => bad request 400*/
     if ((uri.size() >= 1 && uri[0] != '/') || checkUriAllowedChars(uri) == false)
-        throw std::runtime_error("400 Bad Request : bad URI");
+        // throw std::runtime_error("400 Bad Request : bad URI");
+        return 400;
 
     if (uri.size() > MAX_SIZE)
-        throw std::runtime_error("414 Request-URI Too Long");
+        // throw std::runtime_error("414 Request-URI Too Long");
+        return 414;
+    return 0;
 }
 
-void ParseRequest::parseVersion(std::string &version) const{
+int ParseRequest::parseVersion(std::string &version) const{
     std::stringstream ss(version);
     
     std::string http;
@@ -152,26 +162,32 @@ void ParseRequest::parseVersion(std::string &version) const{
     double v = strtod(vers.c_str(), &endptr);
   
     if (http != "HTTP" || *endptr != '\0')
-        throw std::runtime_error("400 Bad Request : Error occured in Http version");
+        // throw std::runtime_error("400 Bad Request : Error occured in Http version");
+        return 400;
     
     if (v == 0.9 || v == 2.0 || v == 1.0 || v == 3.0)
-        throw std::runtime_error("501 Not Implemented : Error occured in http version");
+        // throw std::runtime_error("501 Not Implemented : Error occured in http version");
+        return 501;
     
     if (v != 1.1)
-        throw std::runtime_error("400 Bad Request : Error occured in Http version");
+        // throw std::runtime_error("400 Bad Request : Error occured in Http version");
+        return 400;
+    return 0;
 }
 
-void ParseRequest::parseBody(std::string &body, long long &maxBodySize) const{
-    if (static_cast<long long>(body.length()) > maxBodySize)
-        throw std::runtime_error("413 Request Entity Too Large");
-}
+// void ParseRequest::parseBody(std::string &body, long long &maxBodySize) const{
+//     if (static_cast<long long>(body.length()) > maxBodySize)
+//         throw std::runtime_error("413 Request Entity Too Large");
+// }
 
 const std::deque<std::string> &ParseRequest::getHttpHeaders() const { return this->ngxHttpHeaders; }
 
-void ParseRequest::checkUnknownHeader(std::map<std::string, std::string> &headers) const{
+int ParseRequest::checkUnknownHeader(std::map<std::string, std::string> &headers) const{
     std::map<std::string, std::string>::iterator it = headers.begin();
     for (; it != headers.end(); it++) {
-        // if(ngxHttpHeaders.find(it->first) == ngxHttpHeaders.end())
-        //     throw std::runtime_error("400 bad Request : unknown headers");
+        if(find(ngxHttpHeaders.begin(), ngxHttpHeaders.end(), it->first) == ngxHttpHeaders.end())
+            return 400;
+            // throw std::runtime_error("400 bad Request : unknown headers");
     }
+    return 0;
 }

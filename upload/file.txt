@@ -1,11 +1,10 @@
---------------------------e964a6a9611901f4
-Content-Disposition: form-data; name="image"; filename="hek.txt"
+--------------------------b03ae5b837959c57
+Content-Disposition: form-data; name="file"; filename="file.txt"
 Content-Type: text/plain
 
-salma
-nodi
-tn3si
-la aji
-ghi kandhek
---------------------------e964a6a9611901f4--
-m
+Heeeeeeeellllo
+
+this is me 
+
+--------------------------b03ae5b837959c57--
+

@@ -6,7 +6,7 @@
 /*   By: sel-jama <sel-jama@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/03/24 11:13:12 by sel-jama          #+#    #+#             */
-/*   Updated: 2024/04/26 08:02:23 by sel-jama         ###   ########.fr       */
+/*   Updated: 2024/04/26 09:52:00 by sel-jama         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -65,7 +65,7 @@ class Request {
         const std::string& getBody(void) const;
 
         void requestPartitioning(Request& saver, std::string& request);
-        void isReqWellFormed(Request &req, long long maxBodySize) const;
+        void isReqWellFormed(Request &req, long long maxBodySize);
         void locateMatchingRequestURI(const server &use) const;
         bool allowedMethod(location &location) const;
 

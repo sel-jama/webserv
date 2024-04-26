@@ -6,7 +6,7 @@
 /*   By: sel-jama <sel-jama@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/03/24 15:33:33 by sel-jama          #+#    #+#             */
-/*   Updated: 2024/04/26 08:13:10 by sel-jama         ###   ########.fr       */
+/*   Updated: 2024/04/26 10:24:10 by sel-jama         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -14,6 +14,7 @@
 #include "../sock2/includes/client.hpp"
 #include "../sock2/includes/server.hpp"
 #include "../Response/Response.hpp"
+#include "../error/errorPage.hpp"
 
 Request::Request() : method(""), uri(""), version(""), readBody(0), firstRead(1), headersDone(0), errorCode(0){
 }
@@ -56,7 +57,6 @@ std::string Request::readRequest(int &fdSocket){
     }
         
     char buffer[BUFFER_SIZE];
-
     readbytes = read(fdSocket, buffer, BUFFER_SIZE - 1);
     if (readbytes < 0){
         throw std::runtime_error("Error reading from socket: socket failed");
@@ -118,14 +118,16 @@ void Request::requestPartitioning(Request &saver, std::string& request) {
 }
 
 
-void Request::isReqWellFormed(Request &req, long long maxBodySize) const{
+void Request::isReqWellFormed(Request &req, long long maxBodySize){
     ParseRequest parse;
     (void)maxBodySize;
 
-    parse.parseMethod(req.method);
-    parse.parseHeaders(req.headers, req.method);
-    parse.parseUri(req.uri);
-    parse.parseVersion(req.version);
+    errorCode = parse.parseMethod(req.method);
+    errorCode = parse.parseHeaders(req.headers, req.method);
+    errorCode = parse.parseUri(req.uri);
+    errorCode = parse.parseVersion(req.version);
+    if (errorCode)
+        throw std::runtime_error("error");
     // parse.parseBody(req.body, maxBodySize);
     /*if => Request body larger than client max body size in config file*/
 
@@ -156,8 +158,13 @@ int    Request::getCheckRequest(client &client, const server &serve) {
         client.reqq.retreiveRequestedResource(serve);
     }
     catch(const std::runtime_error &e){
+        if (client.reqq.errorCode)
+        {
+            errorPage::serveErrorPage(client.reqq);
+            client.r_done = 1;
+        }
         std::cerr << e.what() << std::endl;
-        client.reqq.errorMsg = e.what();
+        // client.reqq.errorMsg = e.what();
         return 0;
     }
     return 1;
@@ -251,11 +258,13 @@ void Request::isFileAvailable() {
     std::cout << ">>> path: " << path << std::endl;
     if (stat(path.c_str(), &pathStatus) != 0) {
     // std::cout << "debug msg " << path << std::endl;
-        if (errno == ENOENT) {
-            throw std::runtime_error("404 Not Found: Requested Resource not found");
-        } else{
-            throw std::runtime_error("Error checking file availability");
-        }
+        // if (errno == ENOENT) {
+            // throw std::runtime_error("404 Not Found: Requested Resource not found");
+            errorCode = 404;
+        // } else{
+        //     // throw std::runtime_error("Error checking file availability");
+        //     errorCode = 
+        // }
     }
 }
 

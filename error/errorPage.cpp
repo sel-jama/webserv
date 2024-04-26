@@ -6,14 +6,18 @@
 /*   By: sel-jama <sel-jama@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/04/18 20:58:59 by sel-jama          #+#    #+#             */
-/*   Updated: 2024/04/26 07:44:06 by sel-jama         ###   ########.fr       */
+/*   Updated: 2024/04/26 10:33:18 by sel-jama         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "errorPage.hpp"
+#include "../Request/Request.hpp"
+#include "../Response/method.hpp"
 
 errorPage::errorPage(std::string msg, int code) : msg(msg), code(code) {
 }
+
+errorPage::errorPage(){}
 
 errorPage::~errorPage(){}
 
@@ -105,7 +109,7 @@ void errorPage::HtmlErrorPage() {
     file << htmlCode.str();
 }
 
-void errorPage::setErrorms(){
+void errorPage::setErrorMsgs(){
     //html error pages
     errorMsgs[400] = "Bad Request";
     errorMsgs[401] = "Unquthorized";
@@ -142,3 +146,13 @@ void errorPage::setErrorms(){
 //     }
 //     return 0;
 // }
+
+std::string errorPage::serveErrorPage(Request &req){
+    errorPage use;
+    method use2;
+    errorPage err(use.errorMsgs[req.errorCode], req.errorCode);
+
+    err.HtmlErrorPage();
+    req.path = "../error/page.html";
+    return use2.readContent(req);
+}

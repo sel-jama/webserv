@@ -6,7 +6,7 @@
 /*   By: sel-jama <sel-jama@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/04/18 20:58:59 by sel-jama          #+#    #+#             */
-/*   Updated: 2024/04/26 10:33:18 by sel-jama         ###   ########.fr       */
+/*   Updated: 2024/04/27 07:20:50 by sel-jama         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -23,11 +23,11 @@ errorPage::~errorPage(){}
 
 void errorPage::setProprties(){
     switch (code){
-        case 400 ... 499:
-            color = "#ff4081";
-            boxRgba = "rgba(255, 64, 129, 0.5)";
-            img = "waiting.png";
-            break;
+        // case 400 ... 499:
+        //     color = "#ff4081";
+        //     boxRgba = "rgba(255, 64, 129, 0.5)";
+        //     img = "waiting.png";
+        //     break;
         
         case 500 ... 599:
             color = "#167263";
@@ -38,7 +38,7 @@ void errorPage::setProprties(){
         default:
             color = "#ff4081";
             boxRgba = "rgba(255, 64, 129, 0.5)";
-            img = "waiting.png";
+            img = "/Hooray.jpeg";
             break;
     }
     
@@ -102,10 +102,12 @@ void errorPage::HtmlErrorPage() {
              << "</html>\n";
 
     // Output the stringstream content
-    std::ofstream file("page.html");
+    std::ofstream file("page.html", std::ios::trunc);
 
-    if (!file.is_open())
+    if (!file.is_open()){
+        std::cout << "the problem is here" << std::endl;
         throw std::runtime_error("something went wrong, try freeing space");
+    }
     file << htmlCode.str();
 }
 
@@ -150,9 +152,26 @@ void errorPage::setErrorMsgs(){
 std::string errorPage::serveErrorPage(Request &req){
     errorPage use;
     method use2;
+    std::string content;
+    std::ostringstream response;
+    use.setErrorMsgs();
     errorPage err(use.errorMsgs[req.errorCode], req.errorCode);
+    std::cout << use.errorMsgs[req.errorCode] <<" waaaaaaaaaaa " << std::endl;
 
-    err.HtmlErrorPage();
-    req.path = "../error/page.html";
-    return use2.readContent(req);
+    try{
+        err.HtmlErrorPage();
+        req.path = req.matchedLocation.root + req.matchedLocation.location_name + "sock2/page.html";
+        std::cout << "path error : " << req.path << std::endl;
+        // req.path = "../page.html";
+        content = use2.readContent(req);
+        response << "HTTP/1.1 " << req.errorCode << " KO\r\n"
+            //  << "Content-Type: " << mimeType << "\r\n"
+             << "Content-Length: " << content.length() << "\r\n"
+             << "\r\n"
+             << content;
+    }
+    catch(const std::runtime_error &e){
+        std::cout << "errorPage failed :" << e.what() << std::endl;
+    }
+    return response.str();
 }

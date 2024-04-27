@@ -34,7 +34,9 @@ void method::GetDataForClient(Request &req, int &clientSocket) {
     // std::string content = readContent(req.fileName);
 
     std::ostringstream response;
-    response << "HTTP/1.1 200 OK\r\n"
+    if (!req.errorCode)
+        req.errorCode = 200;
+    response << "HTTP/1.1 " << req.errorCode << " OK\r\n"
             //  << "Content-Type: " << mimeType << "\r\n"
              << "Content-Length: " << content.length() << "\r\n"
              << "\r\n"
@@ -140,8 +142,10 @@ void method::handleDirectory(Request &req){
             autoIndexing(req);
         //no index files and no cgi
         // else if (req.getMatchedLocation().cgi.size() == 0)
-        else
+        else{
+            req.path += "/index.html";
             this->content = readContent(req);
+        }
 
     // }
     //else : make a 301 redirection to request uri with “/ addeed at the end
@@ -170,10 +174,11 @@ bool method::isDirHasIndexFiles(Request &req) const{
         // Iterate through directory entries
         while ((ent = readdir(dir)) != NULL) {
             std::string filename = ent->d_name;
-            size_t pos = filename.find('.');
+            // size_t pos = filename.find('.');
 
-            filename.substr(0, pos);
-            if (filename == "index")  { //compare with index files in location later
+            // filename.substr(0, pos);
+            // std::cout << "filename of dir " << filename << std::endl;
+            if (filename == "index.html")  { //compare with index files in location later
                 closedir(dir);
                 // req.path += filename;
                 return true;

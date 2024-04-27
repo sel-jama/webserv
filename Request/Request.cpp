@@ -6,7 +6,7 @@
 /*   By: sel-jama <sel-jama@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/03/24 15:33:33 by sel-jama          #+#    #+#             */
-/*   Updated: 2024/04/26 10:24:10 by sel-jama         ###   ########.fr       */
+/*   Updated: 2024/04/27 07:40:58 by sel-jama         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -158,10 +158,12 @@ int    Request::getCheckRequest(client &client, const server &serve) {
         client.reqq.retreiveRequestedResource(serve);
     }
     catch(const std::runtime_error &e){
+        std::cout << "my code error ??????  " << client.reqq.errorCode << std::endl;
         if (client.reqq.errorCode)
         {
-            errorPage::serveErrorPage(client.reqq);
             client.r_done = 1;
+            // client.reqq.response = errorPage::serveErrorPage(client.reqq);
+            // throw std::runtime_error("error");
         }
         std::cerr << e.what() << std::endl;
         // client.reqq.errorMsg = e.what();
@@ -208,8 +210,10 @@ const location& Request::getMatchingLocation(const server& serve) {
         }
     }
 
-    if (maxCounter == -1)
+    if (maxCounter == -1){
+        errorCode = 404;
         throw std::runtime_error("404 Not Found: No matching location");
+    }
 
     const location& matchingLocation = serve.getLocations().at(maxIndex);
 
@@ -250,17 +254,16 @@ void Request::retreiveRequestedResource(const server &serve){
     
     path = matchedLocation.root;
     path += matchedLocation.location_name + fileName;
-    isFileAvailable(); 
     std::cout <<"path : " << path << std::endl;
+    isFileAvailable(); 
 }
 
 void Request::isFileAvailable() {
-    std::cout << ">>> path: " << path << std::endl;
     if (stat(path.c_str(), &pathStatus) != 0) {
     // std::cout << "debug msg " << path << std::endl;
         // if (errno == ENOENT) {
-            // throw std::runtime_error("404 Not Found: Requested Resource not found");
             errorCode = 404;
+            throw std::runtime_error("404 Not Found: Requested Resource not found");
         // } else{
         //     // throw std::runtime_error("Error checking file availability");
         //     errorCode = 
@@ -284,7 +287,14 @@ const location &Request::getMatchedLocation(void) const {
 
 int Request::send_response(client &client){
     try{
-        std::string res = Response::handleMethod(client);
+        std::string res;
+        if (!client.reqq.errorCode){
+            res = Response::handleMethod(client);
+        }
+        else{
+            std::cout << "got here "<< std::endl;
+            res = errorPage::serveErrorPage(client.reqq);
+        }
         std::cout << "Response: \n"<<res;
         // write(client.ssocket, res.c_str(), res.length());
         if (send(client.ssocket, res.c_str(), res.length(), 0) == -1){
@@ -295,6 +305,7 @@ int Request::send_response(client &client){
         client.w_done = 1;
     }
     catch (const std::runtime_error &e){
+        std::cout << "Exception catched in send response : " << e.what() << std::endl;
         return 0;
     }
     return 1;
@@ -306,7 +317,6 @@ int Request::read_request(client &client, server &server){
             getCheckRequest(client, server);
         else{
             Post::body(client);
-            std::cout << "sdiina " << std::endl;
         }
     }
     catch (const std::runtime_error &e){

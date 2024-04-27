@@ -92,14 +92,21 @@ void handleCgi::validateCgi(const Request &req){
         throw std::runtime_error("set error page : requested cgi not in location");
 }
 
-char const** handleCgi::createArr() {
-    char const**arr = new char const*[3];
+char ** handleCgi::createArr() {
+    // char const**arr = new char const*[3];
 
-    // Assuming cgiPath and scriptName are std::string objects
-    arr[0] = cgiPath.c_str();
-    arr[1] = scriptName.c_str();
+    // // Assuming cgiPath and scriptName are std::string objects
+    // arr[0] = cgiPath.c_str();
+    // arr[1] = scriptName.c_str(); //path
+    // arr[2] = NULL;
+
+    char *arr = reinterpret_cast<char **>( malloc( 3 * sizeof( char * ) ) );
+    arr[0] = strdup( this->cgiPath.c_str() );
+    arr[1] = strdup( this->scriptName.c_str() );
     arr[2] = NULL;
-
+    // if ( !arr[0] || !arr[1] ) {
+    //     return ( 500 ); 
+    // }
     return arr;
 }
 
@@ -161,7 +168,7 @@ char const** handleCgi::createArr() {
 
 
 std::string handleCgi::executeCgiScript(const Request &req) {
-    scriptName = req.fileName;
+    scriptName = req.path;
     // validateCgi(req);
     std::string response;
     // method use;
@@ -183,9 +190,9 @@ std::string handleCgi::executeCgiScript(const Request &req) {
         if (freopen(random.c_str(), "w", stdout) == NULL)
             throw std::runtime_error("Failed to redirect stdout");
         // Execute the CGI script
-        // char *const arr[] = createArr();
+        char *const arr[] = createArr();
         // const char *arr[] = {cgiPath.c_str(), scriptName.c_str() ,NULL};
-        // execve(cgiPath.c_str(), arr, NULL);
+        execve(cgiPath.c_str(), arr, NULL);
         throw std::runtime_error("Failed to execute CGI script");
         
     

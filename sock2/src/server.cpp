@@ -220,9 +220,12 @@ void server::clientdown(client &bclient, fd_set &r, fd_set &w,int &maxfd)
 
 void server::checktime(fd_set &r, fd_set &w, int &maxfd)
 {
+	(void)r;
+	(void)w;
+	(void)maxfd;
 	for(std::vector<client>::iterator it = clients.begin(); it != clients.end(); ++it)
 	{
-		if (time(NULL) - it->wakt > 60)
+		// if (time(NULL) - it->wakt > 10)
 			clientdown(*it, r, w, maxfd);
 	}
 }

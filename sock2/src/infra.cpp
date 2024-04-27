@@ -58,6 +58,7 @@ void infra::selecttoinfinity()
         if (slct == -1) throw(std::runtime_error("Error : select : lanch"));
         if (slct == 0)
         {
+            std::cout << "ja hna" << std::endl;
             for (std::vector<server>::iterator it = servers.begin(); it != servers.end(); ++it)
                 (*it).checktime(fd_r, fd_w, maxfd);
             continue;

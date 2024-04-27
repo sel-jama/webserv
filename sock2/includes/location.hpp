@@ -10,8 +10,8 @@ class location
         std::string upload;
         std::string autoindex;
         std::map <std::string , int> http_methods;
-        std::map <int , std::string> returns;
-        std::string retu;
+        // std::map <int , std::string> returns;
+        std::string retu; //change retunrs to retu
         std::string root;
         std::map <std::string, std::string> cgi;
         int HM, UP; //httpmethoes uploafpath

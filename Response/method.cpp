@@ -13,6 +13,18 @@
 #include "method.hpp"
 #include "../Request/Request.hpp"
 
+bool method::loacationHasCgi(Request &req, handleCgi &cgi) {
+    try{
+        cgi.setScriptName(req.fileName);
+        cgi.validateCgi(req);
+        return true;
+    }
+    catch(const std::runtime_error &e){
+        return false;
+    }
+    return true;
+}
+
 void method::validateAll(Request &req) const{
     if (!(req.pathStatus.st_mode& S_IRUSR))
         throw std::runtime_error("forbiden : permission denied");
@@ -21,11 +33,13 @@ void method::validateAll(Request &req) const{
 //handle GET method
 void method::GetDataForClient(Request &req, int &clientSocket) {
     (void)clientSocket;
+    // handleCgi cgi;
     defineResourceType(req); //file or dir
     std::cout << "************ "<<type << std::endl;
     if (type == "file") {
         //if location does not have cgi
         // validateAll(req);  //toFix
+        // if (loacationHasCgi(req, cgi))
         content = readContent(req);
     }
     else

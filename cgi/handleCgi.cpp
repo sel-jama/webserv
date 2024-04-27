@@ -6,11 +6,13 @@
 /*   By: sel-jama <sel-jama@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/04/04 07:40:50 by sel-jama          #+#    #+#             */
-/*   Updated: 2024/04/13 14:47:10 by sel-jama         ###   ########.fr       */
+/*   Updated: 2024/04/27 14:45:59 by sel-jama         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "handleCgi.hpp"
+#include "../Request/Request.hpp"
+#include "../Response/method.hpp"
 
 // void handleCGI(const std::string& cgiPath) {
 //     int sockfd[2];
@@ -51,7 +53,12 @@
 //     }
 // }
 
+handleCgi::handleCgi(){
+}
 
+void handleCgi::setScriptName(const std::string name){
+    this->scriptName = name;
+}
 
 std::string generateRandomFileName() {
     std::srand(std::time(NULL));
@@ -66,28 +73,29 @@ std::string generateRandomFileName() {
     return ss.str();
 }
 
-void CgiHandler::validateCgi(const Request &req){
+void handleCgi::validateCgi(const Request &req){
     std::string exe;
     int found = 0;
     size_t pos = scriptName.find(".");
     
     exe = scriptName.substr(pos + 1);
     //exe == php
-    std::map<std::string, std::string>::iterator it = req.matchedLocation.cgi.begin();
+    std::map<std::string, std::string>::const_iterator it = req.matchedLocation.cgi.begin();
     for (; it != req.matchedLocation.cgi.end(); ++it){
-        if (it.first == exe){
-            cgiPath = it.second;
+        if (it->first == exe){
+            cgiPath = it->second;
             found = 1;
             break;
         }
     }
     if (!found)
-        throw std::runtime_error("set error page : requested cgi not in location")
+        throw std::runtime_error("set error page : requested cgi not in location");
 }
 
-char *const *arr &CgiHandler::createArr(){
-    char *const *arr = new char *const[3];
+char const** handleCgi::createArr() {
+    char const**arr = new char const*[3];
 
+    // Assuming cgiPath and scriptName are std::string objects
     arr[0] = cgiPath.c_str();
     arr[1] = scriptName.c_str();
     arr[2] = NULL;
@@ -95,7 +103,8 @@ char *const *arr &CgiHandler::createArr(){
     return arr;
 }
 
-// std::string CgiHandler::executeCgiScript(const Request &req) {
+
+// std::string handleCgi::executeCgiScript(const Request &req) {
 //     scriptName = req.fileName;
 //     validateCgi(req);
     
@@ -151,9 +160,11 @@ char *const *arr &CgiHandler::createArr(){
 // }
 
 
-std::string executeCgiScript(const Request &req) {
+std::string handleCgi::executeCgiScript(const Request &req) {
     scriptName = req.fileName;
-    validateCgi(req);
+    // validateCgi(req);
+    std::string response;
+    // method use;
     
     // Create random file name to avoid mixing up clients' files
     std::string random = generateRandomFileName();
@@ -172,8 +183,9 @@ std::string executeCgiScript(const Request &req) {
         if (freopen(random.c_str(), "w", stdout) == NULL)
             throw std::runtime_error("Failed to redirect stdout");
         // Execute the CGI script
-        char *const arr[] = createArr();
-        execve(cgiPath.c_str(), arr, NULL);
+        // char *const arr[] = createArr();
+        // const char *arr[] = {cgiPath.c_str(), scriptName.c_str() ,NULL};
+        // execve(cgiPath.c_str(), arr, NULL);
         throw std::runtime_error("Failed to execute CGI script");
         
     
@@ -187,7 +199,9 @@ std::string executeCgiScript(const Request &req) {
             throw std::runtime_error("Child process failed to execute CGI script");
         }
     }
-    return random;
+    // req.path = req.matchedLocation.root + req.matchedLocation.location_name + "sock2/" + random;
+    // response = use.readContent(req);
+    return response;
 }
 
 

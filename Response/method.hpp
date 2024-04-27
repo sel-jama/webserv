@@ -15,6 +15,7 @@
 
 // #include "../Request/Request.hpp"
 #include "../Request/Global.hpp"
+#include "../cgi/handleCgi.hpp"
 #include "dirent.h"
 class Request;
 class server;
@@ -53,6 +54,7 @@ class method {
         void directoryListing(const Request &) ;
         void validateAll(Request &req) const;
         void setErrorPages();
+        bool loacationHasCgi(Request &req, handleCgi &cgi);
 };
 
 #endif

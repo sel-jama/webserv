@@ -6,7 +6,7 @@
 /*   By: sel-jama <sel-jama@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/03/24 15:33:33 by sel-jama          #+#    #+#             */
-/*   Updated: 2024/04/27 07:40:58 by sel-jama         ###   ########.fr       */
+/*   Updated: 2024/04/27 14:35:07 by sel-jama         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -166,8 +166,7 @@ int    Request::getCheckRequest(client &client, const server &serve) {
             // throw std::runtime_error("error");
         }
         std::cerr << e.what() << std::endl;
-        // client.reqq.errorMsg = e.what();
-        return 0;
+        throw std::runtime_error("error");
     }
     return 1;
     // reqObj.setContentLength
@@ -286,6 +285,7 @@ const location &Request::getMatchedLocation(void) const {
 }
 
 int Request::send_response(client &client){
+    client.r_done = 0;
     try{
         std::string res;
         if (!client.reqq.errorCode){
@@ -312,6 +312,7 @@ int Request::send_response(client &client){
 }
 
 int Request::read_request(client &client, server &server){
+    client.w_done = 0;
     try{
         if (!readBody)
             getCheckRequest(client, server);

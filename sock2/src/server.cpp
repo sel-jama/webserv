@@ -278,13 +278,13 @@ void server::handle_old_cnx(fd_set &fd_r, fd_set &fd_w, fd_set &fd_rcopy, fd_set
 				clientdown(*it, fd_r, fd_w, maxfd);
 				continue;
 			}
-			if ((*it).w_done) 
+			if ((*it).w_done)
 			{
 				ioswap(fd_r, fd_w, (*it).ssocket);
-				if ((*it).reqq.headers["Connection"] == "keep-alive")
-					(*it).reset_client();
-				else
-					clientdown(*it, fd_r, fd_w, maxfd);
+				// if ((*it).reqq.headers["Connection"] == "keep-alive")
+				// 	(*it).reset_client();
+				// else
+					// clientdown(*it, fd_r, fd_w, maxfd);
 			}
 		}
 	}

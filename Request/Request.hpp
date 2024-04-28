@@ -46,12 +46,12 @@ class Request {
         //additioanal
         std::string path;
         std::string fileName;
+        std::string bodySaver;
         struct stat pathStatus;
         int contentLength; 
         int readbytes;
         int readBody;
         int firstRead;
-        std::string bodySaver;
         int headersDone;
         //error utils
         int errorCode;

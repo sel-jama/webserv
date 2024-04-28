@@ -19,8 +19,9 @@ class Post{
         size_t reading_count;
         size_t content_lenght;
     public:
-        Post(){};
+        Post(){i = 0;};
         std::string Type;
+        int i;
         std::string Body;
         void set_saver(std::string); 
         void set_post_i(bool value);

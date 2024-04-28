@@ -6,7 +6,7 @@
 /*   By: sel-jama <sel-jama@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/03/24 15:33:33 by sel-jama          #+#    #+#             */
-/*   Updated: 2024/04/28 12:50:14 by sel-jama         ###   ########.fr       */
+/*   Updated: 2024/04/28 15:04:47 by sel-jama         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -42,7 +42,6 @@ void Request::cutOffBodySegment(std::string &request){
 
     if(pos != std::string::npos){
         pos += 4;
-        std::cout << "alll request part :::::::: " << request << std::endl;
         bodySaver = request.substr(pos);
         // int num = request.length() - pos;
         request.erase(pos, request.length() - 1);
@@ -94,8 +93,8 @@ void Request::requestPartitioning(Request &saver, std::string& request) {
 
     iss >> saver.method >> saver.uri >> saver.version;
     // Parse header
-    std::string headerLine;
-    while (std::getline(iss, headerLine) && headerLine != "\r") {
+    std::string headerLine("");
+    while (std::getline(iss, headerLine)) {
         size_t pos = headerLine.find(':');
         if (pos != std::string::npos) {
             std::string key = headerLine.substr(0, pos);
@@ -155,6 +154,11 @@ int    Request::getCheckRequest(client &client, const server &serve) {
             return 1;
         // if (client.reqq.reqStr.length() > BUFFER_SIZE)
         client.reqq.requestPartitioning(client.reqq, client.reqq.reqStr);
+        std::cout << "heaaaaaaaa headersss \n";
+        std::map<std::string, std::string>::iterator it = client.reqq.headers.begin();
+        for (; it != client.reqq.headers.end(); ++it){
+            std::cout << it->first << " : " << it->second << std::endl;
+        }
         //done reading from socket if method is GET or DELETE 
         client.reqq.isReqWellFormed(client.reqq, serve.getClientMaxBodySize());
         std::cout << "Request :\n"<< client.reqq.reqStr << std::endl;
@@ -290,6 +294,7 @@ const location &Request::getMatchedLocation(void) const {
 }
 
 int Request::send_response(client &client){
+    std::cout << "\033[1;34m started responding here \033[0m" << std::endl;
     client.w_done = 0;
     try{
         std::string res;
@@ -308,18 +313,18 @@ int Request::send_response(client &client){
             throw std::runtime_error("Error: Failed to send response to client");
         }
         client.w_done = 1;
-        if (client.w_done){
-            client.reqq.method = "";
-            client.reqq.uri = "";
-            client.reqq.version = "";
-            client.reqq.body = "";
-            client.reqq.reqStr = "";
-            client.reqq.bodySaver = "";
-            client.reqq.readBody = 0;
-            client.reqq.firstRead = 1;
-            client.reqq.headersDone = 0;
-            client.reqq.errorCode = 0;
-        }
+        // if (client.w_done){
+        //     client.reqq.method = "";
+        //     client.reqq.uri = "";
+        //     client.reqq.version = "";
+        //     client.reqq.body = "";
+        //     client.reqq.reqStr = "";
+        //     client.reqq.bodySaver = "";
+        //     client.reqq.readBody = 0;
+        //     client.reqq.firstRead = 1;
+        //     client.reqq.headersDone = 0;
+        //     client.reqq.errorCode = 0;
+        // }
     }
     catch (const std::runtime_error &e){
         std::cout << "Exception catched in send response : " << e.what() << std::endl;
@@ -331,9 +336,12 @@ int Request::send_response(client &client){
 int Request::read_request(client &client, server &server){
     client.r_done = 0;
     try{
-        if (!readBody)
+        if (!readBody){
+            std::cout << "\033[1;31m reading HEADERS here \033[0m" << std::endl;
             getCheckRequest(client, server);
+        }
         else{
+            std::cout << "\033[1;33m reading BODY here \033[0m" << std::endl;
             Post::body(client);
         }
     }

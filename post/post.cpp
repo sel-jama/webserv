@@ -197,7 +197,6 @@ void Post::body(client &obj){
     std::cout << "----------------- reading " << std::endl;
     obj.reqq.body += obj.reqq.readRequest(obj.ssocket);
         // std::cout << "bodyyy ************ " << obj.reqq.body << std::endl; 
-    std::cout << obj.reqq.body << " ++++++++ + + + + + + + + + + + + + +"<< std::endl;
     std::cout << "THIS IS THE BODY LEN " <<static_cast<int>(obj.reqq.body.length()) << std::endl;
     std::cout << "THIS IS CONTENT LENGTH " << obj.reqq.contentLength << std::endl;
     if(static_cast<int>(obj.reqq.body.length()) >= obj.reqq.contentLength ){

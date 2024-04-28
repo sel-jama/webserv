@@ -6,7 +6,7 @@
 /*   By: sel-jama <sel-jama@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/03/24 15:33:33 by sel-jama          #+#    #+#             */
-/*   Updated: 2024/04/28 15:04:47 by sel-jama         ###   ########.fr       */
+/*   Updated: 2024/04/28 16:01:11 by sel-jama         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -52,7 +52,6 @@ void Request::cutOffBodySegment(std::string &request){
 std::string Request::readRequest(int &fdSocket){
     std::stringstream buff("");
     if (readBody && firstRead){
-        std::cout << "this is the body save >>>>>>> " <<bodySaver << " <<<<<<<<<<<<<<<<<<<<<<<<<<<<<"<< std::endl;
         std::stringstream buff(bodySaver);
         firstRead = 0;
     }
@@ -60,12 +59,12 @@ std::string Request::readRequest(int &fdSocket){
     char buffer[BUFFER_SIZE];
     readbytes = read(fdSocket, buffer, BUFFER_SIZE - 1);
     if (readbytes < 0){
+        errorCode = 500;
         throw std::runtime_error("Error reading from socket: socket failed");
     }
     else if (readbytes == 0)//flag hada sala fhadi ola -1 (same with write response -1)
         throw std::runtime_error("Peer closed the connection");
     buffer[readbytes] = '\0';
-    std::cout << "readbytes &&&&&&& " << readbytes << std::endl;
     buff << buffer;
     
     // char recvline[BUFFER_SIZE];
@@ -138,7 +137,7 @@ void Request::isReqWellFormed(Request &req, long long maxBodySize){
 bool Request::allowedMethod(location& location) const {
     std::map<std::string, int>::iterator it = location.http_methods.begin();
     for (; it != location.http_methods.end(); it++){
-        if (it->first == this->method)
+        if (it->first == this->method && it->second == 0)
             return false;
     }
     return true;
@@ -154,11 +153,10 @@ int    Request::getCheckRequest(client &client, const server &serve) {
             return 1;
         // if (client.reqq.reqStr.length() > BUFFER_SIZE)
         client.reqq.requestPartitioning(client.reqq, client.reqq.reqStr);
-        std::cout << "heaaaaaaaa headersss \n";
-        std::map<std::string, std::string>::iterator it = client.reqq.headers.begin();
-        for (; it != client.reqq.headers.end(); ++it){
-            std::cout << it->first << " : " << it->second << std::endl;
-        }
+        // std::map<std::string, std::string>::iterator it = client.reqq.headers.begin();
+        // for (; it != client.reqq.headers.end(); ++it){
+        //     std::cout << it->first << " : " << it->second << std::endl;
+        // }
         //done reading from socket if method is GET or DELETE 
         client.reqq.isReqWellFormed(client.reqq, serve.getClientMaxBodySize());
         std::cout << "Request :\n"<< client.reqq.reqStr << std::endl;
@@ -172,10 +170,9 @@ int    Request::getCheckRequest(client &client, const server &serve) {
         {
             client.r_done = 1;
             // client.reqq.response = errorPage::serveErrorPage(client.reqq);
-            // throw std::runtime_error("error");
         }
         std::cerr << e.what() << std::endl;
-        throw std::runtime_error("error");
+        // throw std::runtime_error("error");
     }
     return 1;
     // reqObj.setContentLength
@@ -226,8 +223,10 @@ const location& Request::getMatchingLocation(const server& serve) {
     const location& matchingLocation = serve.getLocations().at(maxIndex);
 
     // Check if method is allowed for the matching location
-    // if (!allowedMethod(const_cast<location&>(matchingLocation)))
+    // if (!allowedMethod(const_cast<location&>(matchingLocation))){
+    //     errorCode = 405;
     //     throw std::runtime_error("405 Method Not Allowed");
+    // }
 
     return matchingLocation;
 }
@@ -263,7 +262,15 @@ void Request::retreiveRequestedResource(const server &serve){
     path = matchedLocation.root;
     path += matchedLocation.location_name + fileName;
     std::cout <<"path : " << path << std::endl;
-    isFileAvailable(); 
+    isFileAvailable();
+    isMethodAllowed();
+}
+
+void Request::isMethodAllowed(){
+    if (!allowedMethod(const_cast<location&>(matchedLocation))){
+        errorCode = 405;
+        throw std::runtime_error("405 Method Not Allowed");
+    }
 }
 
 void Request::isFileAvailable() {
@@ -313,18 +320,18 @@ int Request::send_response(client &client){
             throw std::runtime_error("Error: Failed to send response to client");
         }
         client.w_done = 1;
-        // if (client.w_done){
-        //     client.reqq.method = "";
-        //     client.reqq.uri = "";
-        //     client.reqq.version = "";
-        //     client.reqq.body = "";
-        //     client.reqq.reqStr = "";
-        //     client.reqq.bodySaver = "";
-        //     client.reqq.readBody = 0;
-        //     client.reqq.firstRead = 1;
-        //     client.reqq.headersDone = 0;
-        //     client.reqq.errorCode = 0;
-        // }
+        if (client.w_done){
+            client.reqq.method = "";
+            client.reqq.uri = "";
+            client.reqq.version = "";
+            client.reqq.body = "";
+            client.reqq.reqStr = "";
+            client.reqq.bodySaver = "";
+            client.reqq.readBody = 0;
+            client.reqq.firstRead = 1;
+            client.reqq.headersDone = 0;
+            client.reqq.errorCode = 0;
+        }
     }
     catch (const std::runtime_error &e){
         std::cout << "Exception catched in send response : " << e.what() << std::endl;

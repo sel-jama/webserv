@@ -6,7 +6,7 @@
 /*   By: sel-jama <sel-jama@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/03/24 11:13:12 by sel-jama          #+#    #+#             */
-/*   Updated: 2024/04/27 12:35:22 by sel-jama         ###   ########.fr       */
+/*   Updated: 2024/04/28 15:53:36 by sel-jama         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -78,6 +78,7 @@ class Request {
         const location &getMatchingLocation(const server &serve) ;
         void retreiveRequestedResource(const server &serve) ;
         void isFileAvailable();
+        void isMethodAllowed();
 
         // const server &getServerInfo(void) const;
         const location &getMatchedLocation(void) const;

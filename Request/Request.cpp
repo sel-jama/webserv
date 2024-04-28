@@ -6,7 +6,7 @@
 /*   By: sel-jama <sel-jama@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/03/24 15:33:33 by sel-jama          #+#    #+#             */
-/*   Updated: 2024/04/28 16:01:11 by sel-jama         ###   ########.fr       */
+/*   Updated: 2024/04/28 19:25:36 by sel-jama         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -159,7 +159,7 @@ int    Request::getCheckRequest(client &client, const server &serve) {
         // }
         //done reading from socket if method is GET or DELETE 
         client.reqq.isReqWellFormed(client.reqq, serve.getClientMaxBodySize());
-        std::cout << "Request :\n"<< client.reqq.reqStr << std::endl;
+        // std::cout << "Request :\n"<< client.reqq.reqStr << std::endl;
         if (client.reqq.method != "POST" && client.reqq.headersDone)
             client.r_done = 1;
         client.reqq.retreiveRequestedResource(serve);
@@ -259,8 +259,8 @@ void Request::retreiveRequestedResource(const server &serve){
     std::string url = getUri().substr(1);
     fileName = url.empty() ? "index.html" : url;
     
-    path = matchedLocation.root;
-    path += matchedLocation.location_name + fileName;
+    path = matchedLocation.root + "/";
+    path += fileName;
     std::cout <<"path : " << path << std::endl;
     isFileAvailable();
     isMethodAllowed();
@@ -304,21 +304,34 @@ int Request::send_response(client &client){
     std::cout << "\033[1;34m started responding here \033[0m" << std::endl;
     client.w_done = 0;
     try{
-        std::string res;
+        std::string content;
         if (!client.reqq.errorCode){
-            res = Response::handleMethod(client);
+            content = Response::handleMethod(client);
         }
-        else{
+        if (client.reqq.errorCode || content.empty()){
             std::cout << "got here "<< std::endl;
-            res = errorPage::serveErrorPage(client.reqq);
+            content = errorPage::serveErrorPage(client.reqq);
         }
-        std::cout << "Response: \n"<<res;
+        
+        std::string res;
+        std::ostringstream response;
+        errorPage msg;
+        if (!client.reqq.errorCode)
+            client.reqq.errorCode = 200;
+        response << "HTTP/1.1 " << client.reqq.errorCode << " " << msg.errorMsgs[client.reqq.errorCode] << "\r\n"
+            //  << "Content-Type: " << mimeType << "\r\n"
+             << "Content-Length: " << content.length() << "\r\n"
+             << "\r\n";
+        std::cout << "\033[1;35m---------------RESPONSE-----------------\n" <<  response.str() <<"\033[0m" << std::endl;
+        response << content;
+        res = response.str();
+        // std::cout << "Response: \n"<<res;
         // write(client.ssocket, res.c_str(), res.length());
         if (send(client.ssocket, res.c_str(), res.length(), 0) == -1){
-            std::cout << "failed to send"<< std::endl;
+            std::cout << "Error: Failed to send response to client"<< std::endl;
             return 0;
-            throw std::runtime_error("Error: Failed to send response to client");
         }
+        
         client.w_done = 1;
         if (client.w_done){
             client.reqq.method = "";
@@ -344,11 +357,11 @@ int Request::read_request(client &client, server &server){
     client.r_done = 0;
     try{
         if (!readBody){
-            std::cout << "\033[1;31m reading HEADERS here \033[0m" << std::endl;
+            // std::cout << "\033[1;31m reading HEADERS here \033[0m" << std::endl;
             getCheckRequest(client, server);
         }
         else{
-            std::cout << "\033[1;33m reading BODY here \033[0m" << std::endl;
+            // std::cout << "\033[1;33m reading BODY here \033[0m" << std::endl;
             Post::body(client);
         }
     }
@@ -356,5 +369,6 @@ int Request::read_request(client &client, server &server){
         std::cout << "Error in reading : "<< e.what() << std::endl;
         return 1;
     }
+    std::cout << "\033[1;33m--------------------REQUEST-------------------------\n" << client.reqq.reqStr << client.reqq.body << "\033[0m" << std::endl;
     return 1;
 }

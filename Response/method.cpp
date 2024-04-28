@@ -26,8 +26,10 @@ bool method::loacationHasCgi(Request &req, handleCgi &cgi) {
 }
 
 void method::validateAll(Request &req) const{
-    if (!(req.pathStatus.st_mode& S_IRUSR))
+    if (!(req.pathStatus.st_mode& S_IRUSR)){
+        req.errorCode = 403;
         throw std::runtime_error("forbiden : permission denied");
+    }
 }
 
 //handle GET method
@@ -38,7 +40,7 @@ void method::GetDataForClient(Request &req, int &clientSocket) {
     std::cout << "************ "<<type << std::endl;
     if (type == "file") {
         //if location does not have cgi
-        // validateAll(req);  //toFix
+        validateAll(req);  //toFix
         if (loacationHasCgi(req, cgi)){
             std::cout << "CGI .... " << std::endl;
             content = cgi.executeCgiScript(req);
@@ -51,46 +53,14 @@ void method::GetDataForClient(Request &req, int &clientSocket) {
     // std::string mimeType = getMimeType(req.fileName);
     // std::string content = readContent(req.fileName);
 
-    std::ostringstream response;
-    if (!req.errorCode)
-        req.errorCode = 200;
-    response << "HTTP/1.1 " << req.errorCode << " OK\r\n"
-            //  << "Content-Type: " << mimeType << "\r\n"
-             << "Content-Length: " << content.length() << "\r\n"
-             << "\r\n"
-             << content;
 
-    this->response = response.str();
+    this->response = content;
     // std::cout << this->response << std::endl;
     // if (send(clientSocket, this->response.c_str(), this->response.length(), 0) == -1)
     //     throw std::runtime_error("Error: Failed to send response to client");
     
 }
 
-// void method::setErrorPages(){
-//     //html error pages
-//     errorPage[400] = "Bad Request";
-//     errorPage[401] = "Unquthorized";
-//     errorPage[403] = "Forbidden";
-//     errorPage[404] = "Not Found";
-//     errorPage[405] = "Method Not Allowed";
-//     errorPage[406] = "Not Acceptable";
-//     errorPage[407] = "Proxy Authentication Required";
-//     errorPage[408] = "Request Timeout";
-//     errorPage[409] = "Conflict";
-//     errorPage[410] = "Gone";
-//     errorPage[411] = "Length Required";
-//     errorPage[412] = "Precondition Failed";
-//     errorPage[413] = "Request Entity Too Large";
-//     errorPage[414] = "Request-URI Too Long";
-//     errorPage[415] = "Unsupported Media Type";
-//     errorPage[416] = "Requested Range Not Satisfiable";
-//     errorPage[417] = "Expectation Failed";
-//     errorPage[500] = "Internal Server Error";
-//     errorPage[501] = "Not Implemented";
-//     errorPage[502] = "Bad Gateway";
-//     errorPage[503] = "Service Unavailable";
-// }
 // // std::string method::getMimeType(const std::string& fileName) {
 // //     size_t dotPos = fileName.find_last_of('.');
 // //     if (dotPos != std::string::npos){
@@ -154,6 +124,7 @@ void method::defineResourceType(const Request &req){
 }
 
 void method::handleDirectory(Request &req){
+    handleCgi cgi;
     // size_t uriLength = req.getUri().length() - 1;
     // if (req.getUri().at(uriLength) == '/'){
         if (isDirHasIndexFiles(req) == false)
@@ -161,8 +132,12 @@ void method::handleDirectory(Request &req){
         //no index files and no cgi
         // else if (req.getMatchedLocation().cgi.size() == 0)
         else{
-            req.path += "/index.html";
-            this->content = readContent(req);
+            req.path += "/" + req.fileName;
+            validateAll(req);
+            if (loacationHasCgi(req, cgi))
+                this->content = cgi.executeCgiScript(req);
+            else
+                this->content = readContent(req);
         }
 
     // }
@@ -196,15 +171,19 @@ bool method::isDirHasIndexFiles(Request &req) const{
 
             // filename.substr(0, pos);
             // std::cout << "filename of dir " << filename << std::endl;
-            if (filename == "index.html")  { //compare with index files in location later
-                closedir(dir);
-                // req.path += filename;
-                return true;
+            for (std::vector<std::string>::iterator it = req.matchedLocation.index.begin(); it != req.matchedLocation.index.end(); ++it){
+                if (filename == *it)  { //compare with index files in location later
+                    req.fileName = *it;
+                    closedir(dir);
+                    // req.path += filename;
+                    return true;
+                }
             }
         }
         closedir(dir);
     } else {
         // Unable to open directory
+        req.errorCode = 500;
         std::cerr << "Unable to open directory: " << req.path << std::endl;
     }
 
@@ -212,12 +191,14 @@ bool method::isDirHasIndexFiles(Request &req) const{
     return false;
 }
 
-void method::autoIndexing(const Request &req){
+void method::autoIndexing(Request &req){
     (void)req;
     if (req.getMatchedLocation().autoindex == "on")
         directoryListing(req);
-    else
+    else{
+        req.errorCode = 403;
         throw std::runtime_error("403 Forbiden");
+    }
 }
 
 void method::directoryListing(const Request &req){
@@ -232,7 +213,7 @@ void method::directoryListing(const Request &req){
     struct dirent* entry;
     while ((entry = readdir(directory)) != NULL) {
         if (strcmp(entry->d_name, ".") != 0 && strcmp(entry->d_name, "..") != 0) {
-            page << "<li><a href=\"" << entry->d_name << "\">" << entry->d_name << "</a></li>" << std::endl;
+            page << "<li><a href=\"" << req.fileName + "/" + entry->d_name << "\">" << entry->d_name << "</a></li>" << std::endl;
         }
     }
 

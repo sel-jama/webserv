@@ -6,7 +6,7 @@
 /*   By: sel-jama <sel-jama@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/03/31 00:44:16 by sel-jama          #+#    #+#             */
-/*   Updated: 2024/04/28 06:42:43 by sel-jama         ###   ########.fr       */
+/*   Updated: 2024/04/28 18:31:56 by sel-jama         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -15,14 +15,18 @@
 std::string Response::handleMethod(client &client){
     Response obj;
 
-    if (client.reqq.getMethod() == "GET"){
-        obj.handleGET(client.reqq, client.ssocket);
+    try{
+        if (client.reqq.getMethod() == "GET"){
+            obj.handleGET(client.reqq, client.ssocket);
+        }
+        else if (client.reqq.getMethod() == "POST"){
+            obj.handlePost(client.reqq);
+        }
     }
-    else if (client.reqq.getMethod() == "POST"){
-        obj.handlePost(client.reqq);
+    catch(const std::runtime_error &e){
+        if (client.reqq.errorCode)
+            return "";
     }
-        
-    
     // std::cout << "now"<<obj.response << std::endl;
     return obj.response;
 }

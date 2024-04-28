@@ -50,7 +50,7 @@ class method {
         void defineResourceType(const Request &);
         void handleDirectory(Request &) ;
         bool isDirHasIndexFiles(Request &) const;
-        void autoIndexing(const Request &) ;
+        void autoIndexing(Request &) ;
         void directoryListing(const Request &) ;
         void validateAll(Request &req) const;
         void setErrorPages();

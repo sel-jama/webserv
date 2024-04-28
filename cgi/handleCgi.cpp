@@ -6,7 +6,7 @@
 /*   By: sel-jama <sel-jama@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/04/04 07:40:50 by sel-jama          #+#    #+#             */
-/*   Updated: 2024/04/28 06:15:58 by sel-jama         ###   ########.fr       */
+/*   Updated: 2024/04/28 19:31:18 by sel-jama         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -210,5 +210,9 @@ std::string handleCgi::executeCgiScript(Request &req) {
     response = use.readContent(req);
     return response;
 }
+
+// void handleCgi::handleTimeout() {
+    
+// }
 
 

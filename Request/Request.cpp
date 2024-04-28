@@ -16,7 +16,7 @@
 #include "../Response/Response.hpp"
 #include "../error/errorPage.hpp"
 
-Request::Request() : method(""), uri(""), version(""), readBody(0), firstRead(1), headersDone(0), errorCode(0){
+Request::Request() : method(""), uri(""), version(""), body(""), reqStr(""), bodySaver(""),readBody(0), firstRead(1), headersDone(0), errorCode(0){
 }
 
 Request::~Request(){}
@@ -42,6 +42,7 @@ void Request::cutOffBodySegment(std::string &request){
 
     if(pos != std::string::npos){
         pos += 4;
+        std::cout << "alll request part :::::::: " << request << std::endl;
         bodySaver = request.substr(pos);
         // int num = request.length() - pos;
         request.erase(pos, request.length() - 1);
@@ -52,6 +53,7 @@ void Request::cutOffBodySegment(std::string &request){
 std::string Request::readRequest(int &fdSocket){
     std::stringstream buff("");
     if (readBody && firstRead){
+        std::cout << "this is the body save >>>>>>> " <<bodySaver << " <<<<<<<<<<<<<<<<<<<<<<<<<<<<<"<< std::endl;
         std::stringstream buff(bodySaver);
         firstRead = 0;
     }
@@ -64,8 +66,8 @@ std::string Request::readRequest(int &fdSocket){
     else if (readbytes == 0)
         throw std::runtime_error("Peer closed the connection");
     buffer[readbytes] = '\0';
+    std::cout << "readbytes &&&&&&& " << readbytes << std::endl;
     buff << buffer;
-    std::cout << buffer << std::endl;
     
     // char recvline[BUFFER_SIZE];
     // while ((readbytes = read(fdSocket, recvline, BUFFER_SIZE)) > 0){
@@ -79,8 +81,9 @@ std::string Request::readRequest(int &fdSocket){
     std::string request(buff.str());
     if (!readBody){
         cutOffBodySegment(request);
+        if (headersDone)
+            readBody = 1;
     }
-    readBody = 1;
     //if readBody==1 the return is the body (for post)
     return request;
 }
@@ -147,7 +150,9 @@ int    Request::getCheckRequest(client &client, const server &serve) {
     // std::string reqStr;
     // Request use
     try{
-        client.reqq.reqStr = client.reqq.readRequest(client.ssocket);
+        client.reqq.reqStr += client.reqq.readRequest(client.ssocket);
+        if (!client.reqq.headersDone)
+            return 1;
         // if (client.reqq.reqStr.length() > BUFFER_SIZE)
         client.reqq.requestPartitioning(client.reqq, client.reqq.reqStr);
         //done reading from socket if method is GET or DELETE 
@@ -285,7 +290,7 @@ const location &Request::getMatchedLocation(void) const {
 }
 
 int Request::send_response(client &client){
-    client.r_done = 0;
+    client.w_done = 0;
     try{
         std::string res;
         if (!client.reqq.errorCode){
@@ -303,6 +308,18 @@ int Request::send_response(client &client){
             throw std::runtime_error("Error: Failed to send response to client");
         }
         client.w_done = 1;
+        if (client.w_done){
+            client.reqq.method = "";
+            client.reqq.uri = "";
+            client.reqq.version = "";
+            client.reqq.body = "";
+            client.reqq.reqStr = "";
+            client.reqq.bodySaver = "";
+            client.reqq.readBody = 0;
+            client.reqq.firstRead = 1;
+            client.reqq.headersDone = 0;
+            client.reqq.errorCode = 0;
+        }
     }
     catch (const std::runtime_error &e){
         std::cout << "Exception catched in send response : " << e.what() << std::endl;
@@ -312,7 +329,7 @@ int Request::send_response(client &client){
 }
 
 int Request::read_request(client &client, server &server){
-    client.w_done = 0;
+    client.r_done = 0;
     try{
         if (!readBody)
             getCheckRequest(client, server);

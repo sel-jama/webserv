@@ -220,14 +220,17 @@ void server::clientdown(client &bclient, fd_set &r, fd_set &w,int &maxfd)
 
 void server::checktime(fd_set &r, fd_set &w, int &maxfd)
 {
-	(void)r;
-	(void)w;
-	(void)maxfd;
-	for(std::vector<client>::iterator it = clients.begin(); it != clients.end(); ++it)
+	size_t j = clients.size(); 
+	for(std::vector<client>::iterator it = clients.begin(); it != clients.end(); it++)
 	{
-		// if (time(NULL) - it->wakt > 10)
-			clientdown(*it, r, w, maxfd);
+		if (time(NULL) - it->wakt > 10){
+				// std::cout <<"==-=-=--=-=>" << time(NULL) - it->wakt  << std::endl;
+				clientdown(*it, r, w, maxfd);
+				break;
+}
 	}
+	if (j != clients.size())
+		checktime(r, w, maxfd);
 }
 
 void server::accept_new_connection(fd_set &fd_r, int &maxfd)
@@ -259,7 +262,7 @@ void server::ioswap(fd_set &toadd, fd_set &toremove, int fd)
 
 void server::handle_old_cnx(fd_set &fd_r, fd_set &fd_w, fd_set &fd_rcopy, fd_set &fd_wcopy, int &maxfd)
 {
-
+	size_t j = clients.size();
 	for (std::vector<client>::iterator it = clients.begin(); it != clients.end(); ++it)
 	{
 		if (FD_ISSET((*it).ssocket, &fd_rcopy))
@@ -267,7 +270,7 @@ void server::handle_old_cnx(fd_set &fd_r, fd_set &fd_w, fd_set &fd_rcopy, fd_set
 			if (!((*it).reqq).read_request(*it, *this))
 			{
 				clientdown(*it, fd_r, fd_w, maxfd);
-				continue;
+				break;
 			}
 			if ((*it).r_done) ioswap(fd_w, fd_r, (*it).ssocket);
 		}
@@ -276,16 +279,49 @@ void server::handle_old_cnx(fd_set &fd_r, fd_set &fd_w, fd_set &fd_rcopy, fd_set
 			if (!((*it).reqq).send_response(*it)) 
 			{
 				clientdown(*it, fd_r, fd_w, maxfd);
-				continue;
+				break;
 			}
 			if ((*it).w_done)
 			{
 				ioswap(fd_r, fd_w, (*it).ssocket);
-				// if ((*it).reqq.headers["Connection"] == "keep-alive")
-				// 	(*it).reset_client();
-				// else
-					// clientdown(*it, fd_r, fd_w, maxfd);
+				if ((*it).reqq.headers["Connection"] == "keep-alive")
+					(*it).reset_client();
+				else
+				{
+					clientdown(*it, fd_r, fd_w, maxfd);
+					break;
+				}
 			}
 		}
 	}
+	if (j != clients.size())
+		handle_old_cnx(fd_r, fd_w, fd_rcopy, fd_wcopy, maxfd);
+}
+
+server::server(const server &other) :
+    port(other.port),
+    adress(other.adress),
+    serverName(other.serverName),
+    clientMaxBodySize(other.clientMaxBodySize),
+    errorPages(other.errorPages),
+    locations(other.locations),
+    clients(other.clients),
+    ssocket(other.ssocket),
+    data_socket(other.data_socket)
+{}
+server& server::operator=(const server &other)
+{
+    if (this != &other) // Check for self-assignment
+    {
+        this->port = other.port;
+        this->adress = other.adress;
+        this->serverName = other.serverName;
+        this->clientMaxBodySize = other.clientMaxBodySize;
+        this->errorPages = other.errorPages;
+        this->locations = other.locations;
+        this->clients = other.clients;
+        this->ssocket = other.ssocket;
+        this->data_socket = other.data_socket;
+    }
+    return *this;
 }

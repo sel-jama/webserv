@@ -146,7 +146,7 @@ void Post::support_upload(Request &obj){
 
                     file << obj.body << std::endl;
                     file.close();
-                    // std::cout << Body << std::endl;
+                    std::cout << obj.body  << "!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!" << std::endl;
                     // std::cout << obj.body << std::endl;
                 }
                 else
@@ -195,10 +195,13 @@ void Post::body(client &obj){
     std::cout << "----------------- reading " << std::endl;
     obj.reqq.body += obj.reqq.readRequest(obj.ssocket);
         // std::cout << "bodyyy ************ " << obj.reqq.body << std::endl; 
-    std::cout << static_cast<int>(obj.reqq.body.length()) << std::endl;
-    if(obj.reqq.contentLength <= static_cast<int>(obj.reqq.body.length())){
+    std::cout << obj.reqq.body << " ++++++++ + + + + + + + + + + + + + +"<< std::endl;
+    std::cout << obj.reqq.body.length() << std::endl;
+    if(static_cast<int>(obj.reqq.body.length()) >= obj.reqq.contentLength ){
         obj.r_done = 1;
     }
+    else
+        obj.r_done = 0;
 }
 
 // void Post::chunked_body(Request &obj){

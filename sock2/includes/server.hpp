@@ -11,6 +11,7 @@ class client;
 class server
 {
 	//tochange
+
 	public:
 		uint16_t                            port;
 		std::string                         adress;
@@ -20,12 +21,11 @@ class server
 
 		std::vector<location> locations;
 		//unused
-		const server &operator=(const server &);
+		server & operator=(const server &);
+		server (const server &other);
 
 		//v1.0
 		std::vector<client>					clients;
-	
-	public:
 		//-------------------------------------//
 		//server data x socket
 		int ssocket;

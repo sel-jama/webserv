@@ -6,7 +6,7 @@
 /*   By: sel-jama <sel-jama@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/04/18 20:58:59 by sel-jama          #+#    #+#             */
-/*   Updated: 2024/04/27 07:20:50 by sel-jama         ###   ########.fr       */
+/*   Updated: 2024/04/28 12:43:18 by sel-jama         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -23,11 +23,11 @@ errorPage::~errorPage(){}
 
 void errorPage::setProprties(){
     switch (code){
-        // case 400 ... 499:
-        //     color = "#ff4081";
-        //     boxRgba = "rgba(255, 64, 129, 0.5)";
-        //     img = "waiting.png";
-        //     break;
+        case 400 ... 499:
+            color = "#ff4081";
+            boxRgba = "rgba(255, 64, 129, 0.5)";
+            img = "waiting.png";
+            break;
         
         case 500 ... 599:
             color = "#167263";
@@ -38,7 +38,7 @@ void errorPage::setProprties(){
         default:
             color = "#ff4081";
             boxRgba = "rgba(255, 64, 129, 0.5)";
-            img = "/Hooray.jpeg";
+            img = "/waiting.jpeg";
             break;
     }
     

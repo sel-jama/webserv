@@ -6,7 +6,7 @@
 /*   By: sel-jama <sel-jama@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/04/04 07:40:50 by sel-jama          #+#    #+#             */
-/*   Updated: 2024/04/27 14:45:59 by sel-jama         ###   ########.fr       */
+/*   Updated: 2024/04/28 06:15:58 by sel-jama         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -100,7 +100,7 @@ char ** handleCgi::createArr() {
     // arr[1] = scriptName.c_str(); //path
     // arr[2] = NULL;
 
-    char *arr = reinterpret_cast<char **>( malloc( 3 * sizeof( char * ) ) );
+    char **arr = reinterpret_cast<char **>( malloc( 3 * sizeof( char * ) ) );
     arr[0] = strdup( this->cgiPath.c_str() );
     arr[1] = strdup( this->scriptName.c_str() );
     arr[2] = NULL;
@@ -167,11 +167,11 @@ char ** handleCgi::createArr() {
 // }
 
 
-std::string handleCgi::executeCgiScript(const Request &req) {
+std::string handleCgi::executeCgiScript(Request &req) {
     scriptName = req.path;
     // validateCgi(req);
     std::string response;
-    // method use;
+    method use;
     
     // Create random file name to avoid mixing up clients' files
     std::string random = generateRandomFileName();
@@ -190,7 +190,7 @@ std::string handleCgi::executeCgiScript(const Request &req) {
         if (freopen(random.c_str(), "w", stdout) == NULL)
             throw std::runtime_error("Failed to redirect stdout");
         // Execute the CGI script
-        char *const arr[] = createArr();
+        char **const arr = createArr();
         // const char *arr[] = {cgiPath.c_str(), scriptName.c_str() ,NULL};
         execve(cgiPath.c_str(), arr, NULL);
         throw std::runtime_error("Failed to execute CGI script");
@@ -206,8 +206,8 @@ std::string handleCgi::executeCgiScript(const Request &req) {
             throw std::runtime_error("Child process failed to execute CGI script");
         }
     }
-    // req.path = req.matchedLocation.root + req.matchedLocation.location_name + "sock2/" + random;
-    // response = use.readContent(req);
+    req.path = req.matchedLocation.root + req.matchedLocation.location_name + "sock2/" + random;
+    response = use.readContent(req);
     return response;
 }
 

@@ -33,14 +33,18 @@ void method::validateAll(Request &req) const{
 //handle GET method
 void method::GetDataForClient(Request &req, int &clientSocket) {
     (void)clientSocket;
-    // handleCgi cgi;
+    handleCgi cgi;
     defineResourceType(req); //file or dir
     std::cout << "************ "<<type << std::endl;
     if (type == "file") {
         //if location does not have cgi
         // validateAll(req);  //toFix
-        // if (loacationHasCgi(req, cgi))
-        content = readContent(req);
+        if (loacationHasCgi(req, cgi)){
+            std::cout << "CGI .... " << std::endl;
+            content = cgi.executeCgiScript(req);
+        }
+        else
+            content = readContent(req);
     }
     else
         handleDirectory(req);

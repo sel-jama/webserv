@@ -62,7 +62,7 @@ std::string Request::readRequest(int &fdSocket){
     if (readbytes < 0){
         throw std::runtime_error("Error reading from socket: socket failed");
     }
-    else if (readbytes == 0)
+    else if (readbytes == 0)//flag hada sala fhadi ola -1 (same with write response -1)
         throw std::runtime_error("Peer closed the connection");
     buffer[readbytes] = '\0';
     std::cout << "readbytes &&&&&&& " << readbytes << std::endl;

@@ -121,7 +121,6 @@ void Post::After_geting_resource(Request obj){
 
 void Post::support_upload(Request &obj){
     int check = 0;
-    std::cout << "+++++++++ Im writing " << std::endl;
                     // std::cout << "......................" << std::endl;
 
     location capt = obj.getMatchedLocation();
@@ -132,7 +131,10 @@ void Post::support_upload(Request &obj){
     {
         const char* ptr2= ptr.c_str();
         check = access(ptr2, F_OK);
+        std::cout << ptr2<< std::endl;
+        
         if (check == -1) {
+    std::cout << "+++++++++ Im writing " << std::endl;
             throw Except();
         }
         else {

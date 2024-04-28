@@ -1,9 +1,11 @@
---------------------------513278941e5a4879
-Content-Disposition: form-data; name="file"; filename="test.py"
-Content-Type: application/octet-stream
+--------------------------f8e902a9fb5d27a5
+Content-Disposition: form-data; name="text"; filename="work.txt"
+Content-Type: text/plain
 
-print("Helllo");
-
-
---------------------------513278941e5a4879--
+lakjfksad
+sdf
+sd
+sdfsdfsdf
+sdfsd
+--------------------------f8e902a9fb5d27a5--
 

@@ -226,8 +226,8 @@ void server::checktime(fd_set &r, fd_set &w, int &maxfd)
 		if (time(NULL) - it->wakt > 10){
 				// std::cout <<"==-=-=--=-=>" << time(NULL) - it->wakt  << std::endl;
 				clientdown(*it, r, w, maxfd);
-				break;
-}
+				break;}
+				
 	}
 	if (j != clients.size())
 		checktime(r, w, maxfd);
@@ -256,17 +256,21 @@ void server::accept_new_connection(fd_set &fd_r, int &maxfd)
 
 void server::ioswap(fd_set &toadd, fd_set &toremove, int fd)
 {
+	std::cout << "hani hna" << std::endl;
 	FD_SET(fd, &toadd);
 	FD_CLR(fd, &toremove);
 }
 
-void server::handle_old_cnx(fd_set &fd_r, fd_set &fd_w, fd_set &fd_rcopy, fd_set &fd_wcopy, int &maxfd)
+void server::handle_old_cnx(fd_set &fd_r, fd_set &fd_w, fd_set &fd_rcopy, fd_set &fd_wcopy, int &maxfd, int &k)
 {
 	size_t j = clients.size();
+
+	std::cout << "ja hnna " << std::endl;
 	for (std::vector<client>::iterator it = clients.begin(); it != clients.end(); ++it)
 	{
 		if (FD_ISSET((*it).ssocket, &fd_rcopy))
 		{
+			std::cout << "kkk: " << k << std::endl;
 			if (!((*it).reqq).read_request(*it, *this))
 			{
 				clientdown(*it, fd_r, fd_w, maxfd);
@@ -292,13 +296,12 @@ void server::handle_old_cnx(fd_set &fd_r, fd_set &fd_w, fd_set &fd_rcopy, fd_set
 					break;
 				}
 			}
-		}
-	}
+	}}
 	if (j != clients.size())
-		handle_old_cnx(fd_r, fd_w, fd_rcopy, fd_wcopy, maxfd);
+		handle_old_cnx(fd_r, fd_w, fd_rcopy, fd_wcopy, maxfd, k);
 }
 
-server::server(const server &other) :
+server::server(const server &other):
     port(other.port),
     adress(other.adress),
     serverName(other.serverName),

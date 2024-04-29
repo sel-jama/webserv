@@ -6,7 +6,7 @@
 /*   By: sel-jama <sel-jama@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/04/18 20:59:00 by sel-jama          #+#    #+#             */
-/*   Updated: 2024/04/28 19:05:53 by sel-jama         ###   ########.fr       */
+/*   Updated: 2024/04/29 20:03:37 by sel-jama         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -20,6 +20,8 @@ class errorPage{
         std::string img;
         std::string color;
         std::string boxRgba;
+
+        std::string html;
 
         // std::string page;
         

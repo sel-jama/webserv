@@ -6,7 +6,7 @@
 /*   By: sel-jama <sel-jama@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/04/18 20:58:59 by sel-jama          #+#    #+#             */
-/*   Updated: 2024/04/28 19:27:38 by sel-jama         ###   ########.fr       */
+/*   Updated: 2024/04/29 20:10:11 by sel-jama         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -104,13 +104,15 @@ void errorPage::HtmlErrorPage() {
              << "</html>\n";
 
     // Output the stringstream content
-    std::ofstream file("page.html", std::ios::trunc);
+    // std::ofstream file("page.html", std::ios::trunc);
 
-    if (!file.is_open()){
-        std::cout << "the problem is here" << std::endl;
-        throw std::runtime_error("something went wrong, try freeing space");
-    }
-    file << htmlCode.str();
+    // if (!file.is_open()){
+    //     std::cout << "the problem is here" << std::endl;
+    //     throw std::runtime_error("something went wrong, try freeing space");
+    // }
+    // file << htmlCode.str();
+    this->html = htmlCode.str();
+    
 }
 
 void errorPage::setErrorMsgs(){
@@ -155,7 +157,7 @@ void errorPage::setErrorMsgs(){
 std::string errorPage::serveErrorPage(Request &req){
     errorPage use;
     method use2;
-    std::string content;
+    // std::string content;
     // std::ostringstream response;
     // use.setErrorMsgs();
     errorPage err(use.errorMsgs[req.errorCode], req.errorCode);
@@ -163,10 +165,10 @@ std::string errorPage::serveErrorPage(Request &req){
 
     try{
         err.HtmlErrorPage();
-        req.path = req.matchedLocation.root + req.matchedLocation.location_name + "sock2/page.html";
-        std::cout << "path error : " << req.path << std::endl;
-        // req.path = "../page.html";
-        content = use2.readContent(req);
+        // req.path = req.matchedLocation.root + req.matchedLocation.location_name + "sock2/page.html";
+        // std::cout << "path error : " << req.path << std::endl;
+        // // req.path = "../page.html";
+        // content = use2.readContent(req);
         // response << "HTTP/1.1 " << req.errorCode << " KO\r\n"
         //     //  << "Content-Type: " << mimeType << "\r\n"
         //      << "Content-Length: " << content.length() << "\r\n"
@@ -176,5 +178,6 @@ std::string errorPage::serveErrorPage(Request &req){
     catch(const std::runtime_error &e){
         std::cout << "errorPage failed :" << e.what() << std::endl;
     }
-    return content;
+    // std::cout << err.html << std::endl;
+    return err.html;
 }

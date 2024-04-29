@@ -6,7 +6,7 @@
 /*   By: sel-jama <sel-jama@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/04/04 07:40:50 by sel-jama          #+#    #+#             */
-/*   Updated: 2024/04/28 19:31:18 by sel-jama         ###   ########.fr       */
+/*   Updated: 2024/04/29 20:53:53 by sel-jama         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -166,7 +166,10 @@ char ** handleCgi::createArr() {
 //     }
 // }
 
-
+//creat env
+//post cgi
+//timeout
+//kill pid
 std::string handleCgi::executeCgiScript(Request &req) {
     scriptName = req.path;
     // validateCgi(req);

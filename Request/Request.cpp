@@ -6,7 +6,7 @@
 /*   By: sel-jama <sel-jama@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/03/24 15:33:33 by sel-jama          #+#    #+#             */
-/*   Updated: 2024/04/29 19:01:49 by sel-jama         ###   ########.fr       */
+/*   Updated: 2024/04/29 20:12:08 by sel-jama         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -169,10 +169,11 @@ int    Request::getCheckRequest(client &client, const server &serve) {
         if (client.reqq.errorCode)
         {
             client.r_done = 1;
+            return 1;
             // client.reqq.response = errorPage::serveErrorPage(client.reqq);
         }
         std::cerr << e.what() << std::endl;
-        // throw std::runtime_error("error");
+        throw std::runtime_error("peer closed connection");
     }
     return 1;
     // reqObj.setContentLength
@@ -367,8 +368,9 @@ int Request::read_request(client &client, server &server){
         }
     }
     catch (const std::runtime_error &e){
-        std::cout << "Error in reading : "<< e.what() << std::endl;
-        return 1;
+        std::cout << "\033[1;36mError in reading : "<< e.what() << "\033[0m" << std::endl;
+        if(!errorCode)
+            return 0;
     }
     std::cout << "\033[1;33m--------------------REQUEST-------------------------\n" << client.reqq.reqStr << client.reqq.body << "\033[0m" << std::endl;
     return 1;

@@ -6,7 +6,7 @@
 /*   By: sel-jama <sel-jama@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/03/24 15:33:33 by sel-jama          #+#    #+#             */
-/*   Updated: 2024/04/28 19:25:36 by sel-jama         ###   ########.fr       */
+/*   Updated: 2024/04/29 19:01:49 by sel-jama         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -257,9 +257,10 @@ void Request::retreiveRequestedResource(const server &serve){
     //see the root of the location retrieved and join it with the uri then look for it using access
     //pass "/"
     std::string url = getUri().substr(1);
-    fileName = url.empty() ? "index.html" : url;
+    fileName = url;
     
-    path = matchedLocation.root + "/";
+    path = matchedLocation.root;
+    path += fileName.empty() ? "" : "/";
     path += fileName;
     std::cout <<"path : " << path << std::endl;
     isFileAvailable();

@@ -52,21 +52,25 @@ void Request::cutOffBodySegment(std::string &request){
 std::string Request::readRequest(int &fdSocket){
     std::stringstream buff("");
     if (readBody && firstRead){
-        std::stringstream buff(bodySaver);
+        buff << bodySaver;
         firstRead = 0;
     }
-        
+    
+    
     char buffer[BUFFER_SIZE];
     readbytes = read(fdSocket, buffer, BUFFER_SIZE - 1);
     if (readbytes < 0){
         errorCode = 500;
         throw std::runtime_error("Error reading from socket: socket failed");
     }
-    else if (readbytes == 0)//flag hada sala fhadi ola -1 (same with write response -1)
-        throw std::runtime_error("Peer closed the connection");
+    // else if (readbytes == 0)//flag hada sala fhadi ola -1 (same with write response -1)
+    //     throw std::runtime_error("Peer closed the connection");
     buffer[readbytes] = '\0';
-    buff << buffer;
     
+    //std::cout << "!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!" << std::endl;
+    buff.write(buffer, readbytes);
+    //std::cout << buff.str() << std::endl;
+    // buff.flush();
     // char recvline[BUFFER_SIZE];
     // while ((readbytes = read(fdSocket, recvline, BUFFER_SIZE)) > 0){
     //     buff << recvline;
@@ -81,6 +85,7 @@ std::string Request::readRequest(int &fdSocket){
         cutOffBodySegment(request);
         if (headersDone)
             readBody = 1;
+            
     }
     //if readBody==1 the return is the body (for post)
     return request;
@@ -152,8 +157,8 @@ int    Request::getCheckRequest(client &client, const server &serve) {
     // Request use
     try{
         client.reqq.reqStr += client.reqq.readRequest(client.ssocket);
-        if (!client.reqq.headersDone)
-            return 1;
+        // if (!client.reqq.headersDone)
+        //     return 1;
         // if (client.reqq.reqStr.length() > BUFFER_SIZE)
         client.reqq.requestPartitioning(client.reqq, client.reqq.reqStr);
         // std::map<std::string, std::string>::iterator it = client.reqq.headers.begin();
@@ -165,6 +170,14 @@ int    Request::getCheckRequest(client &client, const server &serve) {
         // std::cout << "Request :\n"<< client.reqq.reqStr << std::endl;
         if (client.reqq.method != "POST" && client.reqq.headersDone)
             client.r_done = 1;
+        std::cout << "hna ghadi iwsl" << std::endl;
+        if (static_cast<int>(client.reqq.bodySaver.length()) >= client.reqq.contentLength){
+            std::cout << "dont read body " << client.reqq.bodySaver.length() << client.reqq.contentLength<<std::endl;
+            client.reqq.readBody = 0;
+            client.r_done = 1;
+            client.reqq.body = client.reqq.bodySaver;
+        }
+        
         client.reqq.retreiveRequestedResource(serve);
     }
     catch(const std::runtime_error &e){
@@ -257,6 +270,7 @@ const location& Request::getMatchingLocation(const server& serve) {
 // }
 
 void Request::retreiveRequestedResource(const server &serve){
+    //std::cout << "s7aaaaa" <<std::endl;
     matchedLocation = getMatchingLocation(serve);
     //see the root of the location retrieved and join it with the uri then look for it using access
     //pass "/"
@@ -272,6 +286,7 @@ void Request::retreiveRequestedResource(const server &serve){
 }
 
 void Request::isMethodAllowed(){
+    //std::cout << "s7aaa2"<<std::endl; 
     if (!allowedMethod(const_cast<location&>(matchedLocation))){
         errorCode = 405;
         throw std::runtime_error("405 Method Not Allowed");
@@ -279,6 +294,8 @@ void Request::isMethodAllowed(){
 }
 
 void Request::isFileAvailable() {
+    //std::cout << "s7aaa3"<<std::endl; 
+
     if (stat(path.c_str(), &pathStatus) != 0) {
     // std::cout << "debug msg " << path << std::endl;
         // if (errno == ENOENT) {
@@ -309,7 +326,9 @@ int Request::send_response(client &client){
     std::cout << "\033[1;34m started responding here \033[0m" << std::endl;
     client.w_done = 0;
     try{
+
         std::string content;
+        std::cout << client.reqq.errorCode << "*********----------"<< std::endl;
         if (!client.reqq.errorCode){
             content = Response::handleMethod(client);
         }
@@ -362,11 +381,15 @@ int Request::read_request(client &client, server &server){
     client.r_done = 0;
     try{
         if (!readBody){
-            // std::cout << "\033[1;31m reading HEADERS here \033[0m" << std::endl;
+            //std::cout << readBody << "ljamal "<<std::endl;
+
+            std::cout << "\033[1;31m reading HEADERS here \033[0m" << std::endl;
             getCheckRequest(client, server);
         }
         else{
-            // std::cout << "\033[1;33m reading BODY here \033[0m" << std::endl;
+            //std::cout << "s7aaa4"<<std::endl; 
+
+            std::cout << "\033[1;33m reading BODY here \033[0m" << std::endl;
             Post::body(client);
         }
     }
@@ -375,6 +398,8 @@ int Request::read_request(client &client, server &server){
         if(!errorCode)
             return 0;
     }
-    std::cout << "\033[1;33m--------------------REQUEST-------------------------\n" << client.reqq.reqStr << client.reqq.body << "\033[0m" << std::endl;
+    // std::cout << "\033[1;33m--------------------REQUEST-------------------------\n" << client.reqq.reqStr << client.reqq.body << "\033[0m" << std::endl;
+    std::cout << "hani hna sf" << std::endl;
+
     return 1;
 }

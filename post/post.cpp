@@ -122,7 +122,7 @@ void Post::After_geting_resource(Request obj){
 void Post::support_upload(Request &obj){
     int check = 0;
                     // std::cout << "......................" << std::endl;
-
+    std::cout << "+++++++++ Im writing " << std::endl;
     location capt = obj.getMatchedLocation();
     std::string  ptr = capt.upload_path;
     if(ptr.empty())
@@ -134,21 +134,20 @@ void Post::support_upload(Request &obj){
         std::cout << ptr2<< std::endl;
         
         if (check == -1) {
-    std::cout << "+++++++++ Im writing " << std::endl;
+            std::cout << "+++++++++ Im writing " << std::endl;
             throw Except();
         }
         else {
-                std::ofstream file(ptr + "/" + "file.txt", std::ios::trunc);
-                obj.path = ptr + "/" + "file.txt";
-                if (file.is_open() == true) 
+                std::ofstream file(ptr + "/" + "file.mp4");
+                obj.path = ptr + "/" + "file.mp4";
+                if (file.is_open() == true)
                 {
                     // if (static_cast<int>(Body.length()) != obj.contentLength) {
                     //     throw Except(); 
                     // }
-
+                    std::cout << "ja hnaya" << std::endl;
                     file << obj.body << std::endl;
                     file.close();
-                    std::cout << obj.body  << "!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!" << std::endl;
                     // std::cout << obj.body << std::endl;
                 }
                 else
@@ -195,7 +194,7 @@ void Post::Work_with_Directory(Request obj)
 
 void Post::body(client &obj){
     std::cout << "----------------- reading " << std::endl;
-    obj.reqq.body += obj.reqq.readRequest(obj.ssocket);
+    obj.reqq.body.append(obj.reqq.readRequest(obj.ssocket));
         // std::cout << "bodyyy ************ " << obj.reqq.body << std::endl; 
     std::cout << "THIS IS THE BODY LEN " <<static_cast<int>(obj.reqq.body.length()) << std::endl;
     std::cout << "THIS IS CONTENT LENGTH " << obj.reqq.contentLength << std::endl;
@@ -207,42 +206,85 @@ void Post::body(client &obj){
         obj.r_done = 0;
 }
 
-// void Post::chunked_body(Request &obj){
-//     // std::string capt = obj.readRequest(obj.fdsock3);
-//     // capt = capt + obj.bodySaver;
-//     int counter = 0;
-//     int length = 0;
-//     int save = 0;
-//     int begin = 0;
-//     while(1){
-//         if(counter == 0)
-//             begin = capt.find("/r/n");
-//         else
-//         {
-//             save = begin;
-//             if(save == 0)
-//                 break;
-//             begin = capt.find("/r/n", begin);
-//         }
-//         if(counter % 2 == 0)
-//         {
-//             std::string to_h = capt.substr(save, begin);
-//             length = hexa_to_num(to_h);
-//         }
-//         else
-//         {
-//             std::string string = capt.substr(save, begin);
-//             if(length != static_cast<int>(string.length()))  
-//                 throw Except();
-//             if(string.empty())
-//                 break;
-//             Body = Body + string;
-//         }
-//         counter++;
-//     }
-//     if(save != 0)
-//         throw Except();
-// }
+void Post::chunked_body(client &obj){
+    std::string capt = obj.reqq.readRequest(obj.ssocket);
+    obj.reqq.body.append(obj.reqq.readRequest(obj.ssocket));
+    // std::string capt = obj.readRequest(obj.fdsock3);
+    // capt = capt + obj.bodySaver;
+    // int counter = 0;
+    // int length = 0;
+    int save = 0;
+    // int begin = 0;
+    // char *ptr = const_cast<char *>(obj.reqq.body.c_str());
+    std::string capt = obj.reqq.body;
+    std::string getit;
+
+        if(saver_count == 0)
+        {
+            saver_count = capt.find("/r");
+            flag = 1;
+            getit = capt.substr(0, saver_count);
+            to_de = hexa_to_num(getit);
+        }
+        if(flag == 4 && capt.find("/r", saver_count) != 0)
+        {
+            save = capt.find("/r", saver_count);
+            getit = capt.substr(saver_count, save);
+            to_de = hexa_to_num(getit);
+            flag = 1;
+        }
+        if(flag == 1 && capt.find("/n", saver_count) != 0)
+        {
+            saver_count = capt.find("/n", saver_count);
+            saver_count++;
+            flag = 2;
+
+        }
+        if(flag == 2 && capt.find("/r", saver_count) != 0)
+        {
+            save = capt.find("/r", saver_count);
+            getit = capt.substr(saver_count, save);
+            obj.reqq.body.append(getit);
+            flag = 3;
+        }
+        if(flag == 3 && capt.find("/n", saver_count) != 0)
+        {
+            saver_count = capt.find("/n", saver_count);
+            saver_count++;
+            flag = 4;
+        }
+        if(flag == 4 && capt.find("/r", saver_count) == 1)
+        {
+            save = capt.find("/r", saver_count);
+            getit = capt.substr(saver_count, save);
+            if(getit.empty())
+                 obj.r_done = 1;
+        }
+        // if(counter == 0)
+        //     begin = capt.find("/r");
+        // else
+        // {
+        //     save = begin;
+        //     if(save == 0)
+        //         break;
+        //     begin = capt.find("/r/n", begin);
+        // }
+        // if(counter % 2 == 0)
+        // {
+        //     std::string to_h = capt.substr(save, begin);
+        //     length = hexa_to_num(to_h);
+        // }
+        // else
+        // {
+        //     std::string string = capt.substr(save, begin);
+        //     if(length != static_cast<int>(string.length()))  
+        //         throw Except();
+        //     if(string.empty())
+        //         break;
+        //     Body = Body + string;
+        // }
+        // counter++;
+    }
 
 void Post::Work_with_file(Request obj){
    location capt = obj.getMatchedLocation();

@@ -6,7 +6,7 @@
 /*   By: sel-jama <sel-jama@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/03/24 15:33:33 by sel-jama          #+#    #+#             */
-/*   Updated: 2024/04/29 20:12:08 by sel-jama         ###   ########.fr       */
+/*   Updated: 2024/04/30 11:42:05 by sel-jama         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -104,6 +104,9 @@ void Request::requestPartitioning(Request &saver, std::string& request) {
             while (!value.empty() && isspace(value.front())) value.erase(0, 1);
             while (!value.empty() && isspace(value.back())) value.pop_back();
             saver.headers[key] = value;
+        }
+        else {
+            saver.errorCode = 400;
         }
     }
 

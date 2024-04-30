@@ -15,11 +15,11 @@
 #include "../sock2/includes/server.hpp"
 #include "../Response/Response.hpp"
 #include "../error/errorPage.hpp"
-
 Request::Request() : method(""), uri(""), 
 version(""), body(""), reqStr(""), fileName(""), bodySaver(""),
 contentLength(0), readbytes(0), readBody(0), firstRead(1)
 ,headersDone(0), errorCode(0), errorMsg(""), isChunked(0){
+    to_de = 0 ;flag = 0; saver_count = 0;
 }
 
 Request::~Request(){}
@@ -402,6 +402,7 @@ int Request::read_request(client &client, server &server){
         }
         else{
             std::cout << "\033[1;33m reading BODY here \033[0m" << std::endl;
+            std::cout << "WA HANIIIIIIII ==== "<<client.reqq.isChunked << std::endl;
             if(client.reqq.isChunked)
                 Post::chunked_body(client);
             else

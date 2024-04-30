@@ -16,10 +16,13 @@ std::string Response::handleMethod(client &client){
     Response obj;
 
     try{
+        //std::cout << client.reqq.getMethod()  << ".....********************"<< std::endl;
         if (client.reqq.getMethod() == "GET"){
             obj.handleGET(client.reqq, client.ssocket);
         }
         else if (client.reqq.getMethod() == "POST"){
+            std::cout << "hello im here !" << std::endl;
+            
             obj.handlePost(client.reqq);
         }
     }
@@ -42,7 +45,6 @@ void Response::handleGET(Request &req, int clientSocket) {
 void Response::handlePost(Request &req){
     Post post;
     method use;
-    
     post.support_upload(req);
     this->response = use.readContent(req);
-}
+} 

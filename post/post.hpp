@@ -17,12 +17,17 @@ class Post{
         std::string string_saver;
         std::string path;
         size_t reading_count;
+        // int count;
         size_t content_lenght;
     public:
         Post(){i = 0;};
+        int saver_count;
+        int finish;
         std::string Type;
         int i;
+        int to_de;
         std::string Body;
+        int flag;
         void set_saver(std::string); 
         void set_post_i(bool value);
         void set_count(size_t value);
@@ -42,9 +47,10 @@ class Post{
         void Work_with_file(Request obj);
         void Work_with_Directory(Request obj);
         static void body(client &obj);
-        void chunked_body(Request &obj);
+        void chunked_body(client &obj);
         ~Post(){};
 };
+int hexa_to_num(std::string ptr);
 class Except : std::exception{
     const char * what() const throw(){
         return ("Error : Not found 404");

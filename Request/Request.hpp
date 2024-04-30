@@ -37,6 +37,7 @@ class Request {
         // client &user;
         location matchedLocation;
         std::string reqStr;
+
         // infra Infra;
 
         //more to set up 
@@ -61,6 +62,7 @@ class Request {
         std::string errorMsg;
 
         int isChunked;
+        int firstArrival;
 
         Request();
         ~Request();

@@ -47,7 +47,7 @@ class Post{
         void Work_with_file(Request obj);
         void Work_with_Directory(Request obj);
         static void body(client &obj);
-        void chunked_body(client &obj);
+        static void chunked_body(client &obj);
         ~Post(){};
 };
 int hexa_to_num(std::string ptr);

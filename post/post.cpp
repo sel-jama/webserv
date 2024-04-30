@@ -138,8 +138,8 @@ void Post::support_upload(Request &obj){
             throw Except();
         }
         else {
-                std::ofstream file(ptr + "/" + "file.mp4");
-                obj.path = ptr + "/" + "file.mp4";
+                std::ofstream file(ptr + "/" + "file.jpeg");
+                obj.path = ptr + "/" + "file.jpeg";
                 if (file.is_open() == true)
                 {
                     // if (static_cast<int>(Body.length()) != obj.contentLength) {
@@ -216,52 +216,52 @@ void Post::chunked_body(client &obj){
     // int begin = 0;
     // char *ptr = const_cast<char *>(obj.reqq.body.c_str());
     std::string getit;
-
-        if(saver_count == 0)
+        std::cout << "wlah ta jit" << std::endl;
+        if(obj.reqq.saver_count == 0)
         {
-            saver_count = capt.find("/r");
-            flag = 1;
-            getit = capt.substr(0, saver_count);
-            to_de = hexa_to_num(getit);
+            obj.reqq.saver_count = capt.find("/r");
+            obj.reqq.flag = 1;
+            getit = capt.substr(0, obj.reqq.saver_count);
+            obj.reqq.to_de = hexa_to_num(getit);
         }
-        if(flag == 4 && capt.find("/r", saver_count) != 0)
+        if(obj.reqq.flag == 4 && capt.find("/r", obj.reqq.saver_count) != 0)
         {
-            save = capt.find("/r", saver_count);
-            getit = capt.substr(saver_count, save);
-            to_de = hexa_to_num(getit);
-            flag = 1;
+            save = capt.find("/r", obj.reqq.saver_count);
+            getit = capt.substr(obj.reqq.saver_count, save);
+            obj.reqq.to_de = hexa_to_num(getit);
+            obj.reqq.flag = 1;
         }
-        if(flag == 1 && capt.find("/n", saver_count) != 0)
+        if(obj.reqq.flag == 1 && capt.find("/n", obj.reqq.saver_count) != 0)
         {
-            saver_count = capt.find("/n", saver_count);
-            saver_count++;
-            flag = 2;
+            obj.reqq.saver_count = capt.find("/n", obj.reqq.saver_count);
+            obj.reqq.saver_count++;
+            obj.reqq.flag = 2;
         }
-        if(flag == 2 && capt.find("/r", saver_count) != 0)
+        if(obj.reqq.flag == 2 && capt.find("/r", obj.reqq.saver_count) != 0)
         {
-            save = capt.find("/r", saver_count);
-            getit = capt.substr(saver_count, save);
-            if(getit.length() != to_de)
-                throw Except();    
+            save = capt.find("/r", obj.reqq.saver_count);
+            getit = capt.substr(obj.reqq.saver_count, save);
+            // if(static_cast<int>(getit.length()) != obj.reqq.to_de)
+            //     throw Except();    
             obj.reqq.body.append(getit);
-            flag = 3;
+            obj.reqq.flag = 3;
         }
-        if(flag == 3 && capt.find("/n", saver_count) != 0)
+        if(obj.reqq.flag == 3 && capt.find("/n", obj.reqq.saver_count) != 0)
         {
-            saver_count = capt.find("/n", saver_count);
-            saver_count++;
-            flag = 4;
+            obj.reqq.saver_count = capt.find("/n", obj.reqq.saver_count);
+            obj.reqq.saver_count++;
+            obj.reqq.flag = 4;
         }
-        if(flag == 4 && capt.find("/r", saver_count) == 1)
+        if(obj.reqq.flag == 4 && capt.find("/r", obj.reqq.saver_count) == 1)
         {
-            save = capt.find("/r", saver_count);
-            getit = capt.substr(saver_count, save);
+            save = capt.find("/r", obj.reqq.saver_count);
+            getit = capt.substr(obj.reqq.saver_count, save);
             if(getit.empty())
                 obj.r_done = 1;
-            if(obj.reqq.body.length() == to_de)
-                flag = 4;
+            if(static_cast<int>(obj.reqq.body.length()) == obj.reqq.to_de)
+                obj.reqq.flag = 4;
             else
-                flag = 1;
+                obj.reqq.flag = 1;
         }
         // if(counter == 0)
         //     begin = capt.find("/r");

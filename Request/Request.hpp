@@ -45,6 +45,9 @@ class Request {
     public:
         //additioanal
         std::string path;
+        int saver_count;
+        int flag;
+        int to_de;
         std::string fileName;
         std::string bodySaver;
         struct stat pathStatus;

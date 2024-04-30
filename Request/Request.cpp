@@ -392,7 +392,10 @@ int Request::read_request(client &client, server &server){
             //std::cout << "s7aaa4"<<std::endl; 
 
             std::cout << "\033[1;33m reading BODY here \033[0m" << std::endl;
-            Post::body(client);
+            if(client.reqq.isChunked)
+                Post::chunked_body(client);
+            else
+                Post::body(client);
         }
     }
     catch (const std::runtime_error &e){

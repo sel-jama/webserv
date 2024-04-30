@@ -208,7 +208,6 @@ void Post::body(client &obj){
 
 void Post::chunked_body(client &obj){
     std::string capt = obj.reqq.readRequest(obj.ssocket);
-    obj.reqq.body.append(obj.reqq.readRequest(obj.ssocket));
     // std::string capt = obj.readRequest(obj.fdsock3);
     // capt = capt + obj.bodySaver;
     // int counter = 0;
@@ -216,7 +215,6 @@ void Post::chunked_body(client &obj){
     int save = 0;
     // int begin = 0;
     // char *ptr = const_cast<char *>(obj.reqq.body.c_str());
-    std::string capt = obj.reqq.body;
     std::string getit;
 
         if(saver_count == 0)
@@ -238,12 +236,13 @@ void Post::chunked_body(client &obj){
             saver_count = capt.find("/n", saver_count);
             saver_count++;
             flag = 2;
-
         }
         if(flag == 2 && capt.find("/r", saver_count) != 0)
         {
             save = capt.find("/r", saver_count);
             getit = capt.substr(saver_count, save);
+            if(getit.length() != to_de)
+                throw Except();    
             obj.reqq.body.append(getit);
             flag = 3;
         }
@@ -258,7 +257,11 @@ void Post::chunked_body(client &obj){
             save = capt.find("/r", saver_count);
             getit = capt.substr(saver_count, save);
             if(getit.empty())
-                 obj.r_done = 1;
+                obj.r_done = 1;
+            if(obj.reqq.body.length() == to_de)
+                flag = 4;
+            else
+                flag = 1;
         }
         // if(counter == 0)
         //     begin = capt.find("/r");
@@ -312,3 +315,4 @@ void Post::Work_with_file(Request obj){
         throw Except();
     }
 }
+

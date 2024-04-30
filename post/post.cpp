@@ -131,15 +131,14 @@ void Post::support_upload(Request &obj){
     {
         const char* ptr2= ptr.c_str();
         check = access(ptr2, F_OK);
-        std::cout << ptr2<< std::endl;
-        
+        std::cout << ptr2 << std::endl;
         if (check == -1) {
-            std::cout << "+++++++++ Im writing " << std::endl;
+            // std::cout << "+++++++++ Im writing " << std::endl;
             throw Except();
         }
         else {
-                std::ofstream file(ptr + "/" + "file.jpeg");
-                obj.path = ptr + "/" + "file.jpeg";
+                std::ofstream file(ptr + "/" + "file.txt");
+                obj.path = ptr + "/" + "file.txt";
                 if (file.is_open() == true)
                 {
                     // if (static_cast<int>(Body.length()) != obj.contentLength) {
@@ -212,7 +211,7 @@ void Post::chunked_body(client &obj){
     // capt = capt + obj.bodySaver;
     // int counter = 0;
     // int length = 0;
-    int save = 0;
+    // int save = 0;
     // int begin = 0;
     // char *ptr = const_cast<char *>(obj.reqq.body.c_str());
     std::string getit;
@@ -223,46 +222,47 @@ void Post::chunked_body(client &obj){
             obj.reqq.flag = 1;
             getit = capt.substr(0, obj.reqq.saver_count);
             obj.reqq.to_de = hexa_to_num(getit);
+            std::cout << "number =========>>>>>>>>> " << getit << std::endl;
         }
-        if(obj.reqq.flag == 4 && capt.find("/r", obj.reqq.saver_count) != 0)
-        {
-            save = capt.find("/r", obj.reqq.saver_count);
-            getit = capt.substr(obj.reqq.saver_count, save);
-            obj.reqq.to_de = hexa_to_num(getit);
-            obj.reqq.flag = 1;
-        }
-        if(obj.reqq.flag == 1 && capt.find("/n", obj.reqq.saver_count) != 0)
-        {
-            obj.reqq.saver_count = capt.find("/n", obj.reqq.saver_count);
-            obj.reqq.saver_count++;
-            obj.reqq.flag = 2;
-        }
-        if(obj.reqq.flag == 2 && capt.find("/r", obj.reqq.saver_count) != 0)
-        {
-            save = capt.find("/r", obj.reqq.saver_count);
-            getit = capt.substr(obj.reqq.saver_count, save);
-            // if(static_cast<int>(getit.length()) != obj.reqq.to_de)
-            //     throw Except();    
-            obj.reqq.body.append(getit);
-            obj.reqq.flag = 3;
-        }
-        if(obj.reqq.flag == 3 && capt.find("/n", obj.reqq.saver_count) != 0)
-        {
-            obj.reqq.saver_count = capt.find("/n", obj.reqq.saver_count);
-            obj.reqq.saver_count++;
-            obj.reqq.flag = 4;
-        }
-        if(obj.reqq.flag == 4 && capt.find("/r", obj.reqq.saver_count) == 1)
-        {
-            save = capt.find("/r", obj.reqq.saver_count);
-            getit = capt.substr(obj.reqq.saver_count, save);
-            if(getit.empty())
-                obj.r_done = 1;
-            if(static_cast<int>(obj.reqq.body.length()) == obj.reqq.to_de)
-                obj.reqq.flag = 4;
-            else
-                obj.reqq.flag = 1;
-        }
+        // if(obj.reqq.flag == 4 && capt.find("/r", obj.reqq.saver_count) != 0)
+        // {
+        //     save = capt.find("/r", obj.reqq.saver_count);
+        //     getit = capt.substr(obj.reqq.saver_count, save);
+        //     obj.reqq.to_de = hexa_to_num(getit);
+        //     obj.reqq.flag = 1;
+        // }
+        // if(obj.reqq.flag == 1 && capt.find("/n", obj.reqq.saver_count) != 0)
+        // {
+        //     obj.reqq.saver_count = capt.find("/n", obj.reqq.saver_count);
+        //     obj.reqq.saver_count++;
+        //     obj.reqq.flag = 2;
+        // }
+        // if(obj.reqq.flag == 2 && capt.find("/r", obj.reqq.saver_count) != 0)
+        // {
+        //     save = capt.find("/r", obj.reqq.saver_count);
+        //     getit = capt.substr(obj.reqq.saver_count, save);
+        //         // if(static_cast<int>(getit.length()) != obj.reqq.to_de)
+        //         //     throw Except();    
+        //     obj.reqq.body.append(getit);
+        //     obj.reqq.flag = 3;
+        // }
+        // if(obj.reqq.flag == 3 && capt.find("/n", obj.reqq.saver_count) != 0)
+        // {
+        //     obj.reqq.saver_count = capt.find("/n", obj.reqq.saver_count);
+        //     obj.reqq.saver_count++;
+        //     obj.reqq.flag = 4;
+        // }
+        // if(obj.reqq.flag == 4 && capt.find("/r", obj.reqq.saver_count) == 1)
+        // {
+        //     save = capt.find("/r", obj.reqq.saver_count);
+        //     getit = capt.substr(obj.reqq.saver_count, save);
+        //     if(getit.empty())
+        //         obj.r_done = 1;
+        //     if(static_cast<int>(obj.reqq.body.length()) == obj.reqq.to_de)
+        //         obj.reqq.flag = 4;
+        //     else
+        //         obj.reqq.flag = 1;
+        // }
         // if(counter == 0)
         //     begin = capt.find("/r");
         // else

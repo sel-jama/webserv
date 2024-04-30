@@ -6,7 +6,7 @@
 /*   By: sel-jama <sel-jama@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/04/04 07:40:50 by sel-jama          #+#    #+#             */
-/*   Updated: 2024/04/29 20:53:53 by sel-jama         ###   ########.fr       */
+/*   Updated: 2024/04/30 17:12:55 by sel-jama         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -110,6 +110,10 @@ char ** handleCgi::createArr() {
     return arr;
 }
 
+// char **handleCgi::createEnv(){
+    
+// }
+
 
 // std::string handleCgi::executeCgiScript(const Request &req) {
 //     scriptName = req.fileName;
@@ -170,6 +174,60 @@ char ** handleCgi::createArr() {
 //post cgi
 //timeout
 //kill pid
+// std::string handleCgi::executeCgiScript(Request &req) {
+//     scriptName = req.path;
+//     // validateCgi(req);
+//     std::string response;
+//     method use;
+    
+//     // Create random file name to avoid mixing up clients' files
+//     std::string random = generateRandomFileName();
+
+//     // Open random file for writing
+//     std::ofstream outputFile(random);
+//     if (!outputFile.is_open())
+//         throw std::runtime_error("Failed to open random file for writing");
+
+//     pid = fork();
+//     if (pid == -1)
+//         throw std::runtime_error("Fork failed");
+    
+//     else if (pid == 0) {
+//         int timeout = 10;
+//         signal(pid, handleTimeout);
+//         alarm(timeout);
+//         // Redirect stdout to the random file
+//         if (freopen(random.c_str(), "w", stdout) == NULL)
+//             throw std::runtime_error("Failed to redirect stdout");
+//         // Execute the CGI script
+//         char **const arr = createArr();
+//         // const char *arr[] = {cgiPath.c_str(), scriptName.c_str() ,NULL};
+//         execve(cgiPath.c_str(), arr, NULL);
+//         throw std::runtime_error("Failed to execute CGI script");
+        
+    
+//     } else {
+//         // Close the file descriptor inherited by the child
+//         outputFile.close();
+//         // Wait for child process to finish
+//         int status;
+//         waitpid(pid, &status, 0);
+//         if (!WIFEXITED(status) || WEXITSTATUS(status) != 0) {
+//             throw std::runtime_error("Child process failed to execute CGI script");
+//         }
+//     }
+//     req.path = req.matchedLocation.root + req.matchedLocation.location_name + "sock2/" + random;
+//     response = use.readContent(req);
+//     return response;
+// }
+
+// void handleCgi::handleTimeout(int sig) {
+//     (void)sig;
+//   // Terminate child process if timeout occurs
+//   kill(sig, SIGKILL);
+// }
+
+
 std::string handleCgi::executeCgiScript(Request &req) {
     scriptName = req.path;
     // validateCgi(req);
@@ -198,14 +256,31 @@ std::string handleCgi::executeCgiScript(Request &req) {
         execve(cgiPath.c_str(), arr, NULL);
         throw std::runtime_error("Failed to execute CGI script");
         
-    
     } else {
         // Close the file descriptor inherited by the child
         outputFile.close();
-        // Wait for child process to finish
+
+        // Set a maximum execution time (adjust as needed)
+        int max_execution_time = 10; // Seconds
+
         int status;
-        waitpid(pid, &status, 0);
+        int remaining_time = max_execution_time;
+        while (remaining_time > 0 && (waitpid(pid, &status, WNOHANG)) == 0) {
+            // Child process hasn't finished yet
+            sleep(1); // Adjust sleep duration for finer control (optional)
+            remaining_time--;
+        }
+
+        if (remaining_time == 0) {
+            // Timeout occurred
+            // Terminate child process forcefully
+            kill(pid, SIGKILL);
+            req.errorCode = 500;
+            throw std::runtime_error("CGI script execution timed out");
+        }
+
         if (!WIFEXITED(status) || WEXITSTATUS(status) != 0) {
+            req.errorCode = 500;
             throw std::runtime_error("Child process failed to execute CGI script");
         }
     }
@@ -214,8 +289,6 @@ std::string handleCgi::executeCgiScript(Request &req) {
     return response;
 }
 
-// void handleCgi::handleTimeout() {
-    
-// }
+
 
 

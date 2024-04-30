@@ -6,7 +6,7 @@
 /*   By: sel-jama <sel-jama@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/03/24 15:33:33 by sel-jama          #+#    #+#             */
-/*   Updated: 2024/04/30 14:04:55 by sel-jama         ###   ########.fr       */
+/*   Updated: 2024/04/30 22:48:27 by sel-jama         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -55,13 +55,13 @@ void Request::cutOffBodySegment(std::string &request){
 std::string Request::readRequest(int &fdSocket){
     std::stringstream buff("");
     if (readBody && firstRead){
-        buff << bodySaver;
+        buff << bodySaver; 
         firstRead = 0;
     }
     
     
     char buffer[BUFFER_SIZE];
-    readbytes = read(fdSocket, buffer, BUFFER_SIZE - 1);
+    readbytes = read(fdSocket, buffer, BUFFER_SIZE);
     if (readbytes <= 0){
         errorCode = 500;
         throw std::runtime_error("Error reading from socket: socket failed");
@@ -174,9 +174,9 @@ int    Request::getCheckRequest(client &client, const server &serve) {
     // std::string reqStr;
     // Request use
     // try{
-        client.reqq.reqStr += client.reqq.readRequest(client.ssocket);
-        // if (!client.reqq.headersDone)
-        //     return 1;
+        client.reqq.reqStr.append(client.reqq.readRequest(client.ssocket));
+        if (!client.reqq.headersDone)
+            return 1;
         // if (client.reqq.reqStr.length() > BUFFER_SIZE)
         client.reqq.requestPartitioning(client.reqq, client.reqq.reqStr);
         // std::map<std::string, std::string>::iterator it = client.reqq.headers.begin();
@@ -398,6 +398,7 @@ int Request::read_request(client &client, server &server){
     try{
         if (!readBody){
             std::cout << "\033[1;31m reading HEADERS here \033[0m" << std::endl;
+            client.reqq.errorPages = server.errorPages;
             getCheckRequest(client, server);
         }
         else{
@@ -420,3 +421,11 @@ int Request::read_request(client &client, server &server){
 
     return 1;
 }
+
+// server &getMatchedServer(const infra &infra, Request &req){
+//     std::vector::iterator it = infra.servers.begin();
+//     for (; it!=infra.servers.end(); ++it){
+//         if (it->port == req.port && it->address == req.address && it->servername)
+//     }
+    
+// }

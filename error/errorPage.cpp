@@ -6,7 +6,7 @@
 /*   By: sel-jama <sel-jama@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/04/18 20:58:59 by sel-jama          #+#    #+#             */
-/*   Updated: 2024/04/29 20:10:11 by sel-jama         ###   ########.fr       */
+/*   Updated: 2024/04/30 22:54:01 by sel-jama         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -154,6 +154,10 @@ void errorPage::setErrorMsgs(){
 //     return 0;
 // }
 
+// std::string errorPagesConfig(Request &req){
+//     for ()
+// }
+
 std::string errorPage::serveErrorPage(Request &req){
     errorPage use;
     method use2;
@@ -162,6 +166,9 @@ std::string errorPage::serveErrorPage(Request &req){
     // use.setErrorMsgs();
     errorPage err(use.errorMsgs[req.errorCode], req.errorCode);
     std::cout << use.errorMsgs[req.errorCode] << std::endl;
+
+    // std::string retErr = errorPagesConfig(req);
+    // if ()
 
     try{
         err.HtmlErrorPage();

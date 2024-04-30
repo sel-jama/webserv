@@ -6,7 +6,7 @@
 /*   By: sel-jama <sel-jama@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/03/24 11:13:12 by sel-jama          #+#    #+#             */
-/*   Updated: 2024/04/30 12:19:23 by sel-jama         ###   ########.fr       */
+/*   Updated: 2024/04/30 22:46:16 by sel-jama         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -61,6 +61,7 @@ class Request {
         std::string errorMsg;
 
         int isChunked;
+        std::map<std::string, std::string>  errorPages;
 
         Request();
         ~Request();

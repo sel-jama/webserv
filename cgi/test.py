@@ -1,3 +1,4 @@
-print("Helllo");
+while(1):
+    print("Helllo");
     
 

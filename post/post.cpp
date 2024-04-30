@@ -215,7 +215,7 @@ void Post::chunked_body(client &obj){
     int save = 0;
     // int begin = 0;
     // char *ptr = const_cast<char *>(obj.reqq.body.c_str());
-    std::string capt = obj.reqq.body;
+    // std::string capt = obj.reqq.body;
     std::string getit;
         std::cout << "wlah ta jit" << std::endl;
         if(obj.reqq.saver_count == 0)

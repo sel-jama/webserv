@@ -6,7 +6,7 @@
 /*   By: sel-jama <sel-jama@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/04/04 07:35:35 by sel-jama          #+#    #+#             */
-/*   Updated: 2024/04/28 06:15:47 by sel-jama         ###   ########.fr       */
+/*   Updated: 2024/04/30 16:45:36 by sel-jama         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -22,6 +22,7 @@
 #include <sys/wait.h>
 #include <cstdlib>
 #include <ctime>
+#include <signal.h>
 
 class Request;
 
@@ -29,6 +30,7 @@ class handleCgi {
     private:
         std::string scriptName;
         std::string cgiPath;
+        pid_t pid;
 
     void initializeEnvironment(const std::map<std::string, std::string>& requestHeaders, const std::string& requestMethod, const std::string& requestPath, const std::string& requestQuery, const std::string& requestBody, const std::string& scriptName);
     char** createEnvironmentArray() const;
@@ -38,9 +40,12 @@ public:
     // handleCgi(const std::map<std::string, std::string>& requestHeaders, const std::string& requestMethod, const std::string& requestPath, const std::string& requestQuery, const std::string& requestBody, const std::string& scriptName);
     std::string executeCgiScript(Request &req);
     char** createArr();
+    char** createEnv();
     void validateCgi(const Request &req);
     
     void setScriptName(const std::string );
+    
+    static void handleTimeout(int);
 };
 
 #endif

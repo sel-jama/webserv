@@ -18,8 +18,8 @@
 Request::Request() : method(""), uri(""), 
 version(""), body(""), reqStr(""), fileName(""), bodySaver(""),
 contentLength(0), readbytes(0), readBody(0), firstRead(1)
-,headersDone(0), errorCode(0), errorMsg(""), isChunked(0){
-    to_de = 0 ;flag = 0; saver_count = 0;
+,headersDone(0), errorCode(0), errorMsg(""), isChunked(0), firstArrival(1){
+    // to_de = 0 ;flag = 0; 
 }
 
 Request::~Request(){}
@@ -189,9 +189,10 @@ int    Request::getCheckRequest(client &client, const server &serve) {
         if (client.reqq.method != "POST" && client.reqq.headersDone)
             client.r_done = 1;
         if (static_cast<int>(client.reqq.bodySaver.length()) >= client.reqq.contentLength){
-            std::cout << "dont read body " << client.reqq.bodySaver.length() << client.reqq.contentLength<<std::endl;
-            client.reqq.readBody = 0;
-            client.r_done = 1;
+            if (!client.reqq.isChunked){
+                client.reqq.readBody = 0;
+                client.r_done = 1;
+            }
             client.reqq.body = client.reqq.bodySaver;
         }
         
@@ -404,11 +405,17 @@ int Request::read_request(client &client, server &server){
         else{
             std::cout << "\033[1;33m reading BODY here \033[0m" << std::endl;
             std::cout << "WA HANIIIIIIII ==== "<<client.reqq.isChunked << std::endl;
-            if(client.reqq.isChunked)
-                Post::chunked_body(client);
-            else
+            if(!client.reqq.isChunked)
                 Post::body(client);
+            else
+            {
+                std::cout << "wa rab l3ali ma riha ma walo ma error ma walo, ikhan" << std::endl;
+               
+            }
+
         }
+        if(client.reqq.isChunked)
+             Post::chunked_body(client);
     }
     catch (const std::runtime_error &e){
         std::cout << "\033[1;36mError in reading : "<< e.what() << "\033[0m" << std::endl;

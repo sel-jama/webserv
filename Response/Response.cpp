@@ -44,6 +44,9 @@ void Response::handleGET(Request &req, int clientSocket) {
 void Response::handlePost(Request &req){
     Post post;
     method use;
-    post.support_upload(req);
-    this->response = use.readContent(req);
+    if(!req.isChunked)
+    {
+        post.support_upload(req);
+        this->response = use.readContent(req);
+    }
 } 

@@ -6,7 +6,7 @@
 /*   By: sel-jama <sel-jama@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/03/24 15:33:33 by sel-jama          #+#    #+#             */
-/*   Updated: 2024/04/30 11:42:05 by sel-jama         ###   ########.fr       */
+/*   Updated: 2024/04/30 12:39:22 by sel-jama         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -16,7 +16,7 @@
 #include "../Response/Response.hpp"
 #include "../error/errorPage.hpp"
 
-Request::Request() : method(""), uri(""), version(""), body(""), reqStr(""), bodySaver(""),readBody(0), firstRead(1), headersDone(0), errorCode(0){
+Request::Request() : method(""), uri(""), version(""), body(""), reqStr(""), bodySaver(""),readBody(0), firstRead(1), headersDone(0), errorCode(0), isChunked(0){
 }
 
 Request::~Request(){}
@@ -59,7 +59,7 @@ std::string Request::readRequest(int &fdSocket){
     
     char buffer[BUFFER_SIZE];
     readbytes = read(fdSocket, buffer, BUFFER_SIZE - 1);
-    if (readbytes < 0){
+    if (readbytes <= 0){
         errorCode = 500;
         throw std::runtime_error("Error reading from socket: socket failed");
     }
@@ -110,9 +110,10 @@ void Request::requestPartitioning(Request &saver, std::string& request) {
             while (!value.empty() && isspace(value.back())) value.pop_back();
             saver.headers[key] = value;
         }
-        else {
-            saver.errorCode = 400;
-        }
+        // else {
+        //     saver.errorCode = 400;
+        //     throw std::runtime_error("bad request");
+        // }
     }
 
     // Parse body if Content-Length header is present
@@ -124,8 +125,10 @@ void Request::requestPartitioning(Request &saver, std::string& request) {
         // bodyBuffer[contentLength] = '\0';
         // saver.body = bodyBuffer;
     }
+    it = saver.headers.find("Transfer-Encoding");
+    if (it != saver.headers.end() && headers["Transfer-Encoding"] == "chunked")
+        isChunked = 1;
 }
-
 
 void Request::isReqWellFormed(Request &req, long long maxBodySize){
     ParseRequest parse;
@@ -136,7 +139,7 @@ void Request::isReqWellFormed(Request &req, long long maxBodySize){
     errorCode = parse.parseUri(req.uri);
     errorCode = parse.parseVersion(req.version);
     if (errorCode)
-        throw std::runtime_error("error");
+        throw std::runtime_error("parse error");
     // parse.parseBody(req.body, maxBodySize);
     /*if => Request body larger than client max body size in config file*/
 
@@ -155,7 +158,7 @@ bool Request::allowedMethod(location& location) const {
 int    Request::getCheckRequest(client &client, const server &serve) {
     // std::string reqStr;
     // Request use
-    try{
+    // try{
         client.reqq.reqStr += client.reqq.readRequest(client.ssocket);
         // if (!client.reqq.headersDone)
         //     return 1;
@@ -170,7 +173,6 @@ int    Request::getCheckRequest(client &client, const server &serve) {
         // std::cout << "Request :\n"<< client.reqq.reqStr << std::endl;
         if (client.reqq.method != "POST" && client.reqq.headersDone)
             client.r_done = 1;
-        std::cout << "hna ghadi iwsl" << std::endl;
         if (static_cast<int>(client.reqq.bodySaver.length()) >= client.reqq.contentLength){
             std::cout << "dont read body " << client.reqq.bodySaver.length() << client.reqq.contentLength<<std::endl;
             client.reqq.readBody = 0;
@@ -179,18 +181,18 @@ int    Request::getCheckRequest(client &client, const server &serve) {
         }
         
         client.reqq.retreiveRequestedResource(serve);
-    }
-    catch(const std::runtime_error &e){
-        std::cout << "my code error ??????  " << client.reqq.errorCode << std::endl;
-        if (client.reqq.errorCode)
-        {
-            client.r_done = 1;
-            return 1;
-            // client.reqq.response = errorPage::serveErrorPage(client.reqq);
-        }
-        std::cerr << e.what() << std::endl;
-        throw std::runtime_error("peer closed connection");
-    }
+    // }
+    // catch(const std::runtime_error &e){
+    //     std::cout << "my code error ??????  " << client.reqq.errorCode << std::endl;
+    //     if (client.reqq.errorCode)
+    //     {
+    //         client.r_done = 1;
+    //         return 1;
+    //         // client.reqq.response = errorPage::serveErrorPage(client.reqq);
+    //     }
+    //     std::cerr << e.what() << std::endl;
+    //     throw std::runtime_error("peer closed connection");
+    // }
     return 1;
     // reqObj.setContentLength
     
@@ -395,8 +397,8 @@ int Request::read_request(client &client, server &server){
     }
     catch (const std::runtime_error &e){
         std::cout << "\033[1;36mError in reading : "<< e.what() << "\033[0m" << std::endl;
-        if(!errorCode)
-            return 0;
+        // if(!errorCode)
+        //     return 0;
     }
     // std::cout << "\033[1;33m--------------------REQUEST-------------------------\n" << client.reqq.reqStr << client.reqq.body << "\033[0m" << std::endl;
     std::cout << "hani hna sf" << std::endl;

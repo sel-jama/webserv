@@ -6,7 +6,7 @@
 /*   By: sel-jama <sel-jama@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/03/26 14:13:04 by sel-jama          #+#    #+#             */
-/*   Updated: 2024/04/26 09:59:58 by sel-jama         ###   ########.fr       */
+/*   Updated: 2024/04/30 12:37:40 by sel-jama         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -122,6 +122,7 @@ int ParseRequest::parseMethod(std::string &method) const{
 }
 
 int ParseRequest::parseHeaders(std::map<std::string, std::string> &headers, std::string &method) const{
+    (void)method;
     int ret = checkUnknownHeader(headers);
     if (ret)
         return ret;
@@ -130,9 +131,10 @@ int ParseRequest::parseHeaders(std::map<std::string, std::string> &headers, std:
         && headers["Transfer-Encoding"] != "chunked")
             // throw std::runtime_error("501 Not Implemented : Transfer-Encoding must be chuncked");
             return 501;
-    else if ((headers.find("Content-Length") == headers.end() || atoi(headers.at("Content-Length").c_str())) && method == "POST")
+    
+    // if (method == "POST" && headers.find("Transfer-Encoding") == headers.end() && (headers.find("Content-Length") == headers.end() || atoi(headers.at("Content-Length").c_str())))
         // throw std::runtime_error("400 Bad Request : Messing headers");
-        return 400;
+        // return 400;
     
     //setContentLength(headers);
     return 0;

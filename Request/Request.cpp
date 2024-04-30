@@ -6,7 +6,7 @@
 /*   By: sel-jama <sel-jama@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/03/24 15:33:33 by sel-jama          #+#    #+#             */
-/*   Updated: 2024/04/30 12:39:22 by sel-jama         ###   ########.fr       */
+/*   Updated: 2024/04/30 14:04:55 by sel-jama         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -16,7 +16,10 @@
 #include "../Response/Response.hpp"
 #include "../error/errorPage.hpp"
 
-Request::Request() : method(""), uri(""), version(""), body(""), reqStr(""), bodySaver(""),readBody(0), firstRead(1), headersDone(0), errorCode(0), isChunked(0){
+Request::Request() : method(""), uri(""), 
+version(""), body(""), reqStr(""), fileName(""), bodySaver(""),
+contentLength(0), readbytes(0), readBody(0), firstRead(1)
+,headersDone(0), errorCode(0), errorMsg(""), isChunked(0){
 }
 
 Request::~Request(){}
@@ -93,27 +96,39 @@ std::string Request::readRequest(int &fdSocket){
 
 // Function to parse HTTP request
 void Request::requestPartitioning(Request &saver, std::string& request) {
-    std::istringstream iss(request);
+    // for(size_t i=0; i < request.size(); i++){
+    //     if (request[i] < 32 || request[i] >126)
+    //         std::cout << static_cast<int>(request[i]) ;
+    //     else
+    //         std::cout << request[i];
+    // }
+    std::stringstream iss(request);
 
     iss >> saver.method >> saver.uri >> saver.version;
     // Parse header
     std::string headerLine("");
-    while (std::getline(iss, headerLine)) {
+    std::getline(iss, headerLine, '\n');
+    while (std::getline(iss, headerLine, '\n')){
+        if (headerLine == "\r")
+            break;
         size_t pos = headerLine.find(':');
         if (pos != std::string::npos) {
             std::string key = headerLine.substr(0, pos);
             std::string value = headerLine.substr(pos + 1);
-            
             while (!key.empty() && isspace(key.front())) key.erase(0, 1);
             while (!key.empty() && isspace(key.back())) key.pop_back();
             while (!value.empty() && isspace(value.front())) value.erase(0, 1);
             while (!value.empty() && isspace(value.back())) value.pop_back();
+            if (key.empty() || value.empty()){
+                saver.errorCode = 400;
+                throw std::runtime_error("bad request");
+            }
             saver.headers[key] = value;
         }
-        // else {
-        //     saver.errorCode = 400;
-        //     throw std::runtime_error("bad request");
-        // }
+        else {
+            saver.errorCode = 400;
+            throw std::runtime_error("bad request");
+        }
     }
 
     // Parse body if Content-Length header is present
@@ -336,7 +351,8 @@ int Request::send_response(client &client){
         }
         if (client.reqq.errorCode || content.empty()){
             std::cout << "got here "<< std::endl;
-            content = errorPage::serveErrorPage(client.reqq);
+            if(client.reqq.method != "HEAD")
+                content = errorPage::serveErrorPage(client.reqq);
         }
         
         std::string res;
@@ -353,10 +369,8 @@ int Request::send_response(client &client){
         res = response.str();
         // std::cout << "Response: \n"<<res;
         // write(client.ssocket, res.c_str(), res.length());
-        if (send(client.ssocket, res.c_str(), res.length(), 0) == -1){
-            std::cout << "Error: Failed to send response to client"<< std::endl;
-            return 0;
-        }
+        if (send(client.ssocket, res.c_str(), res.length(), 0) == -1)
+            throw std::runtime_error("Send failed");
         
         client.w_done = 1;
         if (client.w_done){
@@ -383,25 +397,22 @@ int Request::read_request(client &client, server &server){
     client.r_done = 0;
     try{
         if (!readBody){
-            //std::cout << readBody << "ljamal "<<std::endl;
-
             std::cout << "\033[1;31m reading HEADERS here \033[0m" << std::endl;
             getCheckRequest(client, server);
         }
         else{
-            //std::cout << "s7aaa4"<<std::endl; 
-
             std::cout << "\033[1;33m reading BODY here \033[0m" << std::endl;
             Post::body(client);
         }
     }
     catch (const std::runtime_error &e){
         std::cout << "\033[1;36mError in reading : "<< e.what() << "\033[0m" << std::endl;
+        client.r_done = 1;
         // if(!errorCode)
         //     return 0;
     }
-    // std::cout << "\033[1;33m--------------------REQUEST-------------------------\n" << client.reqq.reqStr << client.reqq.body << "\033[0m" << std::endl;
-    std::cout << "hani hna sf" << std::endl;
+    std::cout << "\033[1;33m--------------------REQUEST-------------------------\n" << client.reqq.reqStr << client.reqq.body << "\033[0m" << std::endl;
+    
 
     return 1;
 }

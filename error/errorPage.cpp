@@ -6,7 +6,7 @@
 /*   By: sel-jama <sel-jama@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/04/18 20:58:59 by sel-jama          #+#    #+#             */
-/*   Updated: 2024/04/30 22:54:01 by sel-jama         ###   ########.fr       */
+/*   Updated: 2024/05/01 16:01:14 by sel-jama         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -68,19 +68,19 @@ void errorPage::HtmlErrorPage() {
              << "        body {\n"
              << "            background-color: black;\n"
              << "            color: #fff;\n"
-             << "            text-align: center;\n"
-             << "            font-family: \"Arial\", sans-serif;\n"
+            //  << "            text-align: center;\n"
+            //  << "            font-family: \"Arial\", sans-serif;\n"
              << "            font-size: 30px;\n"
-             << "            padding-top: 500px;\n"
+            //  << "            padding-top: 100px;\n"
              << "        }\n"
              << "        h1 {\n"
              << "            font-size: 48px;\n"
              << "            color: " << color << ";\n"
-             << "            margin-bottom: 20px;\n"
+            //  << "            margin-bottom: 20px;\n"
              << "        }\n"
-             << "        p {\n"
-             << "            margin-bottom: 30px;\n"
-             << "        }\n"
+            //  << "        p {\n"
+            //  << "            margin-bottom: 30px;\n"
+            //  << "        }\n"
             //  << "        .error-img {\n"
             //  << "            width: 700px;\n"
             //  << "            height: auto;\n"
@@ -118,6 +118,19 @@ void errorPage::HtmlErrorPage() {
 void errorPage::setErrorMsgs(){
     //html error pages
     errorMsgs[200] = "OK";
+    errorMsgs[201] = "Created";
+    errorMsgs[202] = "Accepted";
+    errorMsgs[203] = "Non-Authoritative Information";
+    errorMsgs[204] = "No Content";
+    errorMsgs[205] = "Reset Content";
+    errorMsgs[206] = "Partial Content";
+    errorMsgs[300] = "Multiple Choices";
+    errorMsgs[301] = "Moved Permanently";          
+    errorMsgs[302] = "Found";
+    errorMsgs[303] = "See Other";
+    errorMsgs[304] = "Not Modified";
+    errorMsgs[305] = "Use Proxy";
+    errorMsgs[307] = "Temporary Redirect";
     errorMsgs[400] = "Bad Request";
     errorMsgs[401] = "Unquthorized";
     errorMsgs[403] = "Forbidden";
@@ -139,6 +152,8 @@ void errorPage::setErrorMsgs(){
     errorMsgs[501] = "Not Implemented";
     errorMsgs[502] = "Bad Gateway";
     errorMsgs[503] = "Service Unavailable";
+    errorMsgs[504] = "Gateway Timeout";
+    errorMsgs[505] = "HTTP Version Not Supported";
 }
 
 // int main() {
@@ -158,6 +173,16 @@ void errorPage::setErrorMsgs(){
 //     for ()
 // }
 
+std::string errorPagesConfig(Request &req){
+    std::map<std::string, std::string>::iterator it = req.errorPages.begin();
+    for(; it != req.errorPages.end(); ++it){
+        std::cout << ">>>>> " << it->first.c_str() << std::endl;
+        if (req.errorCode ==  atoi(it->first.c_str()))
+            return req.matchedLocation.root + "/" + it->second;
+    }
+    return "";
+}
+
 std::string errorPage::serveErrorPage(Request &req){
     errorPage use;
     method use2;
@@ -167,8 +192,12 @@ std::string errorPage::serveErrorPage(Request &req){
     errorPage err(use.errorMsgs[req.errorCode], req.errorCode);
     std::cout << use.errorMsgs[req.errorCode] << std::endl;
 
-    // std::string retErr = errorPagesConfig(req);
-    // if ()
+    std::string pathToPage = errorPagesConfig(req);
+    std::cout << pathToPage << "<<<<<<<" << std::endl;
+    if (!pathToPage.empty()){
+        req.path = pathToPage;
+        return use2.readContent(req);
+    }
 
     try{
         err.HtmlErrorPage();

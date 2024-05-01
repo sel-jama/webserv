@@ -6,7 +6,7 @@
 /*   By: sel-jama <sel-jama@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/04/01 01:20:25 by sel-jama          #+#    #+#             */
-/*   Updated: 2024/04/22 02:50:31 by sel-jama         ###   ########.fr       */
+/*   Updated: 2024/05/01 15:56:47 by sel-jama         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -30,5 +30,6 @@
 #include <iomanip>
 #include <vector>
 #include <deque>
+#include <stdlib.h>
 
 #endif

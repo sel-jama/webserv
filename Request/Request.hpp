@@ -6,7 +6,7 @@
 /*   By: sel-jama <sel-jama@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/03/24 11:13:12 by sel-jama          #+#    #+#             */
-/*   Updated: 2024/04/30 22:55:13 by sel-jama         ###   ########.fr       */
+/*   Updated: 2024/05/01 12:01:13 by sel-jama         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -21,6 +21,7 @@
 
 class client;
 class server;
+class infra;
 // class location;
 
 class Request {
@@ -63,6 +64,8 @@ class Request {
 
         int isChunked;
         std::map<std::string, std::string>  errorPages;
+        std::string ip;
+        uint16_t port;
 
 
         Request();
@@ -74,12 +77,12 @@ class Request {
         const std::string& getBody(void) const;
 
         void requestPartitioning(Request& saver, std::string& request);
-        void isReqWellFormed(Request &req, long long maxBodySize);
+        void isReqWellFormed(Request &req);
         void locateMatchingRequestURI(const server &use) const;
         bool allowedMethod(location &location) const;
 
         // static void getCheckRequest(Request &req, const server &serve, int &fdSock);
-        static int getCheckRequest(client &, const server &serve);
+        static int getCheckRequest(client &, const infra &);
 
         std::string &getLocation(location &location) const;
 
@@ -94,7 +97,8 @@ class Request {
         std::string readRequest(int &fdSocket);
         void cutOffBodySegment(std::string &request);
         int send_response(client &);
-        int read_request(client &, server &);
+        int read_request(client &, infra &);
+        const server &getMatchedServer(const infra &infra);
 };
 
 #endif

@@ -6,7 +6,7 @@
 /*   By: sel-jama <sel-jama@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/03/26 14:13:04 by sel-jama          #+#    #+#             */
-/*   Updated: 2024/04/30 12:37:40 by sel-jama         ###   ########.fr       */
+/*   Updated: 2024/05/01 14:21:33 by sel-jama         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -153,27 +153,29 @@ int ParseRequest::parseUri(std::string &uri) const {
 }
 
 int ParseRequest::parseVersion(std::string &version) const{
-    std::stringstream ss(version);
+    if (version != "HTTP/1.1")
+        return 505;
+    // std::stringstream ss(version);
     
-    std::string http;
-    std::string vers;
-    std::getline(ss, http, '/');
-    std::getline(ss, vers);
+    // std::string http;
+    // std::string vers;
+    // std::getline(ss, http, '/');
+    // std::getline(ss, vers);
 
-    char *endptr;
-    double v = strtod(vers.c_str(), &endptr);
+    // char *endptr;
+    // double v = strtod(vers.c_str(), &endptr);
   
-    if (http != "HTTP" || *endptr != '\0')
-        // throw std::runtime_error("400 Bad Request : Error occured in Http version");
-        return 400;
+    // if (http != "HTTP" || *endptr != '\0')
+    //     // throw std::runtime_error("400 Bad Request : Error occured in Http version");
+    //     return 400;
     
-    if (v == 0.9 || v == 2.0 || v == 1.0 || v == 3.0)
-        // throw std::runtime_error("501 Not Implemented : Error occured in http version");
-        return 501;
+    // if (v == 0.9 || v == 2.0 || v == 1.0 || v == 3.0)
+    //     // throw std::runtime_error("501 Not Implemented : Error occured in http version");
+    //     return 501;
     
-    if (v != 1.1)
-        // throw std::runtime_error("400 Bad Request : Error occured in Http version");
-        return 400;
+    // if (v != 1.1)
+    //     // throw std::runtime_error("400 Bad Request : Error occured in Http version");
+    //     return 400;
     return 0;
 }
 

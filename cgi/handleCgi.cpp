@@ -6,7 +6,7 @@
 /*   By: sel-jama <sel-jama@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/04/04 07:40:50 by sel-jama          #+#    #+#             */
-/*   Updated: 2024/04/30 17:12:55 by sel-jama         ###   ########.fr       */
+/*   Updated: 2024/05/01 15:40:17 by sel-jama         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -239,8 +239,10 @@ std::string handleCgi::executeCgiScript(Request &req) {
 
     // Open random file for writing
     std::ofstream outputFile(random);
-    if (!outputFile.is_open())
+    if (!outputFile.is_open()){
+        req.errorCode = 500;
         throw std::runtime_error("Failed to open random file for writing");
+    }
 
     pid_t pid = fork();
     if (pid == -1)
@@ -275,7 +277,7 @@ std::string handleCgi::executeCgiScript(Request &req) {
             // Timeout occurred
             // Terminate child process forcefully
             kill(pid, SIGKILL);
-            req.errorCode = 500;
+            req.errorCode = 504;
             throw std::runtime_error("CGI script execution timed out");
         }
 

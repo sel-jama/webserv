@@ -6,7 +6,7 @@
 /*   By: sel-jama <sel-jama@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/03/24 15:33:33 by sel-jama          #+#    #+#             */
-/*   Updated: 2024/04/30 22:48:27 by sel-jama         ###   ########.fr       */
+/*   Updated: 2024/05/01 15:50:01 by sel-jama         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -15,10 +15,11 @@
 #include "../sock2/includes/server.hpp"
 #include "../Response/Response.hpp"
 #include "../error/errorPage.hpp"
+#include "../sock2/includes/infra.hpp"
 Request::Request() : method(""), uri(""), 
 version(""), body(""), reqStr(""), fileName(""), bodySaver(""),
 contentLength(0), readbytes(0), readBody(0), firstRead(1)
-,headersDone(0), errorCode(0), errorMsg(""), isChunked(0), firstArrival(1){
+,headersDone(0), errorCode(0), errorMsg(""), isChunked(0){
     // to_de = 0 ;flag = 0; 
 }
 
@@ -31,10 +32,6 @@ const std::string& Request::getMethod() const{
 const std::string& Request::getUri() const{
     return this->uri;
 }
-
-// const std::string& Request::getBody() const{
-//     return this->body;
-// }
 
 const std::map<std::string, std::string>& Request::getHeaders() const{
     return this->headers;
@@ -69,20 +66,7 @@ std::string Request::readRequest(int &fdSocket){
     // else if (readbytes == 0)//flag hada sala fhadi ola -1 (same with write response -1)
     //     throw std::runtime_error("Peer closed the connection");
     buffer[readbytes] = '\0';
-    
-    //std::cout << "!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!" << std::endl;
     buff.write(buffer, readbytes);
-    //std::cout << buff.str() << std::endl;
-    // buff.flush();
-    // char recvline[BUFFER_SIZE];
-    // while ((readbytes = read(fdSocket, recvline, BUFFER_SIZE)) > 0){
-    //     buff << recvline;
-    //     if (!readBody && strstr(recvline, "\n\r\n\r"))  //change later >> break when content len is all served
-    //         break;
-    //     memset(recvline, 0, BUFFER_SIZE);
-    // }
-    // if (readbytes < 0)
-    //     throw std::runtime_error("Error reading from socket: socket failed");
     std::string request(buff.str());
     if (!readBody){
         cutOffBodySegment(request);
@@ -90,18 +74,11 @@ std::string Request::readRequest(int &fdSocket){
             readBody = 1;
             
     }
-    //if readBody==1 the return is the body (for post)
     return request;
 }
 
 // Function to parse HTTP request
 void Request::requestPartitioning(Request &saver, std::string& request) {
-    // for(size_t i=0; i < request.size(); i++){
-    //     if (request[i] < 32 || request[i] >126)
-    //         std::cout << static_cast<int>(request[i]) ;
-    //     else
-    //         std::cout << request[i];
-    // }
     std::stringstream iss(request);
 
     iss >> saver.method >> saver.uri >> saver.version;
@@ -131,23 +108,17 @@ void Request::requestPartitioning(Request &saver, std::string& request) {
         }
     }
 
-    // Parse body if Content-Length header is present
     std::map<std::string, std::string>::const_iterator it = saver.headers.find("Content-Length");
-    if (it != saver.headers.end()) {
+    if (it != saver.headers.end()) 
         contentLength = atoi(it->second.c_str());
-        // char bodyBuffer[contentLength + 1];
-        // iss.read(bodyBuffer, contentLength);
-        // bodyBuffer[contentLength] = '\0';
-        // saver.body = bodyBuffer;
-    }
+    
     it = saver.headers.find("Transfer-Encoding");
     if (it != saver.headers.end() && headers["Transfer-Encoding"] == "chunked")
         isChunked = 1;
 }
 
-void Request::isReqWellFormed(Request &req, long long maxBodySize){
+void Request::isReqWellFormed(Request &req){
     ParseRequest parse;
-    (void)maxBodySize;
 
     errorCode = parse.parseMethod(req.method);
     errorCode = parse.parseHeaders(req.headers, req.method);
@@ -155,9 +126,6 @@ void Request::isReqWellFormed(Request &req, long long maxBodySize){
     errorCode = parse.parseVersion(req.version);
     if (errorCode)
         throw std::runtime_error("parse error");
-    // parse.parseBody(req.body, maxBodySize);
-    /*if => Request body larger than client max body size in config file*/
-
 }
 
 bool Request::allowedMethod(location& location) const {
@@ -170,24 +138,18 @@ bool Request::allowedMethod(location& location) const {
 }
 
 //start here
-int    Request::getCheckRequest(client &client, const server &serve) {
-    // std::string reqStr;
-    // Request use
-    // try{
+int    Request::getCheckRequest(client &client, const infra &infra) {
         client.reqq.reqStr.append(client.reqq.readRequest(client.ssocket));
         if (!client.reqq.headersDone)
             return 1;
-        // if (client.reqq.reqStr.length() > BUFFER_SIZE)
+        
         client.reqq.requestPartitioning(client.reqq, client.reqq.reqStr);
-        // std::map<std::string, std::string>::iterator it = client.reqq.headers.begin();
-        // for (; it != client.reqq.headers.end(); ++it){
-        //     std::cout << it->first << " : " << it->second << std::endl;
-        // }
+        client.reqq.isReqWellFormed(client.reqq);
+        
         //done reading from socket if method is GET or DELETE 
-        client.reqq.isReqWellFormed(client.reqq, serve.getClientMaxBodySize());
-        // std::cout << "Request :\n"<< client.reqq.reqStr << std::endl;
         if (client.reqq.method != "POST" && client.reqq.headersDone)
             client.r_done = 1;
+        
         if (static_cast<int>(client.reqq.bodySaver.length()) >= client.reqq.contentLength){
             if (!client.reqq.isChunked){
                 client.reqq.readBody = 0;
@@ -195,41 +157,11 @@ int    Request::getCheckRequest(client &client, const server &serve) {
             }
             client.reqq.body = client.reqq.bodySaver;
         }
-        
+        server serve = client.reqq.getMatchedServer(infra);
+        client.reqq.errorPages = serve.errorPages;
         client.reqq.retreiveRequestedResource(serve);
-    // }
-    // catch(const std::runtime_error &e){
-    //     std::cout << "my code error ??????  " << client.reqq.errorCode << std::endl;
-    //     if (client.reqq.errorCode)
-    //     {
-    //         client.r_done = 1;
-    //         return 1;
-    //         // client.reqq.response = errorPage::serveErrorPage(client.reqq);
-    //     }
-    //     std::cerr << e.what() << std::endl;
-    //     throw std::runtime_error("peer closed connection");
-    // }
     return 1;
-    // reqObj.setContentLength
-    
-    // return reqObj;
 }
-
-// void Request::locateMatchingRequestURI(const server& use) const {
-//     std::vector<location> locations;
-//     std::string matchedLocation;
-//     size_t i;
-
-//     locations = use.getLocations();
-//     for (i = 0; i < locations.size(); i++) {
-//         if (this->uri == locations[i].location_name) {
-//             matchedLocation = locations[i].location_name;
-//             break;
-//         }
-//     }
-//     if (matchedLocation.empty())
-//         throw std::runtime_error("404 Not Found : Matching uri location not found");
-// }
 
 int sameUntilIndex(const std::string &uri, const std::string &locationName){
     size_t i = 0;
@@ -256,39 +188,10 @@ const location& Request::getMatchingLocation(const server& serve) {
     }
 
     const location& matchingLocation = serve.getLocations().at(maxIndex);
-
-    // Check if method is allowed for the matching location
-    // if (!allowedMethod(const_cast<location&>(matchingLocation))){
-    //     errorCode = 405;
-    //     throw std::runtime_error("405 Method Not Allowed");
-    // }
-
     return matchingLocation;
 }
 
-// const location &Request::getMatchingLocation(const server &serve) {
-//     int counter;
-
-//     size_t i = 0;
-//     size_t locationsSize = serve.getLocations().size();
-//     counter = sameUntilIndex(getUri(), serve.getLocations().at(i).location_name);
-//     i++;
-//     for (; i < locationsSize; i++){
-//         if (sameUntilIndex(getUri(), serve.getLocations().at(i).location_name) > counter)
-//             counter = sameUntilIndex(getUri(), serve.getLocations().at(i).location_name);  
-//     }
-//     if (i >= locationsSize)
-//         throw std::runtime_error("404 Not found : No matching location");
-    
-//     if (!allowedMethod(const_cast<location &>(serve.getLocations().at(i))))
-//         throw std::runtime_error("4 Method Not Allowed");
-//     std::cout << "*********" << std::endl;
-    
-//     return serve.getLocations().at(i);
-// }
-
 void Request::retreiveRequestedResource(const server &serve){
-    //std::cout << "s7aaaaa" <<std::endl;
     matchedLocation = getMatchingLocation(serve);
     //see the root of the location retrieved and join it with the uri then look for it using access
     //pass "/"
@@ -304,7 +207,6 @@ void Request::retreiveRequestedResource(const server &serve){
 }
 
 void Request::isMethodAllowed(){
-    //std::cout << "s7aaa2"<<std::endl; 
     if (!allowedMethod(const_cast<location&>(matchedLocation))){
         errorCode = 405;
         throw std::runtime_error("405 Method Not Allowed");
@@ -312,10 +214,7 @@ void Request::isMethodAllowed(){
 }
 
 void Request::isFileAvailable() {
-    //std::cout << "s7aaa3"<<std::endl; 
-
     if (stat(path.c_str(), &pathStatus) != 0) {
-    // std::cout << "debug msg " << path << std::endl;
         // if (errno == ENOENT) {
             errorCode = 404;
             throw std::runtime_error("404 Not Found: Requested Resource not found");
@@ -326,18 +225,21 @@ void Request::isFileAvailable() {
     }
 }
 
-// void Request::isFileAvailable(){
-    
-//     if (stat(path.c_str(), &pathStatus) != 0)
-//         throw std::runtime_error("404 Not found : Requested Resource not found");
-// }
-
-// const server &Request::getServerInfo(void) const {
-//     return this->serverInfo;
-// }
-
 const location &Request::getMatchedLocation(void) const {
     return this->matchedLocation;
+}
+
+void resetClientRequest(Request &req){
+    req.method = "";
+    req.uri = "";
+    req.version = "";
+    req.body = "";
+    req.reqStr = "";
+    req.bodySaver = "";
+    req.readBody = 0;
+    req.firstRead = 1;
+    req.headersDone = 0;
+    req.errorCode = 0;
 }
 
 int Request::send_response(client &client){
@@ -374,18 +276,7 @@ int Request::send_response(client &client){
             throw std::runtime_error("Send failed");
         
         client.w_done = 1;
-        if (client.w_done){
-            client.reqq.method = "";
-            client.reqq.uri = "";
-            client.reqq.version = "";
-            client.reqq.body = "";
-            client.reqq.reqStr = "";
-            client.reqq.bodySaver = "";
-            client.reqq.readBody = 0;
-            client.reqq.firstRead = 1;
-            client.reqq.headersDone = 0;
-            client.reqq.errorCode = 0;
-        }
+        resetClientRequest(client.reqq);
     }
     catch (const std::runtime_error &e){
         std::cout << "Exception catched in send response : " << e.what() << std::endl;
@@ -394,25 +285,19 @@ int Request::send_response(client &client){
     return 1;
 }
 
-int Request::read_request(client &client, server &server){
+int Request::read_request(client &client, infra & infra){
     client.r_done = 0;
     try{
         if (!readBody){
             std::cout << "\033[1;31m reading HEADERS here \033[0m" << std::endl;
-            client.reqq.errorPages = server.errorPages;
-            getCheckRequest(client, server);
+            // client.reqq.errorPages = server.errorPages;
+            getCheckRequest(client, infra);
         }
         else{
             std::cout << "\033[1;33m reading BODY here \033[0m" << std::endl;
             std::cout << "WA HANIIIIIIII ==== "<<client.reqq.isChunked << std::endl;
             if(!client.reqq.isChunked)
                 Post::body(client);
-            else
-            {
-                std::cout << "wa rab l3ali ma riha ma walo ma error ma walo, ikhan" << std::endl;
-               
-            }
-
         }
         if(client.reqq.isChunked)
              Post::chunked_body(client);
@@ -429,10 +314,25 @@ int Request::read_request(client &client, server &server){
     return 1;
 }
 
-// server &getMatchedServer(const infra &infra, Request &req){
-//     std::vector::iterator it = infra.servers.begin();
-//     for (; it!=infra.servers.end(); ++it){
-//         if (it->port == req.port && it->address == req.address && it->servername)
-//     }
+const server &Request::getMatchedServer(const infra &infra){
+    std::map<std::string, std::string>::const_iterator it = headers.find("Host");
+    if (it != headers.end()) {
+        std::stringstream ss(it->second);
+        std::string addr, p;
+        getline(ss, addr, ':');
+        getline(ss, p);
+        char *endp;
+        this->port = strtol(p.c_str(), &endp, 10);
+        this->ip = addr;
+    }
+    else
+        return infra.getServer().at(0);
     
-// }
+    std::vector<server>::const_iterator i = infra.getServer().begin();
+    for (; i!=infra.getServer().end(); ++i){
+        if (i->port == this->port && ((i->adress == this->ip) || (i->adress == "127.0.0.1" && this->ip == "localhost"))) //&& servername too
+            return *i;
+    }
+    return *i;
+    
+}

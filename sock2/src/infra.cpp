@@ -72,7 +72,7 @@ void infra::selecttoinfinity()
             if (FD_ISSET((*it).ssocket, &fd_rcopy))
                 (*it).accept_new_connection(fd_r, maxfd);
             else
-                (*it).handle_old_cnx(fd_r, fd_w, fd_rcopy, fd_wcopy, maxfd, k);
+                (*it).handle_old_cnx(fd_r, fd_w, fd_rcopy, fd_wcopy, maxfd, k, *this);
         }
 
     }

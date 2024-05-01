@@ -261,7 +261,7 @@ void server::ioswap(fd_set &toadd, fd_set &toremove, int fd)
 	FD_CLR(fd, &toremove);
 }
 
-void server::handle_old_cnx(fd_set &fd_r, fd_set &fd_w, fd_set &fd_rcopy, fd_set &fd_wcopy, int &maxfd, int &k)
+void server::handle_old_cnx(fd_set &fd_r, fd_set &fd_w, fd_set &fd_rcopy, fd_set &fd_wcopy, int &maxfd, int &k, infra &infra)
 {
 	size_t j = clients.size();
 
@@ -271,7 +271,7 @@ void server::handle_old_cnx(fd_set &fd_r, fd_set &fd_w, fd_set &fd_rcopy, fd_set
 		if (FD_ISSET((*it).ssocket, &fd_rcopy))
 		{
 			std::cout << "kkk: " << k << std::endl;
-			if (!((*it).reqq).read_request(*it, *this))
+			if (!((*it).reqq).read_request(*it, infra))
 			{
 				clientdown(*it, fd_r, fd_w, maxfd);
 				break;
@@ -298,7 +298,7 @@ void server::handle_old_cnx(fd_set &fd_r, fd_set &fd_w, fd_set &fd_rcopy, fd_set
 			}
 	}}
 	if (j != clients.size())
-		handle_old_cnx(fd_r, fd_w, fd_rcopy, fd_wcopy, maxfd, k);
+		handle_old_cnx(fd_r, fd_w, fd_rcopy, fd_wcopy, maxfd, k, infra);
 }
 
 server::server(const server &other):

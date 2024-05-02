@@ -27,7 +27,7 @@ bool method::loacationHasCgi(Request &req, handleCgi &cgi) {
 
 void method::validateAll(Request &req) const{
     if (!(req.pathStatus.st_mode& S_IRUSR)){
-        req.errorCode = 403;
+        req.statusCode = 403;
         throw std::runtime_error("forbiden : permission denied");
     }
 }
@@ -50,7 +50,8 @@ void method::GetDataForClient(Request &req, int &clientSocket) {
     }
     else
         handleDirectory(req);
-    // std::string mimeType = getMimeType(req.fileName);
+
+    req.responseContentType = getMimeType(req.fileName);
     // std::string content = readContent(req.fileName);
 
 
@@ -61,28 +62,31 @@ void method::GetDataForClient(Request &req, int &clientSocket) {
     
 }
 
-// // std::string method::getMimeType(const std::string& fileName) {
-// //     size_t dotPos = fileName.find_last_of('.');
-// //     if (dotPos != std::string::npos){
-// //         std::string extension = fileName.substr(dotPos + 1);
-// //         if (extension == "html" || extension == "htm") {
-// //             return "text/html";
-// //         } else if (extension == "css") {
-// //             return "text/css";
-// //         } else if (extension == "js") {
-// //             return "application/javascript";
-// //         } else if (extension == "jpg" || extension == "jpeg") {
-// //             return "image/jpeg";
-// //         } else if (extension == "png") {
-// //             return "image/png";
-// //         } else if (extension == "gif") {
-// //             return "image/gif";
-// //         } else if (extension == "txt") {
-// //             return "text/plain";
-// //         }
-// //     }
-// //     return "application/octet-stream";
-// // }
+std::string method::getMimeType(const std::string& fileName) {
+    size_t dotPos = fileName.find_last_of('.');
+    if (dotPos != std::string::npos){
+        std::string extension = fileName.substr(dotPos + 1);
+        if (extension == "html" || extension == "htm") {
+            return "text/html";
+        } else if (extension == "css") {
+            return "text/css";
+        } else if (extension == "js") {
+            return "application/javascript";
+        } else if (extension == "jpg" || extension == "jpeg") {
+            return "image/jpeg";
+        } else if (extension == "png") {
+            return "image/png";
+        } else if (extension == "gif") { 
+            return "image/gif";
+        } else if (extension == "txt") {
+            return "text/plain";
+        }
+        else if (extension == "mp4") {
+            return "video/mp4";
+        }
+    }
+    return "application/octet-stream";
+}
 
 std::string method::readContent(Request &req){
     // std::cout << "got here" << std::endl;
@@ -90,7 +94,7 @@ std::string method::readContent(Request &req){
     std::ifstream file(req.path.c_str());
     if (!file.is_open())
     {
-        req.errorCode = 500;
+        req.statusCode = 500;
         throw std::runtime_error("set error page : failed to read requested content");
         std::cerr << "failed to read content" << std::endl;
     }
@@ -184,7 +188,7 @@ bool method::isDirHasIndexFiles(Request &req) const{
         closedir(dir);
     } else {
         // Unable to open directory
-        req.errorCode = 500;
+        req.statusCode = 500;
         std::cerr << "Unable to open directory: " << req.path << std::endl;
     }
 
@@ -197,7 +201,7 @@ void method::autoIndexing(Request &req){
     if (req.getMatchedLocation().autoindex == "on")
         directoryListing(req);
     else{
-        req.errorCode = 403;
+        req.statusCode = 403;
         throw std::runtime_error("403 Forbiden");
     }
 }
@@ -208,7 +212,7 @@ void method::directoryListing(Request &req){
     DIR* directory = opendir(req.path.c_str());
     if (directory == NULL)
     {
-        req.errorCode = 500;
+        req.statusCode = 500;
         throw std::runtime_error("Error opening directory");
     }
 

@@ -6,7 +6,7 @@
 /*   By: sel-jama <sel-jama@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/03/24 11:13:12 by sel-jama          #+#    #+#             */
-/*   Updated: 2024/05/01 18:14:47 by sel-jama         ###   ########.fr       */
+/*   Updated: 2024/05/02 22:38:48 by sel-jama         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -38,6 +38,8 @@ class Request {
         // client &user;
         location matchedLocation;
         std::string reqStr;
+        std::string responseContentType;
+        int responseContentLen;
 
         // infra Infra;
 
@@ -64,8 +66,8 @@ class Request {
         int firstRead;
         int headersDone;
         //error utils
-        int errorCode;
-        std::string errorMsg;
+        int statusCode;
+        std::string statusMsg;
 
         int isChunked;
         std::map<std::string, std::string>  errorPages;

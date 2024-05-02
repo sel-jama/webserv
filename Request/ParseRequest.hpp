@@ -6,7 +6,7 @@
 /*   By: sel-jama <sel-jama@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/03/26 14:13:24 by sel-jama          #+#    #+#             */
-/*   Updated: 2024/04/26 09:53:53 by sel-jama         ###   ########.fr       */
+/*   Updated: 2024/05/02 17:54:15 by sel-jama         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -27,7 +27,7 @@ class ParseRequest {
     public:
         //utils
         ParseRequest();
-        void    setMethods(void);
+        // void    setMethods(void);
         void    setUriAllowedChars();
         bool    checkMethod(const std::string &method) const;
         bool    unsupportedMethod(const std::string &method) const;

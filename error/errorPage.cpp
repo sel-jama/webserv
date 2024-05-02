@@ -6,7 +6,7 @@
 /*   By: sel-jama <sel-jama@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/04/18 20:58:59 by sel-jama          #+#    #+#             */
-/*   Updated: 2024/05/01 18:34:19 by sel-jama         ###   ########.fr       */
+/*   Updated: 2024/05/02 22:38:48 by sel-jama         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -18,7 +18,7 @@ errorPage::errorPage(std::string msg, int code) : msg(msg), code(code) {
 }
 
 errorPage::errorPage(){
-    setErrorMsgs();
+    setstatusMsgs();
 }
 
 errorPage::~errorPage(){}
@@ -115,45 +115,45 @@ void errorPage::HtmlErrorPage() {
     
 }
 
-void errorPage::setErrorMsgs(){
+void errorPage::setstatusMsgs(){
     //html error pages
-    errorMsgs[200] = "OK";
-    errorMsgs[201] = "Created";
-    errorMsgs[202] = "Accepted";
-    errorMsgs[203] = "Non-Authoritative Information";
-    errorMsgs[204] = "No Content";
-    errorMsgs[205] = "Reset Content";
-    errorMsgs[206] = "Partial Content";
-    errorMsgs[300] = "Multiple Choices";
-    errorMsgs[301] = "Moved Permanently";          
-    errorMsgs[302] = "Found";
-    errorMsgs[303] = "See Other";
-    errorMsgs[304] = "Not Modified";
-    errorMsgs[305] = "Use Proxy";
-    errorMsgs[307] = "Temporary Redirect";
-    errorMsgs[400] = "Bad Request";
-    errorMsgs[401] = "Unquthorized";
-    errorMsgs[403] = "Forbidden";
-    errorMsgs[404] = "Not Found";
-    errorMsgs[405] = "Method Not Allowed";
-    errorMsgs[406] = "Not Acceptable";
-    errorMsgs[407] = "Proxy Authentication Required";
-    errorMsgs[408] = "Request Timeout";
-    errorMsgs[409] = "Conflict";
-    errorMsgs[410] = "Gone";
-    errorMsgs[411] = "Length Required";
-    errorMsgs[412] = "Precondition Failed";
-    errorMsgs[413] = "Request Entity Too Large";
-    errorMsgs[414] = "Request-URI Too Long";
-    errorMsgs[415] = "Unsupported Media Type";
-    errorMsgs[416] = "Requested Range Not Satisfiable";
-    errorMsgs[417] = "Expectation Failed";
-    errorMsgs[500] = "Internal Server Error";
-    errorMsgs[501] = "Not Implemented";
-    errorMsgs[502] = "Bad Gateway";
-    errorMsgs[503] = "Service Unavailable";
-    errorMsgs[504] = "Gateway Timeout";
-    errorMsgs[505] = "HTTP Version Not Supported";
+    statusMsgs[200] = "OK";
+    statusMsgs[201] = "Created";
+    statusMsgs[202] = "Accepted";
+    statusMsgs[203] = "Non-Authoritative Information";
+    statusMsgs[204] = "No Content";
+    statusMsgs[205] = "Reset Content";
+    statusMsgs[206] = "Partial Content";
+    statusMsgs[300] = "Multiple Choices";
+    statusMsgs[301] = "Moved Permanently";          
+    statusMsgs[302] = "Found";
+    statusMsgs[303] = "See Other";
+    statusMsgs[304] = "Not Modified";
+    statusMsgs[305] = "Use Proxy";
+    statusMsgs[307] = "Temporary Redirect";
+    statusMsgs[400] = "Bad Request";
+    statusMsgs[401] = "Unquthorized";
+    statusMsgs[403] = "Forbidden";
+    statusMsgs[404] = "Not Found";
+    statusMsgs[405] = "Method Not Allowed";
+    statusMsgs[406] = "Not Acceptable";
+    statusMsgs[407] = "Proxy Authentication Required";
+    statusMsgs[408] = "Request Timeout";
+    statusMsgs[409] = "Conflict";
+    statusMsgs[410] = "Gone";
+    statusMsgs[411] = "Length Required";
+    statusMsgs[412] = "Precondition Failed";
+    statusMsgs[413] = "Request Entity Too Large";
+    statusMsgs[414] = "Request-URI Too Long";
+    statusMsgs[415] = "Unsupported Media Type";
+    statusMsgs[416] = "Requested Range Not Satisfiable";
+    statusMsgs[417] = "Expectation Failed";
+    statusMsgs[500] = "Internal Server Error";
+    statusMsgs[501] = "Not Implemented";
+    statusMsgs[502] = "Bad Gateway";
+    statusMsgs[503] = "Service Unavailable";
+    statusMsgs[504] = "Gateway Timeout";
+    statusMsgs[505] = "HTTP Version Not Supported";
 }
 
 // int main() {
@@ -177,7 +177,7 @@ std::string errorPagesConfig(Request &req){
     std::map<std::string, std::string>::iterator it = req.errorPages.begin();
     for(; it != req.errorPages.end(); ++it){
         // return req.matchedLocation.root +"/404.html";
-        if (req.errorCode ==  atoi(it->first.c_str())){
+        if (req.statusCode ==  atoi(it->first.c_str())){
             it->second = "404.html";
             std::string pathToerrorPage = req.matchedLocation.root + "/" + it->second;
             struct stat status;
@@ -193,9 +193,9 @@ std::string errorPage::serveErrorPage(Request &req){
     method use2;
     // std::string content;
     // std::ostringstream response;
-    // use.setErrorMsgs();
-    errorPage err(use.errorMsgs[req.errorCode], req.errorCode);
-    std::cout << use.errorMsgs[req.errorCode] << std::endl;
+    // use.setstatusMsgs();
+    errorPage err(use.statusMsgs[req.statusCode], req.statusCode);
+    std::cout << use.statusMsgs[req.statusCode] << std::endl;
 
     std::string pathToPage = errorPagesConfig(req);
     std::cout << pathToPage << "<<<<<<<" << std::endl;
@@ -210,7 +210,7 @@ std::string errorPage::serveErrorPage(Request &req){
         // std::cout << "path error : " << req.path << std::endl;
         // // req.path = "../page.html";
         // content = use2.readContent(req);
-        // response << "HTTP/1.1 " << req.errorCode << " KO\r\n"
+        // response << "HTTP/1.1 " << req.statusCode << " KO\r\n"
         //     //  << "Content-Type: " << mimeType << "\r\n"
         //      << "Content-Length: " << content.length() << "\r\n"
         //      << "\r\n"

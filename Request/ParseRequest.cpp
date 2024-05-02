@@ -6,17 +6,32 @@
 /*   By: sel-jama <sel-jama@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/03/26 14:13:04 by sel-jama          #+#    #+#             */
-/*   Updated: 2024/05/01 14:21:33 by sel-jama         ###   ########.fr       */
+/*   Updated: 2024/05/02 22:35:19 by sel-jama         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "ParseRequest.hpp"
 
 ParseRequest::ParseRequest() {
-    setMethods();
+    // setMethods();
     setUriAllowedChars();
     setHttpHeaders();
 }
+
+// GET /Hooray.jpeg HTTP/1.1
+// Host: localhost:50000
+// Connection: keep-alive
+// sec-ch-ua: "Not/A)Brand";v="99", "Google Chrome";v="115", "Chromium";v="115"
+// sec-ch-ua-mobile: ?0
+// User-Agent: Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/115.0.0.0 Safari/537.36
+// sec-ch-ua-platform: "macOS"
+// Accept: image/avif,image/webp,image/apng,image/svg+xml,image/*,*/*;q=0.8
+// Sec-Fetch-Site: same-origin
+// Sec-Fetch-Mode: no-cors
+// Sec-Fetch-Dest: image
+// Referer: http://localhost:50000/
+// Accept-Encoding: gzip, deflate, br
+// Accept-Language: fr-FR,fr;q=0.9,en-US;q=0.8,en;q=0.7
 
 void ParseRequest::setHttpHeaders() {
     ngxHttpHeaders.push_back("Host");  //A domain name or IP address representing the target host
@@ -67,32 +82,29 @@ void ParseRequest::setHttpHeaders() {
     
 }
 
-void ParseRequest::setMethods(void) {
-    this->methods.push_back("PUT");
-    this->methods.push_back("PATCH");
-    this->methods.push_back("HEAD");
-    this->methods.push_back("OPTIONS");
-    this->methods.push_back("TRACE");
-    this->methods.push_back("CONNECT");
-}
+// void ParseRequest::setMethods(void) {
+//     this->methods.push_back("GET");
+//     this->methods.push_back("POST");
+//     this->methods.push_back("DELETE");
+// }
 
 void ParseRequest::setUriAllowedChars(void) {
     this->uriAllowedChars = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789 ._~:/?#[]@!$&'()*+,;=%";
 }
 
-bool ParseRequest::checkMethod(const std::string &method) const {
-    if (method == "GET" || method == "POST" || method == "DELETE")
-        return "true";
-    return "false";
-}
+// bool ParseRequest::checkMethod(const std::string &method) const {
+//     if (method == "GET" || method == "POST" || method == "DELETE")
+//         return "true";
+//     return "false";
+// }
 
-bool ParseRequest::unsupportedMethod(const std::string &method) const{
-    for (size_t i = 0; i < this->methods.size(); i++){
-        if (this->methods[i] == method)
-            return true;
-    }
-    return false;
-}
+// bool ParseRequest::unsupportedMethod(const std::string &method) const{
+//     for (size_t i = 0; i < this->methods.size(); i++){
+//         if (this->methods[i] == method)
+//             return true;
+//     }
+//     return false;
+// }
 
 bool ParseRequest::charOccured(char c) const{
     for(size_t i = 0; i < uriAllowedChars.size(); i++){
@@ -111,13 +123,9 @@ bool ParseRequest::checkUriAllowedChars(std::string &uri) const{
 }
 
 int ParseRequest::parseMethod(std::string &method) const{
-    if (unsupportedMethod(method))
-        // throw std::runtime_error("501 Not Implemented : Method not supported");
+    if (method != "GET" && method != "POST" && method != "DELETE")
         return 501;
-    
-    if (checkMethod(method) == false)
-        return 404;
-        // throw std::runtime_error("404 Not found : Method not found");
+        // throw std::runtime_error("501 Not Implemented : Method not supported");
     return 0;
 }
 
@@ -132,9 +140,10 @@ int ParseRequest::parseHeaders(std::map<std::string, std::string> &headers, std:
             // throw std::runtime_error("501 Not Implemented : Transfer-Encoding must be chuncked");
             return 501;
     
-    // if (method == "POST" && headers.find("Transfer-Encoding") == headers.end() && (headers.find("Content-Length") == headers.end() || atoi(headers.at("Content-Length").c_str())))
+    char *end;
+    if (method == "POST" && headers.find("Transfer-Encoding") == headers.end() && (headers.find("Content-Length") == headers.end() || strtod(headers.at("Content-Length").c_str(), &end) == 0))
+        return 400;
         // throw std::runtime_error("400 Bad Request : Messing headers");
-        // return 400;
     
     //setContentLength(headers);
     return 0;
@@ -142,9 +151,9 @@ int ParseRequest::parseHeaders(std::map<std::string, std::string> &headers, std:
 
 int ParseRequest::parseUri(std::string &uri) const {
     /*if => Request uri contain a character not allowded => bad request 400*/
-    if ((uri.size() >= 1 && uri[0] != '/') || checkUriAllowedChars(uri) == false)
-        // throw std::runtime_error("400 Bad Request : bad URI");
-        return 400;
+    // if ((uri.size() >= 1 && uri[0] != '/') || checkUriAllowedChars(uri) == false)
+    //     // throw std::runtime_error("400 Bad Request : bad URI");
+    //     return 400;
 
     if (uri.size() > MAX_SIZE)
         // throw std::runtime_error("414 Request-URI Too Long");
@@ -154,7 +163,7 @@ int ParseRequest::parseUri(std::string &uri) const {
 
 int ParseRequest::parseVersion(std::string &version) const{
     if (version != "HTTP/1.1")
-        return 505;
+        return 501;
     // std::stringstream ss(version);
     
     // std::string http;
@@ -189,9 +198,9 @@ const std::deque<std::string> &ParseRequest::getHttpHeaders() const { return thi
 int ParseRequest::checkUnknownHeader(std::map<std::string, std::string> &headers) const{
     std::map<std::string, std::string>::iterator it = headers.begin();
     for (; it != headers.end(); it++) {
-        if(find(ngxHttpHeaders.begin(), ngxHttpHeaders.end(), it->first) == ngxHttpHeaders.end())
-            return 400;
-            // throw std::runtime_error("400 bad Request : unknown headers");
+    //     if(find(ngxHttpHeaders.begin(), ngxHttpHeaders.end(), it->first) == ngxHttpHeaders.end())
+    //         return 400;
+    //         // throw std::runtime_error("400 bad Request : unknown headers");
     }
     return 0;
 }

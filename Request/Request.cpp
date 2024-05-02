@@ -6,7 +6,7 @@
 /*   By: sel-jama <sel-jama@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/03/24 15:33:33 by sel-jama          #+#    #+#             */
-/*   Updated: 2024/05/02 15:50:00 by sel-jama         ###   ########.fr       */
+/*   Updated: 2024/05/02 22:38:48 by sel-jama         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -17,9 +17,9 @@
 #include "../error/errorPage.hpp"
 #include "../sock2/includes/infra.hpp"
 Request::Request() : method(""), uri(""), 
-version(""), body(""), reqStr(""), fileName(""),
+version(""), body(""), reqStr(""), responseContentType(""), responseContentLen(0), fileName(""),
 contentLength(0), readbytes(0), readBody(0), firstRead(1)
-,headersDone(0), errorCode(0), errorMsg(""), isChunked(0), r(0){
+,headersDone(0), statusCode(0), statusMsg(""), isChunked(0), r(0){
     to_de = 0 ;flag = 0; saver_count = 0; tmp = 0;
 }
 
@@ -62,8 +62,8 @@ std::string Request::readRequest(int &fdSocket){
     readbytes = read(fdSocket, buffer, BUFFER_SIZE - 1);
     // std::cout << "readbytes: " << readbytes << std::endl;
     if (readbytes <= 0){
-        errorCode = 500;
-        throw std::runtime_error("Error reading from socket: socket failed");
+        statusCode = 500;
+        throw std::runtime_error("Error reading from socket: Peer closed connection");
     }
     // else if (readbytes == 0)//flag hada sala fhadi ola -1 (same with write response -1)
     //     throw std::runtime_error("Peer closed the connection");
@@ -99,13 +99,13 @@ void Request::requestPartitioning(Request &saver, std::string& request) {
             while (!value.empty() && isspace(value.front())) value.erase(0, 1);
             while (!value.empty() && isspace(value.back())) value.pop_back();
             if (key.empty() || value.empty()){
-                saver.errorCode = 400;
+                saver.statusCode = 400;
                 throw std::runtime_error("bad request");
             }
             saver.headers[key] = value;
         }
         else {
-            saver.errorCode = 400;
+            saver.statusCode = 400;
             throw std::runtime_error("bad request");
         }
     }
@@ -121,12 +121,18 @@ void Request::requestPartitioning(Request &saver, std::string& request) {
 
 void Request::isReqWellFormed(Request &req){
     ParseRequest parse;
-
-    errorCode = parse.parseMethod(req.method);
-    errorCode = parse.parseHeaders(req.headers, req.method);
-    errorCode = parse.parseUri(req.uri);
-    errorCode = parse.parseVersion(req.version);
-    if (errorCode)
+    
+    statusCode = parse.parseMethod(req.method);
+    if (statusCode)
+        throw std::runtime_error("parse error");
+    statusCode = parse.parseHeaders(req.headers, req.method);
+    if (statusCode)
+        throw std::runtime_error("parse error");
+    statusCode = parse.parseUri(req.uri);
+    if (statusCode)
+        throw std::runtime_error("parse error");
+    statusCode = parse.parseVersion(req.version);
+    if (statusCode)
         throw std::runtime_error("parse error");
 }
 
@@ -183,7 +189,7 @@ const location& Request::getMatchingLocation(const server& serve) {
     }
 
     if (maxCounter == -1){
-        errorCode = 404;
+        statusCode = 404;
         throw std::runtime_error("404 Not Found: No matching location");
     }
 
@@ -201,14 +207,14 @@ void Request::retreiveRequestedResource(const server &serve){
     path = matchedLocation.root;
     path += fileName.empty() ? "" : "/";
     path += fileName;
-    // std::cout <<"path : " << path << std::endl;
+    std::cout <<"path : " << path << std::endl;
     isFileAvailable();
     isMethodAllowed();
 }
 
 void Request::isMethodAllowed(){
     if (!allowedMethod(const_cast<location&>(matchedLocation))){
-        errorCode = 405;
+        statusCode = 405;
         throw std::runtime_error("405 Method Not Allowed");
     }
 }
@@ -216,11 +222,11 @@ void Request::isMethodAllowed(){
 void Request::isFileAvailable() {
     if (stat(path.c_str(), &pathStatus) != 0) {
         // if (errno == ENOENT) {
-            errorCode = 404;
+            statusCode = 404;
             throw std::runtime_error("404 Not Found: Requested Resource not found");
         // } else{
         //     // throw std::runtime_error("Error checking file availability");
-        //     errorCode = 
+        //     statusCode = 
         // }
     }
 }
@@ -238,7 +244,7 @@ void resetClientRequest(Request &req){
     req.readBody = 0;
     req.firstRead = 1;
     req.headersDone = 0;
-    req.errorCode = 0;
+    req.statusCode = 0;
     req.isChunked = 0;
     req.serverd = 0;
 }
@@ -249,25 +255,27 @@ int Request::send_response(client &client){
     try{
 
         std::string content;
-        // std::cout << client.reqq.errorCode << "*********----------"<< std::endl;
-        if (!client.reqq.errorCode){
+        // std::cout << client.reqq.statusCode << "*********----------"<< std::endl;
+        if (!client.reqq.statusCode){
             content = Response::handleMethod(client);
         }
-        if (client.reqq.errorCode || content.empty()){
+        //post do not give content handle later  <<<<<<<
+        if (client.reqq.statusCode || content.empty()){
             // std::cout << "got here "<< std::endl;
             if(client.reqq.method != "HEAD")
                 content = errorPage::serveErrorPage(client.reqq);
         }
-        
+        if (!responseContentLen)
+            responseContentLen = content.length();
         std::string res;
         std::stringstream response;
         errorPage msg;
-        if (!client.reqq.errorCode)
-            client.reqq.errorCode = 200;
-        response << "HTTP/1.1 " << client.reqq.errorCode << " " << msg.errorMsgs[client.reqq.errorCode] << "\r\n"
-            //  << "Content-Type: " << mimeType << "\r\n"
-             << "Content-Length: " << content.length() << "\r\n"
-             << "\r\n";
+        if (!client.reqq.statusCode)
+            client.reqq.statusCode = 200;
+        response << "HTTP/1.1 " << client.reqq.statusCode << " " << msg.statusMsgs[client.reqq.statusCode] << "\r\n"
+            << "Content-Type: " << responseContentType << "\r\n"
+            << "Content-Length: " << responseContentLen << "\r\n"
+            << "\r\n";
         std::cout << "\033[1;35m---------------RESPONSE-----------------\n" <<  response.str() <<"\033[0m" << std::endl;
         
         response << content;
@@ -314,11 +322,11 @@ int Request::read_request(client &client, infra & infra){
     catch (const std::runtime_error &e){
         std::cout << "\033[1;36mError in reading : "<< e.what() << "\033[0m" << std::endl;
         client.r_done = 1;
-        // if(!errorCode)
+        // if(!statusCode)
         //     return 0;
     }
     if (client.r_done)
-        std::cout << "\033[1;33m--------------------REQUEST-------------------------\n" << client.reqq.reqStr << client.reqq.body << "\033[0m" << std::endl;
+        std::cout << "\033[1;33m--------------------REQUEST-------------------------\n" << client.reqq.reqStr << "\033[0m" << std::endl;
     
 
     return 1;

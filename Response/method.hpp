@@ -43,7 +43,7 @@ class method {
         void handleGetRequest(int clientSocket);
         void retreiveRequestedResource(server &, Request &) const;
         const location &getMatchingLocation(server &, Request &);
-        // std::string getMimeType(const std::string& fileName);
+        std::string getMimeType(const std::string& fileName);
         std::string readContent(Request &req) ;
         //setters
 

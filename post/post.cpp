@@ -67,29 +67,29 @@ int hexa_to_num(std::string ptr)
     return (value);
 }
 
-void Post::load_extension()
-{
-    std::ifstream file("MIME.conf");
-    std::string buffer;
-    std::string secbuffer;
-    std::string forvalue;
-    std::string forkey;
-    if (!file.is_open()) {
-        while(std::getline(file, buffer))
-        {
-                std::stringstream ss(buffer);
-                for (int i = 0; getline(ss, secbuffer, ' '); i++) {
-                    if (i == 0)
-                        forkey = secbuffer;
-                    if(i == 1)
-                    {
-                            extension[forkey] = secbuffer;
-                            break;
-                    }
-                }
-        }
-    }
-}
+// void Post::load_extension()
+// {
+//     std::ifstream file("MIME.conf");
+//     std::string buffer;
+//     std::string secbuffer;
+//     std::string forvalue;
+//     std::string forkey;
+//     if (!file.is_open()) {
+//         while(std::getline(file, buffer))
+//         {
+//                 std::stringstream ss(buffer);
+//                 for (int i = 0; getline(ss, secbuffer, ' '); i++) {
+//                     if (i == 0)
+//                         forkey = secbuffer;
+//                     if(i == 1)
+//                     {
+//                             extension[forkey] = secbuffer;
+//                             break;
+//                     }
+//                 }
+//         }
+//     }
+// }
 
 void Post::get_Request_resource(Request obj)
 {
@@ -120,7 +120,15 @@ void Post::After_geting_resource(Request obj){
 }
 
 void Post::support_upload(Request &obj){
+    handleCgi obj2;
     int check = 0;
+    std::string filename;
+    std::map<std::string, std::string>::iterator iter = obj.headers.find("Content-Type");
+    if(iter != obj.extension.end() && !iter->second.empty())
+    {
+        std::map<std::string, std::string>::iterator iter2 = obj.extension.find(iter->second);
+        filename = "/text" + iter2->second;
+    }
                     // std::cout << "......................" << std::endl;
     std::cout << "+++++++++ Im writing " << std::endl;
     location capt = obj.getMatchedLocation();
@@ -137,9 +145,11 @@ void Post::support_upload(Request &obj){
             throw Except();
         }
         else {
-            std::cout << "helo ->>>>>>>>" << std::endl;
-                std::ofstream file(ptr + "/" + "file.mov");
-                obj.path = ptr + "/" + "file.mov";
+            if(filename.empty())
+                filename = "/file.txt";
+            // std::cout << "helo ->>>>>>>>" << std::endl;
+                std::ofstream file(ptr + filename);
+                obj.path = ptr + filename;
                 if (file.is_open() == true)
                 {
                     // if (static_cast<int>(Body.length()) != obj.contentLength) {
@@ -214,7 +224,7 @@ std::ofstream Request::file;
 void Post::chunked_body(client &obj){
         if(obj.reqq.flag == 0)
         {
-            obj.reqq.file.open(obj.reqq.path + "/" + "uhm.jpg");
+            obj.reqq.file.open(obj.reqq.path + "/" + "uhm.txt");
             obj.reqq.flag = 1;
         }
         obj.reqq.body.append( obj.reqq.readRequest(obj.ssocket));

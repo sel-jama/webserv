@@ -31,6 +31,7 @@ class Request {
         std::string uri;
         std::string version;
         std::map<std::string, std::string> headers;
+        std::map<std::string, std::string> extension;
         
         std::string body;
 
@@ -108,6 +109,8 @@ class Request {
         int send_response(client &);
         int read_request(client &, infra &);
         const server &getMatchedServer(const infra &infra);
+
+        void load_extension();
 };
 
 #endif

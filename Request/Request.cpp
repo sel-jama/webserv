@@ -37,6 +37,30 @@ const std::map<std::string, std::string>& Request::getHeaders() const{
     return this->headers;
 }
 
+void Request::load_extension()
+{
+    std::ifstream file("MIME.conf");
+    std::string buffer;
+    std::string secbuffer;
+    std::string forvalue;
+    std::string forkey;
+    if (!file.is_open()) {
+        while(std::getline(file, buffer))
+        {
+                std::stringstream ss(buffer);
+                for (int i = 0; getline(ss, secbuffer, ' '); i++) {
+                    if (i == 0)
+                        forkey = secbuffer;
+                    if(i == 1)
+                    {
+                            extension[forkey] = secbuffer;
+                            break;
+                    }
+                }
+        }
+    }
+}
+
 void Request::cutOffBodySegment(std::string &request){
     size_t pos = request.find("\r\n\r\n");
 

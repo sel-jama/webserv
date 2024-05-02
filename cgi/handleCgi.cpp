@@ -140,25 +140,25 @@ std::string handleCgi::executeCgiScript(Request &req) {
 }
 
 
-void handleCgi::executeCgiBody(Request &req) {
-    std::string randomFile = generateRandomFileName();
+// void handleCgi::executeCgiBody(Request &req) {
+//     std::string randomFile = generateRandomFileName();
     
-    std::ofstream outputFile(randomFile);
-    if (!outputFile.is_open()){
-        req.statusCode = 500;
-        throw std::runtime_error("failed to open file ...");
-    }
+//     std::ofstream outputFile(randomFile);
+//     if (!outputFile.is_open()){
+//         req.statusCode = 500;
+//         throw std::runtime_error("failed to open file ...");
+//     }
 
-    pid_t pid = fork();
-    if (pid == -1){
-        req.statusCode = 500;
-        throw std::runtime_error("fork failed");
-    }
+//     pid_t pid = fork();
+//     if (pid == -1){
+//         req.statusCode = 500;
+//         throw std::runtime_error("fork failed");
+//     }
 
-    else if (pid == 0){
-        if (freopen(randomFile.c_str(), "r", ))
-    }
-}
+    // else if (pid == 0){
+        // if (freopen(randomFile.c_str(), "r", ))
+    // }
+// }
 
 
 

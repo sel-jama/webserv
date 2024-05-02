@@ -60,9 +60,10 @@ class Request {
         std::string fileName;
         // std::string bodySaver;
         struct stat pathStatus;
-        int contentLength; 
+        double contentLength; 
         int readbytes;
         int readBody;
+        int chunked_flag;
         int firstRead;
         int headersDone;
         //error utils

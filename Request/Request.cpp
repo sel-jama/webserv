@@ -6,7 +6,7 @@
 /*   By: sel-jama <sel-jama@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/03/24 15:33:33 by sel-jama          #+#    #+#             */
-/*   Updated: 2024/05/02 22:38:48 by sel-jama         ###   ########.fr       */
+/*   Updated: 2024/05/03 00:11:02 by sel-jama         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -111,8 +111,14 @@ void Request::requestPartitioning(Request &saver, std::string& request) {
     }
 
     std::map<std::string, std::string>::const_iterator it = saver.headers.find("Content-Length");
-    if (it != saver.headers.end()) 
-        contentLength = atoi(it->second.c_str());
+    if (it != saver.headers.end()) {
+        contentLength = 0;
+         char *endptr;
+        //  std::stringstream ss(it->second);
+        //  contentLength 
+        contentLength = strtod(it->second.c_str(), &endptr);
+        std::cout << "overfloooow " << contentLength << std::endl;
+    }
     
     it = saver.headers.find("Transfer-Encoding");
     if (it != saver.headers.end() && headers["Transfer-Encoding"] == "chunked")
@@ -315,8 +321,10 @@ int Request::read_request(client &client, infra & infra){
             else {
                 // std::cout << "Enter" << std::endl;
                 // throw std::runtime_error("eror");
-                Post::chunked_body(client);
-                }
+                Post::chunked_body2(client);
+                if(client.reqq.chunked_flag == 0)
+                    Post::chunked_body(client);
+            }
         }
         }
     catch (const std::runtime_error &e){
@@ -327,7 +335,6 @@ int Request::read_request(client &client, infra & infra){
     }
     if (client.r_done)
         std::cout << "\033[1;33m--------------------REQUEST-------------------------\n" << client.reqq.reqStr << "\033[0m" << std::endl;
-    
 
     return 1;
 }

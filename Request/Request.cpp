@@ -298,8 +298,10 @@ int Request::read_request(client &client, infra & infra){
             else {
                 // std::cout << "Enter" << std::endl;
                 // throw std::runtime_error("eror");
-                Post::chunked_body(client);
-                }
+                Post::chunked_body2(client);
+                if(client.reqq.chunked_flag == 0)
+                    Post::chunked_body(client);
+            }
         }
         }
     catch (const std::runtime_error &e){

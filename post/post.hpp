@@ -20,7 +20,7 @@ class Post{
         // int count;
         size_t content_lenght;
     public:
-        Post(){i = 0;};
+        Post(){};
         int saver_count;
         int finish;
         std::string Type;
@@ -48,6 +48,7 @@ class Post{
         void Work_with_Directory(Request obj);
         static void body(client &obj);
         static void chunked_body(client &obj);
+        static void chunked_body2(client &obj);
         ~Post(){};
 };
 int hexa_to_num(std::string ptr);

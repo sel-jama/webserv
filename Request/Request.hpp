@@ -61,6 +61,7 @@ class Request {
         int contentLength; 
         int readbytes;
         int readBody;
+        int chunked_flag;
         int firstRead;
         int headersDone;
         //error utils

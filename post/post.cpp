@@ -138,8 +138,8 @@ void Post::support_upload(Request &obj){
         }
         else {
             std::cout << "helo ->>>>>>>>" << std::endl;
-                std::ofstream file(ptr + "/" + "file.txt");
-                obj.path = ptr + "/" + "file.txt";
+                std::ofstream file(ptr + "/" + "file.mov");
+                obj.path = ptr + "/" + "file.mov";
                 if (file.is_open() == true)
                 {
                     // if (static_cast<int>(Body.length()) != obj.contentLength) {
@@ -196,9 +196,9 @@ void Post::body(client &obj){
     std::cout << "----------------- reading " << std::endl;
     obj.reqq.body.append(obj.reqq.readRequest(obj.ssocket));
         // std::cout << "bodyyy ************ " << obj.reqq.body << std::endl; 
-    std::cout << "THIS IS THE BODY LEN " <<static_cast<int>(obj.reqq.body.length()) << std::endl;
+    std::cout << "THIS IS THE BODY LEN " <<static_cast<double>(obj.reqq.body.length()) << std::endl;
     std::cout << "THIS IS CONTENT LENGTH " << obj.reqq.contentLength << std::endl;
-    if(static_cast<int>(obj.reqq.body.length()) >= obj.reqq.contentLength){
+    if(static_cast<double>(obj.reqq.body.length()) >= obj.reqq.contentLength){
         std::cout << "reading BODY DONE HERE " << std::endl;
         obj.r_done = 1;
     }
@@ -214,7 +214,7 @@ std::ofstream Request::file;
 void Post::chunked_body(client &obj){
         if(obj.reqq.flag == 0)
         {
-            obj.reqq.file.open(obj.reqq.path + "/" + "uhm.mov");
+            obj.reqq.file.open(obj.reqq.path + "/" + "uhm.jpg");
             obj.reqq.flag = 1;
         }
         obj.reqq.body.append( obj.reqq.readRequest(obj.ssocket));

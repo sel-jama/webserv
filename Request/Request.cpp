@@ -111,8 +111,14 @@ void Request::requestPartitioning(Request &saver, std::string& request) {
     }
 
     std::map<std::string, std::string>::const_iterator it = saver.headers.find("Content-Length");
-    if (it != saver.headers.end()) 
-        contentLength = atoi(it->second.c_str());
+    if (it != saver.headers.end()) {
+        contentLength = 0;
+         char *endptr;
+        //  std::stringstream ss(it->second);
+        //  contentLength 
+        contentLength = strtod(it->second.c_str(), &endptr);
+        std::cout << "overfloooow " << contentLength << std::endl;
+    }
     
     it = saver.headers.find("Transfer-Encoding");
     if (it != saver.headers.end() && headers["Transfer-Encoding"] == "chunked")
@@ -310,8 +316,8 @@ int Request::read_request(client &client, infra & infra){
         // if(!errorCode)
         //     return 0;
     }
-    if (client.r_done)
-        std::cout << "\033[1;33m--------------------REQUEST-------------------------\n" << client.reqq.reqStr << client.reqq.body << "\033[0m" << std::endl;
+    // if (client.r_done)
+        // std::cout << "\033[1;33m--------------------REQUEST-------------------------\n" << client.reqq.reqStr << client.reqq.body << "\033[0m" << std::endl;
     
 
     return 1;

@@ -6,7 +6,7 @@
 /*   By: sel-jama <sel-jama@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/04/18 20:58:59 by sel-jama          #+#    #+#             */
-/*   Updated: 2024/05/01 16:01:14 by sel-jama         ###   ########.fr       */
+/*   Updated: 2024/05/01 18:34:19 by sel-jama         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -176,9 +176,14 @@ void errorPage::setErrorMsgs(){
 std::string errorPagesConfig(Request &req){
     std::map<std::string, std::string>::iterator it = req.errorPages.begin();
     for(; it != req.errorPages.end(); ++it){
-        std::cout << ">>>>> " << it->first.c_str() << std::endl;
-        if (req.errorCode ==  atoi(it->first.c_str()))
-            return req.matchedLocation.root + "/" + it->second;
+        // return req.matchedLocation.root +"/404.html";
+        if (req.errorCode ==  atoi(it->first.c_str())){
+            it->second = "404.html";
+            std::string pathToerrorPage = req.matchedLocation.root + "/" + it->second;
+            struct stat status;
+            if (stat(pathToerrorPage.c_str(), &status) == 0 && status.st_mode &S_IRUSR) //error page file found && permission
+                return pathToerrorPage;
+        }
     }
     return "";
 }

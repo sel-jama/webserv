@@ -90,6 +90,7 @@ std::string method::readContent(Request &req){
     std::ifstream file(req.path.c_str());
     if (!file.is_open())
     {
+        req.errorCode = 500;
         throw std::runtime_error("set error page : failed to read requested content");
         std::cerr << "failed to read content" << std::endl;
     }
@@ -201,12 +202,15 @@ void method::autoIndexing(Request &req){
     }
 }
 
-void method::directoryListing(const Request &req){
+void method::directoryListing(Request &req){
     std::stringstream page;
 
     DIR* directory = opendir(req.path.c_str());
     if (directory == NULL)
-        throw std::runtime_error("serve page: Error opening directory");
+    {
+        req.errorCode = 500;
+        throw std::runtime_error("Error opening directory");
+    }
 
     page << "<html><head><title>Index of " << req.path.c_str() << "</title></head><body><h1>Index of " << req.path.c_str() << "</h1><ul>" << std::endl;
 

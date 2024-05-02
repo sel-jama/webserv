@@ -266,7 +266,7 @@ int Request::send_response(client &client){
             //  << "Content-Type: " << mimeType << "\r\n"
              << "Content-Length: " << content.length() << "\r\n"
              << "\r\n";
-        // std::cout << "\033[1;35m---------------RESPONSE-----------------\n" <<  response.str() <<"\033[0m" << std::endl;
+        std::cout << "\033[1;35m---------------RESPONSE-----------------\n" <<  response.str() <<"\033[0m" << std::endl;
         response << content;
         res = response.str();
         // std::cout << "Response: \n"<<res;
@@ -308,7 +308,8 @@ int Request::read_request(client &client, infra & infra){
         // if(!errorCode)
         //     return 0;
     }
-    // std::cout << "\033[1;33m--------------------REQUEST-------------------------\n" << client.reqq.reqStr << client.reqq.body << "\033[0m" << std::endl;
+    if (client.r_done)
+        std::cout << "\033[1;33m--------------------REQUEST-------------------------\n" << client.reqq.reqStr << client.reqq.body << "\033[0m" << std::endl;
     
 
     return 1;

@@ -8,7 +8,6 @@
 #include <map>
 #include "../Request/Request.hpp"
 #include "../sock2/includes/client.hpp"
-#include <fstream>
 
 class Post{
     private:
@@ -22,9 +21,11 @@ class Post{
         size_t content_lenght;
     public:
         Post(){i = 0;};
+        int saver_count;
+        int finish;
         std::string Type;
-        // static std::stringstream file;
         int i;
+        size_t to_de;
         std::string Body;
         int flag;
         void set_saver(std::string); 

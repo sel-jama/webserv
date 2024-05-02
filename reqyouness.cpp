@@ -1,15 +1,3 @@
-/* ************************************************************************** */
-/*                                                                            */
-/*                                                        :::      ::::::::   */
-/*   Request.cpp                                        :+:      :+:    :+:   */
-/*                                                    +:+ +:+         +:+     */
-/*   By: sel-jama <sel-jama@student.42.fr>          +#+  +:+       +#+        */
-/*                                                +#+#+#+#+#+   +#+           */
-/*   Created: 2024/03/24 15:33:33 by sel-jama          #+#    #+#             */
-/*   Updated: 2024/05/02 15:50:00 by sel-jama         ###   ########.fr       */
-/*                                                                            */
-/* ************************************************************************** */
-
 #include "Request.hpp"
 #include "../sock2/includes/client.hpp"
 #include "../sock2/includes/server.hpp"
@@ -17,10 +5,10 @@
 #include "../error/errorPage.hpp"
 #include "../sock2/includes/infra.hpp"
 Request::Request() : method(""), uri(""), 
-version(""), body(""), reqStr(""), fileName(""),
+version(""), body(""), reqStr(""), fileName(""), bodySaver(""),
 contentLength(0), readbytes(0), readBody(0), firstRead(1)
-,headersDone(0), errorCode(0), errorMsg(""), isChunked(0), r(0){
-    to_de = 0 ;flag = 0; saver_count = 0; tmp = 0;
+,headersDone(0), errorCode(0), errorMsg(""), isChunked(0){
+    // to_de = 0 ;flag = 0; 
 }
 
 Request::~Request(){}
@@ -52,13 +40,12 @@ void Request::cutOffBodySegment(std::string &request){
 std::string Request::readRequest(int &fdSocket){
     std::stringstream buff("");
     // if (readBody && firstRead){
-    //     buff << bodySaver; 
+    //     buff << bodySaver;
     //     firstRead = 0;
     // }
     
     
     char buffer[BUFFER_SIZE];
-    // std::cout << "readbytes-> " << readbytes << std::endl;
     readbytes = read(fdSocket, buffer, BUFFER_SIZE - 1);
     // std::cout << "readbytes: " << readbytes << std::endl;
     if (readbytes <= 0){
@@ -73,8 +60,7 @@ std::string Request::readRequest(int &fdSocket){
     if (!readBody){
         cutOffBodySegment(request);
         if (headersDone)
-            readBody = 1;
-            
+            readBody = 1;   
     }
     return request;
 }
@@ -151,14 +137,18 @@ int    Request::getCheckRequest(client &client, const infra &infra) {
         //done reading from socket if method is GET or DELETE 
         if (client.reqq.method != "POST" && client.reqq.headersDone)
             client.r_done = 1;
-        
-       if(!client.reqq.isChunked && (static_cast<size_t>(client.reqq.contentLength) <= client.reqq.body.size()))
+        if(!client.reqq.isChunked && (static_cast<size_t>(client.reqq.contentLength) <= client.reqq.body.size()))
         {
             client.reqq.readBody = 0;
             client.r_done = 1;
         }
-        server serve = client.reqq.getMatchedServer(infra);
-        // client.reqq.errorPages = serve.errorPages;
+        // if (static_cast<int>(client.reqq.bodySaver.length()) >= client.reqq.contentLength){
+        //     if (!client.reqq.isChunked){
+        //         client.reqq.readBody = 0;
+        //         client.r_done = 1;
+        //     }
+        //     client.reqq.body = client.reqq.bodySaver;
+        // }
         client.reqq.retreiveRequestedResource(serve);
     return 1;
 }
@@ -235,12 +225,11 @@ void resetClientRequest(Request &req){
     req.version = "";
     req.body = "";
     req.reqStr = "";
+    req.bodySaver = "";
     req.readBody = 0;
     req.firstRead = 1;
     req.headersDone = 0;
     req.errorCode = 0;
-    req.isChunked = 0;
-    req.serverd = 0;
 }
 
 int Request::send_response(client &client){
@@ -260,7 +249,7 @@ int Request::send_response(client &client){
         }
         
         std::string res;
-        std::stringstream response;
+        std::ostringstream response;
         errorPage msg;
         if (!client.reqq.errorCode)
             client.reqq.errorCode = 200;
@@ -268,23 +257,16 @@ int Request::send_response(client &client){
             //  << "Content-Type: " << mimeType << "\r\n"
              << "Content-Length: " << content.length() << "\r\n"
              << "\r\n";
-        std::cout << "\033[1;35m---------------RESPONSE-----------------\n" <<  response.str() <<"\033[0m" << std::endl;
-        
+        // std::cout << "\033[1;35m---------------RESPONSE-----------------\n" <<  response.str() <<"\033[0m" << std::endl;
         response << content;
         res = response.str();
-        // char buffer[BUFFER_SIZE] = {};
-        // response.read(buffer, BUFFER_SIZE);
-        // buffer[response.gcount()] = '\0';
-        // std::streamsize bytes = response.readsome(buffer, BUFFER_SIZE);
-        
         // std::cout << "Response: \n"<<res;
         // write(client.ssocket, res.c_str(), res.length());
-        // if (response.eof()){
-            client.w_done = 1;
-            resetClientRequest(client.reqq);
-        // }
         if (send(client.ssocket, res.c_str(), res.length(), 0) == -1)
             throw std::runtime_error("Send failed");
+        
+        client.w_done = 1;
+        resetClientRequest(client.reqq);
     }
     catch (const std::runtime_error &e){
         std::cout << "Exception catched in send response : " << e.what() << std::endl;
@@ -298,27 +280,26 @@ int Request::read_request(client &client, infra & infra){
     try{
         if (!readBody){
             // std::cout << "\033[1;31m reading HEADERS here \033[0m" << std::endl;
-            // client.reqq.errorPages = server.errorPages;
-            getCheckRequest(client, infra);
+            getCheckRequest(client, server);
         }
         else{
+        
             if(!client.reqq.isChunked)
                 Post::body(client);
-            else {
+        }
+        if(client.reqq.isChunked){
                 // std::cout << "Enter" << std::endl;
                 // throw std::runtime_error("eror");
                 Post::chunked_body(client);
                 }
         }
-        }
     catch (const std::runtime_error &e){
-        std::cout << "\033[1;36mError in reading : "<< e.what() << "\033[0m" << std::endl;
+        // std::cout << "\033[1;36mError in reading : "<< e.what() << "\033[0m" << std::endl;
         client.r_done = 1;
         // if(!errorCode)
         //     return 0;
     }
-    if (client.r_done)
-        std::cout << "\033[1;33m--------------------REQUEST-------------------------\n" << client.reqq.reqStr << client.reqq.body << "\033[0m" << std::endl;
+    // std::cout << "\033[1;33m--------------------REQUEST-------------------------\n" << client.reqq.reqStr << client.reqq.body << "\033[0m" << std::endl;
     
 
     return 1;

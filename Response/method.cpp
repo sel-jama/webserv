@@ -37,7 +37,7 @@ void method::GetDataForClient(Request &req, int &clientSocket) {
     (void)clientSocket;
     handleCgi cgi;
     defineResourceType(req); //file or dir
-    std::cout << "************ "<<type << std::endl;
+    // std::cout << "************ "<<type << std::endl;
     if (type == "file") {
         //if location does not have cgi
         validateAll(req);  //toFix

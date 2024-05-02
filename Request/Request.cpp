@@ -6,7 +6,7 @@
 /*   By: sel-jama <sel-jama@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/03/24 15:33:33 by sel-jama          #+#    #+#             */
-/*   Updated: 2024/05/01 15:50:01 by sel-jama         ###   ########.fr       */
+/*   Updated: 2024/05/01 18:56:28 by sel-jama         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -19,7 +19,7 @@
 Request::Request() : method(""), uri(""), 
 version(""), body(""), reqStr(""), fileName(""), bodySaver(""),
 contentLength(0), readbytes(0), readBody(0), firstRead(1)
-,headersDone(0), errorCode(0), errorMsg(""), isChunked(0){
+,headersDone(0), errorCode(0), errorMsg(""), isChunked(0), serverd(0){
     // to_de = 0 ;flag = 0; 
 }
 
@@ -240,6 +240,8 @@ void resetClientRequest(Request &req){
     req.firstRead = 1;
     req.headersDone = 0;
     req.errorCode = 0;
+    req.isChunked = 0;
+    req.serverd = 0;
 }
 
 int Request::send_response(client &client){
@@ -259,7 +261,7 @@ int Request::send_response(client &client){
         }
         
         std::string res;
-        std::ostringstream response;
+        std::stringstream response;
         errorPage msg;
         if (!client.reqq.errorCode)
             client.reqq.errorCode = 200;
@@ -268,15 +270,22 @@ int Request::send_response(client &client){
              << "Content-Length: " << content.length() << "\r\n"
              << "\r\n";
         std::cout << "\033[1;35m---------------RESPONSE-----------------\n" <<  response.str() <<"\033[0m" << std::endl;
+        
         response << content;
         res = response.str();
+        // char buffer[BUFFER_SIZE] = {};
+        // response.read(buffer, BUFFER_SIZE);
+        // buffer[response.gcount()] = '\0';
+        // std::streamsize bytes = response.readsome(buffer, BUFFER_SIZE);
+        
         // std::cout << "Response: \n"<<res;
         // write(client.ssocket, res.c_str(), res.length());
+        // if (response.eof()){
+            client.w_done = 1;
+            resetClientRequest(client.reqq);
+        // }
         if (send(client.ssocket, res.c_str(), res.length(), 0) == -1)
             throw std::runtime_error("Send failed");
-        
-        client.w_done = 1;
-        resetClientRequest(client.reqq);
     }
     catch (const std::runtime_error &e){
         std::cout << "Exception catched in send response : " << e.what() << std::endl;

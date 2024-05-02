@@ -6,7 +6,7 @@
 /*   By: sel-jama <sel-jama@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/03/24 11:13:12 by sel-jama          #+#    #+#             */
-/*   Updated: 2024/05/01 12:01:13 by sel-jama         ###   ########.fr       */
+/*   Updated: 2024/05/01 18:14:47 by sel-jama         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -66,6 +66,7 @@ class Request {
         std::map<std::string, std::string>  errorPages;
         std::string ip;
         uint16_t port;
+        uint16_t serverd;
 
 
         Request();

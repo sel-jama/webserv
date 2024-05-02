@@ -46,12 +46,17 @@ class Request {
         // std::string query;
     public:
         //additioanal
-        std::string path;
-        int saver_count;
+        std::string getit;
+        std::string r_s;
         int flag;
-        int to_de;
+        size_t saver_count;
+        int tmp;
+        static std::ofstream file; 
+        size_t to_de;
+
+        std::string path;
         std::string fileName;
-        std::string bodySaver;
+        // std::string bodySaver;
         struct stat pathStatus;
         int contentLength; 
         int readbytes;
@@ -67,7 +72,7 @@ class Request {
         std::string ip;
         uint16_t port;
 
-
+        int r;
         Request();
         ~Request();
 

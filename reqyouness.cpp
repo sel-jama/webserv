@@ -47,7 +47,7 @@ std::string Request::readRequest(int &fdSocket){
     
     char buffer[BUFFER_SIZE];
     readbytes = read(fdSocket, buffer, BUFFER_SIZE - 1);
-    std::cout << "readbytes: " << readbytes << std::endl;
+    // std::cout << "readbytes: " << readbytes << std::endl;
     if (readbytes <= 0){
         errorCode = 500;
         throw std::runtime_error("Error reading from socket: socket failed");
@@ -191,7 +191,7 @@ void Request::retreiveRequestedResource(const server &serve){
     path = matchedLocation.root;
     path += fileName.empty() ? "" : "/";
     path += fileName;
-    std::cout <<"path : " << path << std::endl;
+    // std::cout <<"path : " << path << std::endl;
     isFileAvailable();
     isMethodAllowed();
 }
@@ -288,7 +288,7 @@ int Request::read_request(client &client, infra & infra){
                 Post::body(client);
         }
         if(client.reqq.isChunked){
-                std::cout << "Enter" << std::endl;
+                // std::cout << "Enter" << std::endl;
                 // throw std::runtime_error("eror");
                 Post::chunked_body(client);
                 }

@@ -55,19 +55,21 @@ void infra::selecttoinfinity()
         fd_rcopy = fd_r;
         fd_wcopy = fd_w;
         // std::cout << "Waiting for connection... " << std::endl;
+        // std::cout << "hiii " << std::endl;
         int slct = select(maxfd + 1, &fd_rcopy, &fd_wcopy, NULL, &timeout);
+        // std::cout << "hello " << std::endl;
         //std::cout << "=============>jit hnaya : " << slct << std::endl;
         if (slct == -1) throw(std::runtime_error("Error : select : lanch"));
         if (slct == 0)
         {
-            std::cout << "ja hna" << std::endl;
+            // std::cout << "ja hna" << std::endl;
             for (std::vector<server>::iterator it = servers.begin(); it != servers.end(); ++it)
                 (*it).checktime(fd_r, fd_w, maxfd);
             continue;
         }
         for (std::vector<server>::iterator it = servers.begin(); it !=servers.end(); ++it)
         {
-            std::cout << "k==>" << k << std::endl;
+            // std::cout << "k==>" << k << std::endl;
             ++k;
             if (FD_ISSET((*it).ssocket, &fd_rcopy))
                 (*it).accept_new_connection(fd_r, maxfd);

@@ -198,27 +198,26 @@ void Post::body(client &obj){
         // std::cout << "bodyyy ************ " << obj.reqq.body << std::endl; 
     std::cout << "THIS IS THE BODY LEN " <<static_cast<int>(obj.reqq.body.length()) << std::endl;
     std::cout << "THIS IS CONTENT LENGTH " << obj.reqq.contentLength << std::endl;
-    if(static_cast<int>(obj.reqq.body.length()) >= obj.reqq.contentLength ){
+    if(static_cast<int>(obj.reqq.body.length()) >= obj.reqq.contentLength){
         std::cout << "reading BODY DONE HERE " << std::endl;
         obj.r_done = 1;
     }
     else
+    {
+        // std::cout << "olah tantqad "<< std::endl;
         obj.r_done = 0;
+    }
 }
 
 std::ofstream Request::file;
 
 void Post::chunked_body(client &obj){
+
     // std::string capt;
-    std::cout << "heloooooooo" << std::endl;
+    // std::cout << "heloooooooo" << std::endl;
     // if(!obj.reqq.r_s.empty())
     //     capt = obj.reqq.r_s;
     // capt.append(obj.reqq.body);
-    if(obj.reqq.saver_count == 0)
-    {
-        // std::cout << "created" << std::endl;
-        obj.reqq.file.open(obj.reqq.path + "/" + "uhm.txt");
-    }
     // std::string capt = obj.readRequest(obj.fdsock3);
     // capt = capt + obj.bodySaver;
     // int counter = 0;
@@ -229,7 +228,7 @@ void Post::chunked_body(client &obj){
     // std::string capt = obj.reqq.body;
         // std::cout << "wlah ta jit" << std::endl;
 
-    size_t index = 0;
+    // size_t index = 0;
 
     // while ( index < capt.size())
     // {
@@ -254,6 +253,12 @@ void Post::chunked_body(client &obj){
     //         // else bad request
     //     }
     //     else if (obj.reqq.flag == 2 || obj.reqq.flag == 6)
+        if(obj.reqq.flag == 0)
+        {
+            // std::cout << "created" << std::endl;
+            obj.reqq.file.open(obj.reqq.path + "/" + "uhm.mp4");
+            obj.reqq.flag = 1;
+        }
     //     {
     //         if (capt[index] == '\n')
     //         {
@@ -325,26 +330,26 @@ void Post::chunked_body(client &obj){
        
             if(obj.reqq.saver_count == 0)
             {
-                std::cout <<  "dkhelt had lmra " <<std::endl;
+                // std::cout <<  "dkhelt had lmra " <<std::endl;
                 if (obj.reqq.body[0] == '\r' && obj.reqq.body[1] == '\n')
                     obj.reqq.body = obj.reqq.body.substr(2, obj.reqq.body.length());
-                std::cout << obj.reqq.body.substr(0, 20) << "jellol" << std::endl;
+                // std::cout << obj.reqq.body.substr(0, 20) << "jellol" << std::endl;
                 obj.reqq.saver_count = obj.reqq.body.find("\r\n");
 
-                std::cout << obj.reqq.saver_count << std::endl;
+                // std::cout << obj.reqq.saver_count << std::endl;
                 obj.reqq.tmp = obj.reqq.saver_count + 2;
                 if(obj.reqq.saver_count == 0)
                     throw Except();
                 // obj.reqq.flag = 1;
                 obj.reqq.getit = obj.reqq.body.substr(0, obj.reqq.saver_count);
-                std::cout << "getit" << obj.reqq.getit << std::endl;
+                // std::cout << "getit" << obj.reqq.getit << std::endl;
                 obj.reqq.to_de = hexa_to_num(obj.reqq.getit);
                 obj.reqq.body = obj.reqq.body.substr(obj.reqq.tmp, obj.reqq.body.size());
-                std::cout << "number =========>>>>>>>>> " << obj.reqq.to_de << std::endl;
+                // std::cout << "number =========>>>>>>>>> " << obj.reqq.to_de << std::endl;
                 // index = obj.reqq.saver_count;
             }
-            obj.reqq.r_s = obj.reqq.body[index];
-            std::cout << obj.reqq.saver_count <<  " " << obj.reqq.body.size()  << " " << obj.reqq.to_de<< std::endl;
+            // obj.reqq.r_s = obj.reqq.body[index];
+            // std::cout << obj.reqq.saver_count <<  " " << obj.reqq.body.size()  << " " << obj.reqq.to_de<< std::endl;
             if(obj.reqq.body.size() >= obj.reqq.to_de)
             {
                 // save = obj.reqq.body.find("\r", obj.reqq.saver_count);
@@ -353,30 +358,51 @@ void Post::chunked_body(client &obj){
                 //     throw Except();    
                 // if(obj.reqq.body[index + 1] == '\n')
                 // {    
-                    std::cout << obj.reqq.saver_count  << "<<<<<<<<<<+++++++++++==============================="<< std::endl;
+                    // std::cout << obj.reqq.saver_count  << "<<<<<<<<<<+++++++++++==============================="<< std::endl;
                     obj.reqq.file.write(obj.reqq.body.c_str(), obj.reqq.to_de);
-                    std::cout << "hello" << std::endl;
+                    // std::cout << "hello" << std::endl;
                     obj.reqq.body = obj.reqq.body.substr(obj.reqq.to_de, obj.reqq.body.length());
-                    std::cout << "body len: " << obj.reqq.body.length() << std::endl;
+                    // std::cout << "body len: " << obj.reqq.body.length() << std::endl;
                     obj.reqq.file.flush();
+                    // obj.reqq.to_de = 0;
+
                     obj.reqq.saver_count = 0;
                     // obj.r_done = 1;
                 // }
-            }
+                }
             // if(obj.reqq.body.find("0\r\n\r\n") != std::string::npos)
-            std::cout << "tqrat hadi : "<<obj.reqq.body.find("0\r\n\r\n") << std::endl;
-            std::cout <<  "\\ "<< obj.reqq.body.size() <<   obj.reqq.to_de << std::endl;
-            if((obj.reqq.body.size() >= obj.reqq.to_de) && obj.reqq.body.find("0\r\n\r\n"))
-            {
-                std::cout << "mnytak : " << obj.reqq.body.substr(0, 20) << std::endl;
-                std::cout << "Done" << std::endl;
-                // if(obj.reqq.body[save] == 0)
-                    obj.r_done = 1;
-                    // break;
-                // if(obj.reqq.body[save - 1] && capt[save - 1] == 0)
-                // obj.reqq.saver_count = 0;
-                // obj.reqq.flag = 0;
-            }
+                if(obj.reqq.body.find("\r\n0\r\n\r\n") != std::string::npos)
+                    {
+
+
+                        while (!obj.reqq.body.empty() && (isspace(obj.reqq.body.front()) || obj.reqq.body.front() == '1' || obj.reqq.body.front() == '5')) obj.reqq.body.erase(0, 1);
+                        while (!obj.reqq.body.empty() && (isspace(obj.reqq.body.back()) || iscntrl(obj.reqq.body.back()) || obj.reqq.body.back() == '0')) obj.reqq.body.pop_back();
+                        while (!obj.reqq.body.empty() && (isspace(obj.reqq.body.back()) || iscntrl(obj.reqq.body.back()))) obj.reqq.body.pop_back();
+                        obj.reqq.file.write(obj.reqq.body.c_str(), obj.reqq.body.size());
+                        obj.reqq.file.flush();
+                        // std::cout  << obj.reqq.body<< std::endl;
+                        // std::string str = obj.reqq.body.substr(obj.reqq.body.find("\r\n"));
+                        // std::cout << "here " << str << std::endl;
+                        // for (size_t i = 0; i < str.size(); i++){
+                        //     if ((str[i] > 0 && str[i] < 31) || str[i] == 127)
+                        //         std::cout << (int)str[i] << std::endl;
+                        //     else
+                        //         std::cout << str[i] << std::endl;;
+                        // }
+                        std::cout << "Done" << std::endl;
+                        obj.r_done = 1;
+                    }
+            // std::cout << "tqrat hadi : "<<obj.reqq.body.find("0\r\n\r\n") << std::endl;
+            // std::cout <<  "\\ "<< obj.reqq.body.size() <<   obj.reqq.to_de << std::endl;
+            // if(obj.reqq.body.find("0\r\n\r\n") && (obj.reqq.body.size() >= obj.reqq.to_de))
+            // {
+            //     std::cout << obj.reqq.body.substr(0, obj.reqq.body.find("0\r\n\r\n")).c_str() << std::endl;
+                
+            //         // break;
+            //     // if(obj.reqq.body[save - 1] && capt[save - 1] == 0)
+            //     // obj.reqq.saver_count = 0;
+            //     // obj.reqq.flag = 0;
+            // }
             // if(obj.reqq.flag == 4 && capt.find("\r", obj.reqq.saver_count) == 1)
             // {
             //     save = capt.find("\r", obj.reqq.saver_count);

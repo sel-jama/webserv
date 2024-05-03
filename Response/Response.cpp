@@ -6,7 +6,7 @@
 /*   By: sel-jama <sel-jama@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/03/31 00:44:16 by sel-jama          #+#    #+#             */
-/*   Updated: 2024/04/30 13:54:11 by sel-jama         ###   ########.fr       */
+/*   Updated: 2024/05/03 20:51:55 by sel-jama         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -29,7 +29,6 @@ std::string Response::handleMethod(client &client){
     catch(const std::runtime_error &e){
             return "";
     }
-    // std::cout << "now"<<obj.response << std::endl;
     return obj.response;
 }
 

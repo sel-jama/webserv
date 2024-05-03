@@ -6,7 +6,7 @@
 /*   By: sel-jama <sel-jama@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/03/26 14:13:04 by sel-jama          #+#    #+#             */
-/*   Updated: 2024/05/02 22:35:19 by sel-jama         ###   ########.fr       */
+/*   Updated: 2024/05/03 21:20:20 by sel-jama         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -54,7 +54,6 @@ void ParseRequest::setHttpHeaders() {
     ngxHttpHeaders.push_back("Allow");
     ngxHttpHeaders.push_back("Auth-Scheme");
     ngxHttpHeaders.push_back("Content-Language");
-    ngxHttpHeaders.push_back("Content-Length");
     ngxHttpHeaders.push_back("Content-Location");
     ngxHttpHeaders.push_back("Last-Modified");
     ngxHttpHeaders.push_back("Location");
@@ -130,7 +129,6 @@ int ParseRequest::parseMethod(std::string &method) const{
 }
 
 int ParseRequest::parseHeaders(std::map<std::string, std::string> &headers, std::string &method) const{
-    (void)method;
     int ret = checkUnknownHeader(headers);
     if (ret)
         return ret;

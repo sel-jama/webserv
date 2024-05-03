@@ -85,7 +85,8 @@ std::string method::getMimeType(const std::string& fileName) {
             return "video/mp4";
         }
     }
-    return "application/octet-stream";
+    // return "application/octet-stream";
+    return "";
 }
 
 std::string method::readContent(Request &req){
@@ -175,7 +176,6 @@ bool method::isDirHasIndexFiles(Request &req) const{
             // size_t pos = filename.find('.');
 
             // filename.substr(0, pos);
-            // std::cout << "filename of dir " << filename << std::endl;
             for (std::vector<std::string>::iterator it = req.matchedLocation.index.begin(); it != req.matchedLocation.index.end(); ++it){
                 if (filename == *it)  { //compare with index files in location later
                     req.fileName = *it;

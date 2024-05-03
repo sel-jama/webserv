@@ -22,6 +22,7 @@
 #include <sys/select.h>
 
 #include <sys/time.h>
+#include <netdb.h>
 
 #include "config.hpp"
 #include "paths.hpp"

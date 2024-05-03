@@ -15,6 +15,7 @@ int main(int ac, char **av)
 		infra InfraStruct((configFile(patho).getConfigfile()));
 		
 		InfraStruct.printInfra();
+		// exit (19);
 		InfraStruct.initservers();
 	}
 	catch(const std::exception &e)

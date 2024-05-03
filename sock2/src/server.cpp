@@ -42,26 +42,36 @@ void server::setErrorpages(std::vector<std::string>::const_iterator &it, const s
 		pages.push_back(*it);
 		++it;
 	}
-	if (pages.size() <= 1)throw(std::runtime_error("Error : config-file :bad config file\" Error-pages :check number of arguments in  error-pages\""));
+	// for (std::vector<std::string>::iterator it = pages.begin(); it != pages.end(); ++it)
+	// {
+	// 	std::cout << "=== >" << *it << std::endl;
+	// }
+	if (pages.size() != 2)throw(std::runtime_error("Error : config-file :bad config file\" Error-pages :check number of arguments in  error-pages\""));
 	if (*it != ";") throw(std::runtime_error("Error : config-file :bad config file\" Error-pages :add \";\"at the end of the path of error-pages\""));
 	++it;
-	std::string path;
-	std::vector<std::string>::const_iterator it2 = pages.end() - 1;
-	int state = 0;
-	if ((*it2).at(0) == '/' && ((*it2).at(1) == '~' || !(*it2).empty())) path = *it2;
-	for (std::vector<std::string>::iterator it3 = pages.begin(); it3 != pages.end(); ++it3)
-	{
-		for (std::map<std::string, std::string>::iterator ito = errorPages.begin(); ito != errorPages.end() ; ++ito)
-		{
-			if ((*it3) == (ito)->first)
-			{
-				errorPages[*it3] = path;
-				state = 1;
-				break;
-			}
-		}
-		if (state == 0) throw(std::runtime_error("Error : config-file :bad config file\" Error-pages : give valide error-pages please\""));
-	}
+	// // std::string path;
+	// // std::vector<std::string>::const_iterator it2 = pages.end() - 1;
+	// std::vector<std::string>::const_iterator it2 = pages.begin();
+	// std::cout << "====>" << *it2 << std::endl;
+
+	// // int state = 0;
+	// // std::cout << "----------->" << (*it2) << std::endl;
+	// // if ((*it2).at(0) == '/' && ((*it2).at(1) == '~' || !(*it2).empty())) path = *it2;
+	// // for (std::vector<std::string>::iterator it3 = pages.begin(); it3 != pages.end(); ++it3)
+	// // {
+	// // 	for (std::map<std::string, std::string>::iterator ito = errorPages.begin(); ito != errorPages.end() ; ++ito)
+	// // 	{
+	// // 		if ((*it3) == (ito)->first)
+	// // 		{
+	// // 			errorPages[*it3] = path;
+	// // 			state = 1;
+	// // 			break;
+	// // 		}
+	// // 	}
+	// // 	if (state == 0) throw(std::runtime_error("Error : config-file :bad config file\" Error-pages : give valide error-pages please\""));
+	// // }
+
+	errorPages[*(pages.begin())] = *(pages.end() - 1) ;
 }
 
 void server::setClientMaxBodySize(std::vector<std::string>::const_iterator &it, int &j)
@@ -131,20 +141,20 @@ void server::setlisten(std::vector<std::string>::const_iterator &it)
 server::server()
 {
 	//error-page number
-	errorPages["300"] = "";
-	errorPages["301"] = "";
-	errorPages["400"] = "";
-	errorPages["403"] = "";
-	errorPages["404"] = "";
-	errorPages["405"] = "";
-	errorPages["408"] = "";
-	errorPages["409"] = "";
-	errorPages["411"] = "";
-	errorPages["413"] = "";
-	errorPages["500"] = "";
-	errorPages["501"] = "";
-	errorPages["504"] = "";
-	errorPages["505"] = "";
+	// errorPages["300"] = "";
+	// errorPages["301"] = "";
+	// errorPages["400"] = "";
+	// errorPages["403"] = "";
+	// errorPages["404"] = "";
+	// errorPages["405"] = "";
+	// errorPages["408"] = "";
+	// errorPages["409"] = "";
+	// errorPages["411"] = "";
+	// errorPages["413"] = "";
+	// errorPages["500"] = "";
+	// errorPages["501"] = "";
+	// errorPages["504"] = "";
+	// errorPages["505"] = "";
 	//client max body size
 	clientMaxBodySize = 0;
 
@@ -152,7 +162,36 @@ server::server()
 }
 
 
-
+// void server::setErrorpages(std::vector<std::string>::const_iterator &it, const std::vector<std::string> &tokens)
+// {
+// 	++it;
+// 	std::vector<std::string> pages;
+// 	while(*it != ";" && it != tokens.end())
+// 	{
+// 		pages.push_back(*it);
+// 		++it;
+// 	}
+// 	if (pages.size() <= 1)throw(std::runtime_error("Error : config-file :bad config file\" Error-pages :check number of arguments in  error-pages\""));
+// 	if (*it != ";") throw(std::runtime_error("Error : config-file :bad config file\" Error-pages :add \";\"at the end of the path of error-pages\""));
+// 	++it;
+// 	std::string path;
+// 	std::vector<std::string>::const_iterator it2 = pages.end() - 1;
+// 	int state = 0;
+// 	if ((*it2).at(0) == '/' && ((*it2).at(1) == '~' || !(*it2).empty())) path = *it2;
+// 	for (std::vector<std::string>::iterator it3 = pages.begin(); it3 != pages.end(); ++it3)
+// 	{
+// 		for (std::map<std::string, std::string>::iterator ito = errorPages.begin(); ito != errorPages.end() ; ++ito)
+// 		{
+// 			if ((*it3) == (ito)->first)
+// 			{
+// 				errorPages[*it3] = path;
+// 				state = 1;
+// 				break;
+// 			}
+// 		}
+// 		if (state == 0) throw(std::runtime_error("Error : config-file :bad config file\" Error-pages : give valide error-pages please\""));
+// 	}
+// }
 
 
 server::~server(){}
@@ -186,16 +225,20 @@ void server::printServer()
 	checkServerData();
 	std::cout << "Port value : " << port << std::endl;
 	std::cout << "Port Adress : " << adress << std::endl;
+
 	for (std::map<std::string, std::string>::iterator it = errorPages.begin(); it != errorPages.end(); ++it)
 	{
 		if (!it->second.empty())
-			std::cout << "Error page: " << it->first << " ==> " << it->second << std::endl;
+			std::cout << "Error page: " << it->first
+		 << " ==> " << it->second 
+		 << std::endl;
 	}
 	std::cout << "client max body size: " << clientMaxBodySize << std::endl;
 	for (std::vector<location>::iterator it = locations.begin(); it != locations.end(); ++it)
 	{
 		it->printlocation();
 	}
+
 }
 
 

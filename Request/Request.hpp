@@ -6,7 +6,7 @@
 /*   By: sel-jama <sel-jama@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/03/24 11:13:12 by sel-jama          #+#    #+#             */
-/*   Updated: 2024/05/02 22:38:48 by sel-jama         ###   ########.fr       */
+/*   Updated: 2024/05/03 20:32:03 by sel-jama         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -40,6 +40,7 @@ class Request {
         std::string reqStr;
         std::string responseContentType;
         int responseContentLen;
+        std::string queryString;
 
         // infra Infra;
 
@@ -75,6 +76,7 @@ class Request {
         std::string ip;
         uint16_t port;
         uint16_t serverd;
+        int cgi;
 
         int r;
         Request();
@@ -84,6 +86,7 @@ class Request {
         const std::string& getUri(void) const;
         const std::map<std::string, std::string>& getHeaders(void) const;
         const std::string& getBody(void) const;
+        const std::string& getQuryString(void)const;
 
         void requestPartitioning(Request& saver, std::string& request);
         void isReqWellFormed(Request &req);
@@ -108,6 +111,8 @@ class Request {
         int send_response(client &);
         int read_request(client &, infra &);
         const server &getMatchedServer(const infra &infra);
+        void uriQuery(std::string &uri);
+        std::string generateResponse(client &, std::string &);
 };
 
 #endif

@@ -56,6 +56,8 @@ class Request {
         int tmp;
         static std::ofstream file; 
         size_t to_de;
+        size_t to_de2;
+        std::string content_T;
 
         std::string path;
         std::string fileName;

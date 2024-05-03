@@ -67,30 +67,6 @@ int hexa_to_num(std::string ptr)
     return (value);
 }
 
-// void Post::load_extension()
-// {
-//     std::ifstream file("MIME.conf");
-//     std::string buffer;
-//     std::string secbuffer;
-//     std::string forvalue;
-//     std::string forkey;
-//     if (!file.is_open()) {
-//         while(std::getline(file, buffer))
-//         {
-//                 std::stringstream ss(buffer);
-//                 for (int i = 0; getline(ss, secbuffer, ' '); i++) {
-//                     if (i == 0)
-//                         forkey = secbuffer;
-//                     if(i == 1)
-//                     {
-//                             extension[forkey] = secbuffer;
-//                             break;
-//                     }
-//                 }
-//         }
-//     }
-// }
-
 void Post::get_Request_resource(Request obj)
 {
     struct stat buffer;
@@ -129,12 +105,11 @@ void Post::support_upload(Request &obj){
     obj.load_extension();
     if(iter != obj.headers.end() && !iter->second.empty())
     {
+        obj.content_T = iter->second;
         std::map<std::string, std::string>::iterator iter2 = obj.extension.find(iter->second);
         std::string name = "Post_" + obj2.generateRandomFileName();
         filename = "/"  + name + iter2->second;
     }
-                    // std::cout << "......................" << std::endl;
-        std::cout << "+++++++++ Im writing " << std::endl;
         location capt = obj.getMatchedLocation();
         std::string  ptr = capt.upload_path;
         if(ptr.empty())
@@ -150,19 +125,16 @@ void Post::support_upload(Request &obj){
         }
         else {
             if(filename.empty())
+            {
+                obj.content_T  = "text/plain";
                 filename = "/" + obj2.generateRandomFileName() + ".txt";
-            // std::cout << "helo ->>>>>>>>" << std::endl;
+            }
                 std::ofstream file(ptr + filename);
                 obj.path = ptr + filename;
                 if (file.is_open() == true)
                 {
-                    // if (static_cast<int>(Body.length()) != obj.contentLength) {
-                    //     throw Except(); 
-                    // }
-                    std::cout << "ja hnaya" << std::endl;
                     file << obj.body << std::endl;
                     file.close();
-                    // std::cout << obj.body << std::endl;
                 }
                 else
                     throw Except();
@@ -209,18 +181,16 @@ void Post::Work_with_Directory(Request obj)
 void Post::body(client &obj){
     std::cout << "----------------- reading " << std::endl;
     obj.reqq.body.append(obj.reqq.readRequest(obj.ssocket));
-        // std::cout << "bodyyy ************ " << obj.reqq.body << std::endl; 
     std::cout << "THIS IS THE BODY LEN " <<static_cast<double>(obj.reqq.body.length()) << std::endl;
     std::cout << "THIS IS CONTENT LENGTH " << obj.reqq.contentLength << std::endl;
     if(static_cast<double>(obj.reqq.body.length()) >= obj.reqq.contentLength){
         std::cout << "reading BODY DONE HERE " << std::endl;
+        obj.reqq.statusCode = 201;
+        obj.reqq.responseContentLen = obj.reqq.body.length();
         obj.r_done = 1;
     }
     else
-    {
-        // std::cout << "olah tantqad "<< std::endl;
         obj.r_done = 0;
-    }
 }
 
 std::ofstream Request::file;
@@ -236,12 +206,16 @@ void Post::chunked_body(client &obj){
             obj.reqq.load_extension();
              if(iter != obj.reqq.headers.end() && !iter->second.empty())
             {
+                obj.reqq.content_T = iter->second;
                 std::map<std::string, std::string>::iterator iter2 = obj.reqq.extension.find(iter->second);
                 std::string name = "Post_" + obj2.generateRandomFileName();
                 filename = "/"  + name + iter2->second;
             }
             else if(filename.empty())
+            {
+                obj.reqq.content_T = "text/plain";
                 filename = "/" + obj2.generateRandomFileName() + ".txt";
+            }
             obj.reqq.file.open(obj3.upload_path + filename);
             obj.reqq.flag = 1;
         }
@@ -256,6 +230,8 @@ void Post::chunked_body(client &obj){
                     throw Except();
                 obj.reqq.getit = obj.reqq.body.substr(0, obj.reqq.saver_count);
                 obj.reqq.to_de = hexa_to_num(obj.reqq.getit);
+                obj.reqq.to_de2 += obj.reqq.to_de;
+                obj.reqq.responseContentLen = obj.reqq.to_de2;
                 obj.reqq.body = obj.reqq.body.substr(obj.reqq.tmp, obj.reqq.body.size());
             }
             if(obj.reqq.body.size() >= obj.reqq.to_de)
@@ -274,6 +250,7 @@ void Post::chunked_body(client &obj){
                         obj.reqq.file.write(obj.reqq.body.c_str(), obj.reqq.body.size() - 5);
                         obj.reqq.file.flush();
                         std::cout << "Done" << std::endl;
+                        obj.reqq.statusCode = 201;
                         obj.r_done = 1;
                     }
     }
@@ -294,12 +271,16 @@ void Post::chunked_body2(client &obj){
                 obj.reqq.load_extension();
                 if(iter != obj.reqq.headers.end() && !iter->second.empty())
                 {
+                    obj.reqq.content_T = iter->second;
                     std::map<std::string, std::string>::iterator iter2 = obj.reqq.extension.find(iter->second);
                     std::string name = "Post_" + obj2.generateRandomFileName();
                     filename = "/"  + name + iter2->second;
                 }
                 else if(filename.empty())
+                {
+                    obj.reqq.content_T = "text/plain";
                     filename = "/" + obj2.generateRandomFileName() + ".txt";
+                }
                 obj.reqq.file.open(obj3.upload_path + filename);
                 obj.reqq.flag = 1;
             }
@@ -313,6 +294,7 @@ void Post::chunked_body2(client &obj){
                     throw Except();
                 obj.reqq.getit = obj.reqq.body.substr(0, obj.reqq.saver_count);
                 obj.reqq.to_de = hexa_to_num(obj.reqq.getit);
+                obj.reqq.to_de2 += obj.reqq.to_de;
                 obj.reqq.body = obj.reqq.body.substr(obj.reqq.tmp, obj.reqq.body.size());
             }
             if(obj.reqq.body.size() >= obj.reqq.to_de)
@@ -327,6 +309,8 @@ void Post::chunked_body2(client &obj){
                 obj.reqq.file.write(obj.reqq.body.c_str(), obj.reqq.body.size() - 5);
                 obj.reqq.file.flush();
                 std::cout << "Done" << std::endl;
+                obj.reqq.statusCode = 201;
+                obj.reqq.responseContentLen = obj.reqq.to_de2;
                 obj.r_done = 1;
             }
         }

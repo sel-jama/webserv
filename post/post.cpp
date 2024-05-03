@@ -123,18 +123,22 @@ void Post::support_upload(Request &obj){
     handleCgi obj2;
     int check = 0;
     std::string filename;
+    obj.load_extension();
+    // location obj3 = obj.getMatchedLocation();
     std::map<std::string, std::string>::iterator iter = obj.headers.find("Content-Type");
-    if(iter != obj.extension.end() && !iter->second.empty())
+    obj.load_extension();
+    if(iter != obj.headers.end() && !iter->second.empty())
     {
         std::map<std::string, std::string>::iterator iter2 = obj.extension.find(iter->second);
-        filename = "/text" + iter2->second;
+        std::string name = "Post_" + obj2.generateRandomFileName();
+        filename = "/"  + name + iter2->second;
     }
                     // std::cout << "......................" << std::endl;
-    std::cout << "+++++++++ Im writing " << std::endl;
-    location capt = obj.getMatchedLocation();
-    std::string  ptr = capt.upload_path;
-    if(ptr.empty())
-        throw Except();
+        std::cout << "+++++++++ Im writing " << std::endl;
+        location capt = obj.getMatchedLocation();
+        std::string  ptr = capt.upload_path;
+        if(ptr.empty())
+            throw Except();
     else
     {
         const char* ptr2= ptr.c_str();
@@ -146,7 +150,7 @@ void Post::support_upload(Request &obj){
         }
         else {
             if(filename.empty())
-                filename = "/file.txt";
+                filename = "/" + obj2.generateRandomFileName() + ".txt";
             // std::cout << "helo ->>>>>>>>" << std::endl;
                 std::ofstream file(ptr + filename);
                 obj.path = ptr + filename;
@@ -222,9 +226,23 @@ void Post::body(client &obj){
 std::ofstream Request::file;
 
 void Post::chunked_body(client &obj){
+    std::string filename;
+    handleCgi obj2;
+    location obj3 = obj.reqq.getMatchedLocation();
+
+    std::map<std::string, std::string>::iterator iter = obj.reqq.headers.find("Content-Type");
         if(obj.reqq.flag == 0)
         {
-            obj.reqq.file.open(obj.reqq.path + "/" + "uhm.txt");
+            obj.reqq.load_extension();
+             if(iter != obj.reqq.headers.end() && !iter->second.empty())
+            {
+                std::map<std::string, std::string>::iterator iter2 = obj.reqq.extension.find(iter->second);
+                std::string name = "Post_" + obj2.generateRandomFileName();
+                filename = "/"  + name + iter2->second;
+            }
+            else if(filename.empty())
+                filename = "/" + obj2.generateRandomFileName() + ".txt";
+            obj.reqq.file.open(obj3.upload_path + filename);
             obj.reqq.flag = 1;
         }
         obj.reqq.body.append( obj.reqq.readRequest(obj.ssocket));
@@ -250,13 +268,6 @@ void Post::chunked_body(client &obj){
                 if(obj.reqq.body.find("\r\n0\r\n\r\n") != std::string::npos)
                     {
                         std::cout << "im here"<< std::endl;
-                        // while (!obj.reqq.body.empty() && (isspace(obj.reqq.body.front()) || obj.reqq.body.front() == '1' || obj.reqq.body.front() == '5')) obj.reqq.body.erase(0, 1);
-                        // while (!obj.reqq.body.empty() && (isspace(obj.reqq.body.back()) || iscntrl(obj.reqq.body.back()) || obj.reqq.body.back() == '0')) obj.reqq.body.pop_back();
-                        // while (!obj.reqq.body.empty() && (isspace(obj.reqq.body.back()) || iscntrl(obj.reqq.body.back()))) obj.reqq.body.pop_back();
-                        // obj.reqq.body = obj.reqq.body.substr(obj.reqq.to_de, obj.reqq.body.length());
-                        // std::cout << "the end of body: " << obj.reqq.body << std::endl;
-                        // if (obj.reqq.body[0] == '\r' && obj.reqq.body[1] == '\n')
-                        //     obj.reqq.body = obj.reqq.body.substr(2, obj.reqq.body.length());
                         if (obj.reqq.body[0] == '\r' && obj.reqq.body[1] == '\n')
                             obj.reqq.body = obj.reqq.body.substr(2, obj.reqq.body.length());
                         obj.reqq.body = obj.reqq.body.substr(obj.reqq.body.find("\r\n") + 2 , obj.reqq.body.size());
@@ -268,6 +279,11 @@ void Post::chunked_body(client &obj){
     }
 
 void Post::chunked_body2(client &obj){
+    std::string filename;
+    handleCgi obj2;
+    location obj3 = obj.reqq.getMatchedLocation();
+
+    std::map<std::string, std::string>::iterator iter = obj.reqq.headers.find("Content-Type");
 
         if(!obj.reqq.body.empty() && obj.reqq.body.find("\r\n0\r\n\r\n") != std::string::npos)
             obj.reqq.chunked_flag = 1;
@@ -275,7 +291,16 @@ void Post::chunked_body2(client &obj){
         {
             if(obj.reqq.flag == 0)
             {
-                obj.reqq.file.open(obj.reqq.path + "/" + "uhm.txt");
+                obj.reqq.load_extension();
+                if(iter != obj.reqq.headers.end() && !iter->second.empty())
+                {
+                    std::map<std::string, std::string>::iterator iter2 = obj.reqq.extension.find(iter->second);
+                    std::string name = "Post_" + obj2.generateRandomFileName();
+                    filename = "/"  + name + iter2->second;
+                }
+                else if(filename.empty())
+                    filename = "/" + obj2.generateRandomFileName() + ".txt";
+                obj.reqq.file.open(obj3.upload_path + filename);
                 obj.reqq.flag = 1;
             }
             if(obj.reqq.saver_count == 0)
@@ -299,11 +324,6 @@ void Post::chunked_body2(client &obj){
             }
             if(obj.reqq.body.find("\r\n0\r\n\r\n") != std::string::npos)
             {
-
-
-                // while (!obj.reqq.body.empty() && (isspace(obj.reqq.body.front()) || obj.reqq.body.front() == '1' || obj.reqq.body.front() == '5')) obj.reqq.body.erase(0, 1);
-                // while (!obj.reqq.body.empty() && (isspace(obj.reqq.body.back()) || iscntrl(obj.reqq.body.back()) || obj.reqq.body.back() == '0')) obj.reqq.body.pop_back();
-                // while (!obj.reqq.body.empty() && (isspace(obj.reqq.body.back()) || iscntrl(obj.reqq.body.back()))) obj.reqq.body.pop_back();
                 obj.reqq.file.write(obj.reqq.body.c_str(), obj.reqq.body.size() - 5);
                 obj.reqq.file.flush();
                 std::cout << "Done" << std::endl;

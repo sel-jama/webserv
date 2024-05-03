@@ -32,9 +32,6 @@ class handleCgi {
         std::string cgiPath;
         pid_t pid;
 
-    void initializeEnvironment(const std::map<std::string, std::string>& requestHeaders, const std::string& requestMethod, const std::string& requestPath, const std::string& requestQuery, const std::string& requestBody, const std::string& scriptName);
-    char** createEnvironmentArray() const;
-
 public:
     handleCgi();
     // handleCgi(const std::map<std::string, std::string>& requestHeaders, const std::string& requestMethod, const std::string& requestPath, const std::string& requestQuery, const std::string& requestBody, const std::string& scriptName);
@@ -46,6 +43,7 @@ public:
     void setScriptName(const std::string );
     
     static void handleTimeout(int);
+    std::string generateRandomFileName();
 };
 
 #endif

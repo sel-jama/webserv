@@ -21,7 +21,7 @@ void handleCgi::setScriptName(const std::string name){
     this->scriptName = name;
 }
 
-std::string generateRandomFileName() {
+std::string handleCgi::generateRandomFileName() {
     std::srand(std::time(NULL));
     
     const int filenameLen = 8;

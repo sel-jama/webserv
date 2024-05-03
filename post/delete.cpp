@@ -1,4 +1,4 @@
-#include "Delete.hpp"
+#include "delete.hpp"
 
 void Delete::check_RequestedR(Request &obj){
     struct stat buffer;
@@ -19,49 +19,62 @@ void Delete::check_RequestedR(Request &obj){
         Type = "File";
 }
 
-void Delete::Work_with_file(Request &obj, handleCgi &o)
+void Delete::Work_with_file()
 {
     method b;
     std::string check;
-    size_t t = obj.path.find("..") + 1;
-    // check ../ /.. /../  403
-        if(t == obj.path.size())
-            throw Except();
-        else
-        {
-                if(std::remove(obj.path.c_str()) != 0)
+    // size_t t = obj.path.find("..") + 1;
+    // // check ../ /.. /../  403
+    //     if(t == obj.path.size())
+    //         throw Except();
+        // else
+        // {d
+                if(std::remove("file.txt2") != 0)
                     throw Except();
-        }
+        // } 
 
 }
 
-void Delete::Work_with_Directory(Request &obj, handleCgi &o)
+void Delete::Work_with_Directory()
 {
-    R_removing(obj);
+    R_removing();
 }
 
-void Delete::R_removing(Request &obj){
+void Delete::R_removing(){
     DIR *dir;
     struct dirent *ent;
 
     // Open directory
-    if ((dir = opendir(obj.path.c_str()))) {
+    if(variable == 0)
+    {
+        variable = 1;
+        Path = "/goinfre/yboucha/webserv/post/folder/";
+        std::cout << Path << std::endl;
+    }
+    dir = opendir(Path.c_str());
+    if (dir != NULL) {
+        dir = opendir(Path.c_str());
         // Iterate through directory entries
         while ((ent = readdir(dir)) != NULL) {
-            std::string filename = ent->d_name;
-            std::string filepath = obj.path + '/' + filename;
-            char *filepath2 = const_cast<char*>(filepath.c_str());
+            std::string filpath = ent->d_name;
+            std::cout << ent->d_name  << std::endl;
+            std::string filepath = Path + '/' + ent->d_name;
+            char *filepath2 = const_cast<char*>(filpath.c_str());
+            // std::cout << filpath.c_str()  << "hi " << std::endl;
             if(ent->d_type == DT_DIR)
             {
-                obj.path = filepath2;
-                R_removing(obj);
+                Path = filepath2;
+                R_removing();
             }
-            if(std::remove(filepath.c_str()) != 0)
+            if(std::remove(filpath.c_str()) != 0)
                 throw Except();//403
         }
     }
     else
+    {
+        std::cout << "final"<< std::endl;
         throw Except();//500
+    }
     // No index file found
     return ;
 }

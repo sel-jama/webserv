@@ -6,7 +6,7 @@
 /*   By: sel-jama <sel-jama@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/03/24 11:13:12 by sel-jama          #+#    #+#             */
-/*   Updated: 2024/05/03 20:32:03 by sel-jama         ###   ########.fr       */
+/*   Updated: 2024/05/04 01:02:34 by sel-jama         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -31,6 +31,7 @@ class Request {
         std::string uri;
         std::string version;
         std::map<std::string, std::string> headers;
+        std::map<std::string, std::string> extension;
         
         std::string body;
 
@@ -56,6 +57,8 @@ class Request {
         int tmp;
         static std::ofstream file; 
         size_t to_de;
+        size_t to_de2;
+        std::string content_T;
 
         std::string path;
         std::string fileName;
@@ -113,6 +116,7 @@ class Request {
         const server &getMatchedServer(const infra &infra);
         void uriQuery(std::string &uri);
         std::string generateResponse(client &, std::string &);
+        void load_extension();
 };
 
 #endif

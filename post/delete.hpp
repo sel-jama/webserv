@@ -4,7 +4,7 @@
 #include <iostream>
 #include "../Request/Request.hpp"
 #include <map>
-#include "../Cgi/handleCgi.hpp"
+// #include "../Cgi/handleCgi.hpp"
 #include "../Response/method.hpp"
 
 class handleCgi;
@@ -12,11 +12,13 @@ class Delete{
 
     private :
     public : 
+        std::string Path;
+        int variable;
         std::string Type;
         void check_RequestedR(Request &obj);
-        void Work_with_file(Request &obj, handleCgi &o);
-        void Work_with_Directory(Request &obj, handleCgi &o);
-        void R_removing(Request &obj);
+        void Work_with_file(void);
+        void Work_with_Directory();
+        void R_removing();
 };
 
 class Except : std::exception{

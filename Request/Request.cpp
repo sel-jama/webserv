@@ -6,7 +6,7 @@
 /*   By: sel-jama <sel-jama@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/03/24 15:33:33 by sel-jama          #+#    #+#             */
-/*   Updated: 2024/05/04 00:53:24 by sel-jama         ###   ########.fr       */
+/*   Updated: 2024/05/04 01:02:10 by sel-jama         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -39,6 +39,33 @@ const std::map<std::string, std::string>& Request::getHeaders() const{
 
 const std::string& Request::getQuryString() const{
     return this->queryString;
+}
+
+void Request::load_extension()
+{
+    std::ifstream file("/goinfre/yboucha/cloned/Request/MIME.conf");
+    std::string buffer;
+    std::string secbuffer;
+    std::string forvalue;
+    std::string forkey;
+    if (file.is_open()) {
+        while(std::getline(file, buffer))
+        {
+                std::stringstream ss(buffer);
+                // std::cout << buffer << std::endl;
+                for (int i = 0; getline(ss, secbuffer, ' '); i++) {
+
+                            // std::cout << secbuffer << "."<< std::endl;
+                    if (i == 0)
+                        forkey = secbuffer;
+                    if(i == 1)
+                    {
+                            extension[forkey] = secbuffer;
+                            break;
+                    }
+                }
+        }
+    }
 }
 
 void Request::cutOffBodySegment(std::string &request){

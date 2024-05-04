@@ -7,11 +7,12 @@
 #include <strstream>
 #include <map>
 #include "../Request/Request.hpp"
+#include "../cgi/handleCgi.hpp"
 #include "../sock2/includes/client.hpp"
 
 class Post{
     private:
-        std::map<std::string, std::string> extension;
+        // std::map<std::string, std::string> extension;
         bool post_indicate;
         bool chunked_indicate;
         std::string string_saver;

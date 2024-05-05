@@ -9,18 +9,29 @@
 //     if (port)
 // }
 
+// void infra::sockettolisten(std::vector<server>::iterator &it)
+// {
+//     // check_port();
+//     int opt = 1;
+//     socklen_t j = sizeof((*it).data_socket);
+//     if (((*it).ssocket = socket(AF_INET, SOCK_STREAM, 0)) == -1)                        throw(std::runtime_error("Error: init servers : socket()"));
+//     if (fcntl((*it).ssocket, F_SETFL, O_NONBLOCK, FD_CLOEXEC) == -1)                    throw(std::runtime_error("Error: init servers : fcntl()"));
+//     if (setsockopt((*it).ssocket, SOL_SOCKET, SO_REUSEPORT, &(opt), sizeof(opt)) == -1) throw(std::runtime_error("Error: init servers : setsockopt() SO_REUSPORT"));
+//     // if (setsockopt((*it).ssocket, SOL_SOCKET, SO_REUSEADDR, &(opt), sizeof(opt)) == -1) throw(std::runtime_error("Error: init servers : setsockopt() SO_REUSPORT"));
+//     if (bind((*it).ssocket, (const sockaddr *)&((*it).data_socket), j) != 0)           throw(std::runtime_error("Error: init servers : bind()"));
+    
+//     if (listen((*it).ssocket,10 ) == -1)                                                throw(std::runtime_error("Error: init servers : listen()"));
+// }
 void infra::sockettolisten(std::vector<server>::iterator &it)
 {
     // check_port();
     int opt = 1;
-    socklen_t j = sizeof((*it).data_socket);
     if (((*it).ssocket = socket(AF_INET, SOCK_STREAM, 0)) == -1)                        throw(std::runtime_error("Error: init servers : socket()"));
     if (fcntl((*it).ssocket, F_SETFL, O_NONBLOCK, FD_CLOEXEC) == -1)                                         throw(std::runtime_error("Error: init servers : fcntl()"));
     if (setsockopt((*it).ssocket, SOL_SOCKET, SO_REUSEPORT, &(opt), sizeof(opt)) == -1) throw(std::runtime_error("Error: init servers : setsockopt() SO_REUSPORT"));
-    if (bind((*it).ssocket, (const sockaddr *)&((*it).data_socket), j) == -1)           throw(std::runtime_error("Error: init servers : bind()"));
-    if (listen((*it).ssocket,10 ) == -1)                                                throw(std::runtime_error("Error: init servers : listen()"));
+    if (bind((*it).ssocket, (*it).servinfo->ai_addr, (*it).servinfo->ai_addrlen) == -1)           throw(std::runtime_error("Error: init servers : bind()"));
+    if (listen((*it).ssocket, SOMAXCONN ) == -1)                                                throw(std::runtime_error("Error: init servers : listen()"));
 }
-
 
 void infra::initselect()
 {
@@ -38,11 +49,22 @@ void infra::initselect()
 
 void infra::initdata(std::vector<server>::iterator &it)//to be modifed
 {
-
-    (*it).data_socket.sin_addr.s_addr = INADDR_ANY;
-    (*it).data_socket.sin_port = htons((*it).getPort());
-    (*it).data_socket.sin_family = AF_INET;
-
+    // (*it).data_socket.sin_addr.s_addr = INADDR_ANY;
+    // (*it).data_socket.sin_port = htons((*it).getPort());
+    // (*it).data_socket.sin_family = AF_INET;
+    struct addrinfo hints;
+    memset(&hints, 0, sizeof hints);
+    std::string ip2 = (*it).getAdress();
+    std::string port2 = std::to_string((*it).getPort());
+    // std::cout << "ip >> " << ip2 << "   port >> " << port2 << std::endl;
+    hints.ai_family = AF_INET;
+    hints.ai_socktype = SOCK_STREAM;
+    hints.ai_flags = AI_PASSIVE;
+    // (void)ip2;
+    // (void)port2;
+    if (getaddrinfo(ip2.c_str() , port2.c_str(), &(hints), &((*it).servinfo)) != 0) throw(std::runtime_error("pb"));
+    // exit(66);
+    // std::cout << "parapapa " << (*it).getPort() << "====>" << (*it).data_socket.sin_port << std::endl;
 }
 
 

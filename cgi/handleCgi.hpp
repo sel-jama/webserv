@@ -6,7 +6,7 @@
 /*   By: sel-jama <sel-jama@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/04/04 07:35:35 by sel-jama          #+#    #+#             */
-/*   Updated: 2024/05/02 23:14:34 by sel-jama         ###   ########.fr       */
+/*   Updated: 2024/05/04 01:03:06 by sel-jama         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -44,6 +44,10 @@ public:
     
     static void handleTimeout(int);
     std::string generateRandomFileName();
+    char ** createPostEnv(Request &req);
+    void executeCgiBody(Request &req);
+    char **createGetEnv(Request &req);
+    std::string parseCgiRsponse(std::string &);
 };
 
 #endif

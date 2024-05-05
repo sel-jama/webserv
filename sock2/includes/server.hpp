@@ -30,6 +30,12 @@ class server
 		//server data x socket
 		int ssocket;
 		struct sockaddr_in data_socket;
+
+		//add to fix servers pb
+		
+		struct addrinfo *servinfo;
+
+
 		//setter
 		// void setPort(const uint16_t &);
 		// void setAdress(const std::string &);
@@ -59,7 +65,6 @@ class server
 		void ioswap(fd_set &, fd_set &, int);
 		void accept_new_connection(fd_set &, int &);
 		void handle_old_cnx(fd_set &, fd_set &, fd_set &, fd_set &, int &, int &, infra &);
-
 
 		//check - debug
 		void printServer();

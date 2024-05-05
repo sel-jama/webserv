@@ -23,58 +23,64 @@ void Delete::Work_with_file()
 {
     method b;
     std::string check;
-    // size_t t = obj.path.find("..") + 1;
-    // // check ../ /.. /../  403
-    //     if(t == obj.path.size())
-    //         throw Except();
-        // else
-        // {d
-                if(std::remove("file.txt2") != 0)
-                    throw Except();
-        // } 
-
+    
+    if(std::remove("file.txt2") != 0)
+            throw Except();
 }
 
 void Delete::Work_with_Directory()
 {
-    R_removing();
+    first_Delete();
 }
 
-void Delete::R_removing(){
+void Delete::first_Delete()
+{
     DIR *dir;
     struct dirent *ent;
 
-    // Open directory
-    if(variable == 0)
-    {
-        variable = 1;
-        Path = "/goinfre/yboucha/webserv/post/folder/";
-        std::cout << Path << std::endl;
-    }
+    Path = "folder";
     dir = opendir(Path.c_str());
     if (dir != NULL) {
-        dir = opendir(Path.c_str());
-        // Iterate through directory entries
-        while ((ent = readdir(dir)) != NULL) {
+        while ((ent = readdir(dir))) {
             std::string filpath = ent->d_name;
-            std::cout << ent->d_name  << std::endl;
+            if(!std::strcmp(ent->d_name, ".") || !std::strcmp(ent->d_name, ".."))
+                continue;
             std::string filepath = Path + '/' + ent->d_name;
-            char *filepath2 = const_cast<char*>(filpath.c_str());
-            // std::cout << filpath.c_str()  << "hi " << std::endl;
-            if(ent->d_type == DT_DIR)
-            {
-                Path = filepath2;
-                R_removing();
-            }
-            if(std::remove(filpath.c_str()) != 0)
-                throw Except();//403
+            if(ent->d_type ==  DT_DIR)
+                R_removing(filepath);
+            if(std::remove(filepath.c_str()) != 0)
+                throw Except();
         }
     }
-    else
-    {
-        std::cout << "final"<< std::endl;
-        throw Except();//500
+}
+
+void Delete::R_removing(std::string path){
+    DIR *dir;
+    struct dirent *ent;
+    std::string saver;
+
+    std::cout << path << " <============"<< std::endl;
+    if (dir != NULL) {
+        while ((ent = readdir(dir))) {
+            std::cout << ent->d_name   << " ana "<< std::endl;
+            std::string filpath = ent->d_name;
+            if(!std::strcmp(ent->d_name, ".") || !std::strcmp(ent->d_name, ".."))
+                continue;
+            std::string filepath = path + '/' + ent->d_name;
+            char *filepath2 = const_cast<char*>(ent->d_name);
+            if(ent->d_type == DT_DIR)
+            {
+                saver = path;
+                path = path + "/" + filepath2;
+                R_removing(path);
+                path = saver;
+            } 
+            if(std::remove(filepath.c_str()) != 0)
+                throw Except();
+        }
     }
-    // No index file found
+    if(dir == NULL)
+        throw Except();
+    std::cout << "final" << std::endl;
     return ;
 }

@@ -76,7 +76,7 @@ void Post::get_Request_resource(Request obj)
     std::string Encoding;
     std::map<std::string, std::string>::const_iterator value = obj.getHeaders().find("Transfer-Encoding"); 
     Encoding = value->second;
-    const char *ptr = path.c_str();
+    const char *ptr = path.c_str(); 
     int check = access(ptr, F_OK);
     if (check  == -1) {
         throw Except();

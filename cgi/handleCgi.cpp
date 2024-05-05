@@ -6,7 +6,7 @@
 /*   By: sel-jama <sel-jama@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/04/04 07:40:50 by sel-jama          #+#    #+#             */
-/*   Updated: 2024/05/05 04:45:49 by sel-jama         ###   ########.fr       */
+/*   Updated: 2024/05/05 22:33:12 by sel-jama         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -148,53 +148,6 @@ std::string handleCgi::parseCgiRsponse(std::string &cgiOutput){
     return ret;
 }
 
-// std::string handleCgi::parseCgiRsponse(std::string& cgiOutput) {
-//     std::string ret;
-//     std::stringstream ss;
-//     std::stringstream iss(cgiOutput);
-
-//     size_t p = cgiOutput.find("\r\n\r\n");
-//     if (p != std::string::npos) {
-//         std::string headers = cgiOutput.substr(0, p + 4); // Include the last \r\n\r\n
-//         std::string body = cgiOutput.substr(p + 4);
-
-//         // Parse headers
-//         std::map<std::string, std::string> mapHeaders;
-//         std::string headerLine;
-//         while (std::getline(iss, headerLine, '\n')) {
-//             if (headerLine == "\r") break; // End of headers
-//             size_t pos = headerLine.find(':');
-//             if (pos != std::string::npos) {
-//                 std::string key = headerLine.substr(0, pos);
-//                 std::string value = headerLine.substr(pos + 1);
-//                 // Trim spaces from key and value
-//                 key.erase(0, key.find_first_not_of(' ')); // Trim leading spaces
-//                 key.erase(key.find_last_not_of(' ') + 1); // Trim trailing spaces
-//                 value.erase(0, value.find_first_not_of(' ')); // Trim leading spaces
-//                 value.erase(value.find_last_not_of(' ') + 1); // Trim trailing spaces
-//                 mapHeaders[key] = value;
-//             }
-//         }
-
-//         if (mapHeaders.find("Content-Length") == mapHeaders.end()) {
-//             ss << "Content-Length: " << body.length() << "\r\n";
-//         }
-
-//         // Append original headers and body
-//         ss << headers << body;
-//         ret = ss.str();
-//     } else {
-//         // If headers not found, generate response with default headers
-//         ss << "Content-Length: " << cgiOutput.length() << "\r\n"
-//            << "Content-Type: text/plain\r\n\r\n"
-//            << cgiOutput;
-//         ret = ss.str();
-//     }
-
-//     return ret;
-// }
-
-
 std::string handleCgi::executeCgiScript(Request &req) {
     scriptName = req.path;
     // validateCgi(req);
@@ -279,19 +232,16 @@ char **handleCgi::createPostEnv(Request &req){
 		mapEnv["AUTH_TYPE"] = headers["Authorization"];
 
 	mapEnv["REDIRECT_STATUS"] = "200";
-	mapEnv["GATEWAY_INTERFACE"] = "CGI/1.1";
 	mapEnv["SCRIPT_NAME"] = req.path;
 	mapEnv["SCRIPT_FILENAME"] = scriptName;
 	mapEnv["REQUEST_METHOD"] = req.getMethod();
 	mapEnv["CONTENT_LENGTH"] = std::to_string(req.responseContentLen);
 	mapEnv["CONTENT_TYPE"] = headers["Content-Type"];
-	mapEnv["REMOTE_IDENT"] = headers["Authorization"];
-	mapEnv["REMOTE_USER"] = headers["Authorization"];
 	mapEnv["SERVER_NAME"] = headers["Hostname"];
 	mapEnv["SERVER_PORT"] = req.port;
     mapEnv["QUERY_STRING"] = req.getQuryString();
 	mapEnv["SERVER_PROTOCOL"] = "HTTP/1.1";
-	mapEnv["SERVER_SOFTWARE"] = "Webserv/1.0";
+    mapEnv["PATH_INFO"] = req.path;
 
     
     char	**env = new char*[mapEnv.size() + 1];

@@ -6,7 +6,7 @@
 /*   By: sel-jama <sel-jama@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/03/24 15:33:33 by sel-jama          #+#    #+#             */
-/*   Updated: 2024/05/05 01:10:56 by sel-jama         ###   ########.fr       */
+/*   Updated: 2024/05/05 23:07:42 by sel-jama         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -19,7 +19,7 @@
 Request::Request() : method(""), uri(""), 
 version(""), body(""), reqStr(""), responseContentType(""), responseContentLen(0), fileName(""),
 contentLength(0), readbytes(0), readBody(0), firstRead(1)
-,headersDone(0), statusCode(0), statusMsg(""), isChunked(0), cgi(0), r(0){
+,headersDone(0), statusCode(0), statusMsg(""), isChunked(0), cgi(0), chunkPos(0), firstChunk(1),r(0){
     to_de = 0 ;flag = 0; saver_count = 0; tmp = 0;
 }
 
@@ -305,6 +305,9 @@ void resetClientRequest(Request &req){
     req.serverd = 0;
     req.cgi = 0;
     req.queryString = "";
+    req.response = "";
+    req.chunkPos = 0;
+    req.firstChunk = 1;
 }
 
 std::string Request::generateResponse(client &client, std::string &content){
@@ -328,43 +331,36 @@ std::string Request::generateResponse(client &client, std::string &content){
 
 int Request::send_response(client &client){
     // std::cout << "\033[1;34m started responding here \033[0m" << std::endl;
-    client.w_done = 0;
-    std::string res;
-    try{
-
+    std::string chunk("");
+    
+    if (firstChunk){
+        client.w_done = 0;
         std::string content;
-        // std::cout << client.reqq.statusCode << "*********----------"<< std::endl;
-        if (!client.reqq.statusCode){
+        try{
+            if (client.reqq.statusCode)
+                throw std::runtime_error("Request reading failed");
             content = Response::handleMethod(client);
         }
-        //post do not give content handle later  <<<<<<<
-        if (client.reqq.statusCode || content.empty()){
-            // std::cout << "got here "<< std::endl;
-            if(client.reqq.method != "HEAD")
+        catch (const std::runtime_error &e){
+            if (client.reqq.method != "HEAD")
                 content = errorPage::serveErrorPage(client.reqq);
         }
-        // if (!client.reqq.cgi)
-            res = generateResponse(client, content);
-        // else
-            // res = content;
-        std::cout << "\033[1;35m---------------RESPONSE-----------------\n" <<  res <<"\033[0m" << std::endl;
-        // char buffer[BUFFER_SIZE] = {};
-        // response.read(buffer, BUFFER_SIZE);
-        // buffer[response.gcount()] = '\0';
-        // std::streamsize bytes = response.readsome(buffer, BUFFER_SIZE);
-        
-        // std::cout << "Response: \n"<<res;
-        // write(client.ssocket, res.c_str(), res.length());
-        // if (response.eof()){
+        response = generateResponse(client, content);
+        firstChunk = 0;
+    }
+    
+    if (chunkPos < response.length()){
+        chunk = response.substr(chunkPos, chunkPos+1023);
+        if (send(client.ssocket, chunk.c_str(), chunk.length(), 0) == -1){
+            std::cerr << "send failed ..." << std::endl;
+            return 0;
+        }
+        chunkPos += 1023;
+    }
+    else{
+        std::cout << "\033[1;35m---------------RESPONSE-----------------\n" <<  response.substr(0, response.find("\r\n\r\n")) <<"\033[0m" << std::endl;
         client.w_done = 1;
         resetClientRequest(client.reqq);
-        // }
-        if (send(client.ssocket, res.c_str(), res.length(), 0) == -1)
-            throw std::runtime_error("Send failed");
-    }
-    catch (const std::runtime_error &e){
-        std::cout << "Exception catched in send response : " << e.what() << std::endl;
-        return 0;
     }
     return 1;
 }

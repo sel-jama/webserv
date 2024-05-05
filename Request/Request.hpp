@@ -6,7 +6,7 @@
 /*   By: sel-jama <sel-jama@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/03/24 11:13:12 by sel-jama          #+#    #+#             */
-/*   Updated: 2024/05/04 22:53:01 by sel-jama         ###   ########.fr       */
+/*   Updated: 2024/05/05 23:04:21 by sel-jama         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -71,6 +71,9 @@ class Request {
         uint16_t port;
         uint16_t serverd;
         int cgi;
+        std::string response;
+        size_t chunkPos;
+        int firstChunk;
 
         int r;
         Request();

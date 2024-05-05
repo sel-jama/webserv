@@ -18,7 +18,8 @@ class Delete{
         void check_RequestedR(Request &obj);
         void Work_with_file(void);
         void Work_with_Directory();
-        void R_removing();
+        void R_removing(std::string path);
+        void first_Delete();
 };
 
 class Except : std::exception{

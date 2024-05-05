@@ -6,7 +6,7 @@
 /*   By: sel-jama <sel-jama@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/03/24 15:33:33 by sel-jama          #+#    #+#             */
-/*   Updated: 2024/05/04 01:02:10 by sel-jama         ###   ########.fr       */
+/*   Updated: 2024/05/05 01:10:56 by sel-jama         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -39,6 +39,10 @@ const std::map<std::string, std::string>& Request::getHeaders() const{
 
 const std::string& Request::getQuryString() const{
     return this->queryString;
+}
+
+const std::string& Request::getVersion() const{
+    return this->version;
 }
 
 void Request::load_extension()
@@ -85,19 +89,19 @@ std::string Request::readRequest(int &fdSocket){
     // if (readBody && firstRead){
     //     buff << bodySaver; 
     //     firstRead = 0;
-    // }
-    
-    
+    // 
     char buffer[BUFFER_SIZE];
     // std::cout << "readbytes-> " << readbytes << std::endl;
     readbytes = read(fdSocket, buffer, BUFFER_SIZE - 1);
     // std::cout << "readbytes: " << readbytes << std::endl;
-    if (readbytes <= 0){
+    if (readbytes < 0){
         statusCode = 500;
-        throw std::runtime_error("Error reading from socket: Peer closed connection");
+        throw std::runtime_error("Error reading from socket");
     }
-    // else if (readbytes == 0)//flag hada sala fhadi ola -1 (same with write response -1)
-    //     throw std::runtime_error("Peer closed the connection");
+    else if (readbytes == 0){
+        statusCode = -1;
+        throw std::runtime_error("Peer closed the connection");
+    }
     buffer[readbytes] = '\0';
     buff.write(buffer, readbytes);
     std::string request(buff.str());
@@ -105,7 +109,6 @@ std::string Request::readRequest(int &fdSocket){
         cutOffBodySegment(request);
         if (headersDone)
             readBody = 1;
-            
     }
     return request;
 }
@@ -133,6 +136,11 @@ void Request::requestPartitioning(Request &saver, std::string& request) {
     while (std::getline(iss, headerLine, '\n')){
         if (headerLine == "\r")
             break;
+        if (headerLine.length() > 1024)
+        {
+            statusCode = 413;
+            throw std::runtime_error("Too long headerline");
+        }
         size_t pos = headerLine.find(':');
         if (pos != std::string::npos) {
             std::string key = headerLine.substr(0, pos);
@@ -296,6 +304,7 @@ void resetClientRequest(Request &req){
     req.isChunked = 0;
     req.serverd = 0;
     req.cgi = 0;
+    req.queryString = "";
 }
 
 std::string Request::generateResponse(client &client, std::string &content){
@@ -309,8 +318,7 @@ std::string Request::generateResponse(client &client, std::string &content){
         response << "HTTP/1.1 " << client.reqq.statusCode << " " << msg.statusMsgs[client.reqq.statusCode] << "\r\n";
         if (!client.reqq.cgi){
             response << "Content-Type: " << responseContentType << "\r\n"
-            << "Content-Length: " << responseContentLen << "\r\n"
-            << "\r\n";
+            << "Content-Length: " << responseContentLen << "\r\n\r\n";
         }
         
         response << content;
@@ -384,8 +392,8 @@ int Request::read_request(client &client, infra & infra){
     catch (const std::runtime_error &e){
         std::cout << "\033[1;36mError in reading : "<< e.what() << "\033[0m" << std::endl;
         client.r_done = 1;
-        // if(!statusCode)
-            // return 0;
+        if(statusCode == -1)
+            return 0;
     }
     if (client.r_done)
         std::cout << "\033[1;33m--------------------REQUEST-------------------------\n" << client.reqq.reqStr << "\033[0m" << std::endl;

@@ -6,7 +6,7 @@
 /*   By: sel-jama <sel-jama@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/03/26 14:13:04 by sel-jama          #+#    #+#             */
-/*   Updated: 2024/05/03 21:20:20 by sel-jama         ###   ########.fr       */
+/*   Updated: 2024/05/04 23:35:00 by sel-jama         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -78,7 +78,6 @@ void ParseRequest::setHttpHeaders() {
     ngxHttpHeaders.push_back("Destination");  //Specifies the destination URL for a WebDAV operation
     ngxHttpHeaders.push_back("Date");  //Specifies the date and time at which the message was originated
     ngxHttpHeaders.push_back("Cookie");  //Specifies the date and time at which the message was originated
-    
 }
 
 // void ParseRequest::setMethods(void) {
@@ -140,7 +139,7 @@ int ParseRequest::parseHeaders(std::map<std::string, std::string> &headers, std:
     
     char *end;
     if (method == "POST" && headers.find("Transfer-Encoding") == headers.end() && (headers.find("Content-Length") == headers.end() || strtod(headers.at("Content-Length").c_str(), &end) == 0))
-        return 400;
+        return 411;
         // throw std::runtime_error("400 Bad Request : Messing headers");
     
     //setContentLength(headers);

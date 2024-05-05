@@ -6,7 +6,7 @@
 /*   By: sel-jama <sel-jama@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/03/24 11:13:12 by sel-jama          #+#    #+#             */
-/*   Updated: 2024/05/04 01:02:34 by sel-jama         ###   ########.fr       */
+/*   Updated: 2024/05/04 22:53:01 by sel-jama         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -25,7 +25,6 @@ class infra;
 // class location;
 
 class Request {
-    //tochange
     public:
         std::string method;
         std::string uri;
@@ -33,23 +32,15 @@ class Request {
         std::map<std::string, std::string> headers;
         std::map<std::string, std::string> extension;
         
-        std::string body;
-
-        // server serverInfo;
-        // client &user;
-        location matchedLocation;
-        std::string reqStr;
-        std::string responseContentType;
-        int responseContentLen;
-        std::string queryString;
-
-        // infra Infra;
-
-        //more to set up 
-        // std::map<std::string, std::string> cgiEnv;
-        // std::string query;
     public:
         //additioanal
+        std::string body;
+        std::string reqStr;
+        std::string queryString;
+        std::string responseContentType;
+        int responseContentLen;
+        location matchedLocation;
+        
         std::string getit;
         std::string r_s;
         int flag;
@@ -85,11 +76,18 @@ class Request {
         Request();
         ~Request();
 
+        //getters
         const std::string& getMethod(void) const;
         const std::string& getUri(void) const;
+        const std::string& getVersion(void) const;
         const std::map<std::string, std::string>& getHeaders(void) const;
         const std::string& getBody(void) const;
         const std::string& getQuryString(void)const;
+
+        //setters
+        // void setMethod(const std::string );
+        // void setUri(const std::string ) ;
+        // void setVersion(const std::string );
 
         void requestPartitioning(Request& saver, std::string& request);
         void isReqWellFormed(Request &req);

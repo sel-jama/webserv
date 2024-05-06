@@ -51,7 +51,7 @@ void method::GetDataForClient(Request &req, int &clientSocket) {
     else
         handleDirectory(req);
 
-    req.responseContentType = getMimeType(req.fileName);
+    // req.responseContentType = getMimeType(req.fileName);
     // std::string content = readContent(req.fileName);
 
 
@@ -60,33 +60,6 @@ void method::GetDataForClient(Request &req, int &clientSocket) {
     // if (send(clientSocket, this->response.c_str(), this->response.length(), 0) == -1)
     //     throw std::runtime_error("Error: Failed to send response to client");
     
-}
-
-std::string method::getMimeType(const std::string& fileName) {
-    size_t dotPos = fileName.find_last_of('.');
-    if (dotPos != std::string::npos){
-        std::string extension = fileName.substr(dotPos + 1);
-        if (extension == "html" || extension == "htm") {
-            return "text/html";
-        } else if (extension == "css") {
-            return "text/css";
-        } else if (extension == "js") {
-            return "application/javascript";
-        } else if (extension == "jpg" || extension == "jpeg") {
-            return "image/jpeg";
-        } else if (extension == "png") {
-            return "image/png";
-        } else if (extension == "gif") { 
-            return "image/gif";
-        } else if (extension == "txt") {
-            return "text/plain";
-        }
-        else if (extension == "mp4") {
-            return "video/mp4";
-        }
-    }
-    // return "application/octet-stream";
-    return "";
 }
 
 std::string method::readContent(Request &req){

@@ -335,8 +335,8 @@ void server::handle_old_cnx(fd_set &fd_r, fd_set &fd_w, fd_set &fd_rcopy, fd_set
 				// 	(*it).reset_client();
 				// else
 				// {
-					clientdown(*it, fd_r, fd_w, maxfd);
-					break;
+					// clientdown(*it, fd_r, fd_w, maxfd);
+					// break;
 				// }
 			}
 	}}

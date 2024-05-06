@@ -6,7 +6,7 @@
 /*   By: sel-jama <sel-jama@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/03/24 15:33:33 by sel-jama          #+#    #+#             */
-/*   Updated: 2024/05/05 23:07:42 by sel-jama         ###   ########.fr       */
+/*   Updated: 2024/05/06 05:45:23 by sel-jama         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -93,7 +93,7 @@ std::string Request::readRequest(int &fdSocket){
     char buffer[BUFFER_SIZE];
     // std::cout << "readbytes-> " << readbytes << std::endl;
     readbytes = read(fdSocket, buffer, BUFFER_SIZE - 1);
-    // std::cout << "readbytes: " << readbytes << std::endl;
+    std::cout << "readbytes: " << readbytes << std::endl;
     if (readbytes < 0){
         statusCode = 500;
         throw std::runtime_error("Error reading from socket");
@@ -311,6 +311,7 @@ void resetClientRequest(Request &req){
 }
 
 std::string Request::generateResponse(client &client, std::string &content){
+    client.reqq.responseContentType = getMimeType(client.reqq.fileName);
     if (!responseContentLen)
             responseContentLen = content.length();
         std::string res;
@@ -351,7 +352,8 @@ int Request::send_response(client &client){
     
     if (chunkPos < response.length()){
         chunk = response.substr(chunkPos, chunkPos+1023);
-        if (send(client.ssocket, chunk.c_str(), chunk.length(), 0) == -1){
+        std::cout << chunk.length()<< std::endl;
+         if (send(client.ssocket, chunk.c_str(), chunk.length(), 0) == -1){
             std::cerr << "send failed ..." << std::endl;
             return 0;
         }
@@ -418,4 +420,18 @@ const server &Request::getMatchedServer(const infra &infra){
     }
     return *i;
     
+}
+
+std::string Request::getMimeType(const std::string& fileName){
+    load_extension();
+    size_t dotPos = fileName.find_last_of('.');
+    if (dotPos != std::string::npos){
+        std::string exe = fileName.substr(dotPos);
+        std::map<std::string, std::string>::iterator it = extension.begin();
+        for (; it != extension.end(); it++){
+            if (it->second == exe)
+                return it->first;
+        }
+    }
+    return "text/html";
 }

@@ -6,7 +6,7 @@
 /*   By: sel-jama <sel-jama@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/03/24 15:33:33 by sel-jama          #+#    #+#             */
-/*   Updated: 2024/05/06 05:45:23 by sel-jama         ###   ########.fr       */
+/*   Updated: 2024/05/06 23:04:16 by sel-jama         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -19,7 +19,7 @@
 Request::Request() : method(""), uri(""), 
 version(""), body(""), reqStr(""), responseContentType(""), responseContentLen(0), fileName(""),
 contentLength(0), readbytes(0), readBody(0), firstRead(1)
-,headersDone(0), statusCode(0), statusMsg(""), isChunked(0), cgi(0), chunkPos(0), firstChunk(1),r(0){
+,headersDone(0), statusCode(0), statusMsg(""), isChunked(0), cgi(0), chunkPos(0), firstChunk(1), locationHeader("") ,r(0){
     to_de = 0 ;flag = 0; saver_count = 0; tmp = 0;
 }
 
@@ -47,7 +47,7 @@ const std::string& Request::getVersion() const{
 
 void Request::load_extension()
 {
-    std::ifstream file("/goinfre/yboucha/cloned/Request/MIME.conf");
+    std::ifstream file("/Users/sel-jama/Desktop/Webserv/Request/MIME.conf");
     std::string buffer;
     std::string secbuffer;
     std::string forvalue;
@@ -266,6 +266,7 @@ void Request::retreiveRequestedResource(const server &serve){
     std::cout <<"path : " << path << std::endl;
     isFileAvailable();
     isMethodAllowed();
+    isRedirect();
 }
 
 void Request::isMethodAllowed(){
@@ -284,6 +285,14 @@ void Request::isFileAvailable() {
             statusCode = 500;
             throw std::runtime_error("Error checking file availability");
         }
+    }
+}
+
+void Request::isRedirect() {
+    if (!matchedLocation.retu.empty()){
+        locationHeader = matchedLocation.retu;
+        statusCode = 301;
+        throw std::runtime_error("Redirect");
     }
 }
 
@@ -308,6 +317,7 @@ void resetClientRequest(Request &req){
     req.response = "";
     req.chunkPos = 0;
     req.firstChunk = 1;
+    req.locationHeader = "";
 }
 
 std::string Request::generateResponse(client &client, std::string &content){
@@ -321,10 +331,14 @@ std::string Request::generateResponse(client &client, std::string &content){
             client.reqq.statusCode = 200;
         response << "HTTP/1.1 " << client.reqq.statusCode << " " << msg.statusMsgs[client.reqq.statusCode] << "\r\n";
         if (!client.reqq.cgi){
-            response << "Content-Type: " << responseContentType << "\r\n"
-            << "Content-Length: " << responseContentLen << "\r\n\r\n";
+            response << "Content-Type: " << responseContentType << "\r\n";
+            if (!client.reqq.locationHeader.empty()){
+                response << "Location: " << client.reqq.locationHeader << "\r\n";
+                response << "Content-Length: 0\r\n\r\n";
+                return response.str();
+            }
+            response << "Content-Length: " << responseContentLen << "\r\n\r\n";
         }
-        
         response << content;
         res = response.str();
         return res;
@@ -351,18 +365,19 @@ int Request::send_response(client &client){
     }
     
     if (chunkPos < response.length()){
-        chunk = response.substr(chunkPos, chunkPos+1023);
+        chunk = response.substr(chunkPos, chunkPos+1024);
+        chunk = response;
         std::cout << chunk.length()<< std::endl;
          if (send(client.ssocket, chunk.c_str(), chunk.length(), 0) == -1){
             std::cerr << "send failed ..." << std::endl;
             return 0;
         }
-        chunkPos += 1023;
+        chunkPos += 1024;
     }
     else{
         std::cout << "\033[1;35m---------------RESPONSE-----------------\n" <<  response.substr(0, response.find("\r\n\r\n")) <<"\033[0m" << std::endl;
-        client.w_done = 1;
         resetClientRequest(client.reqq);
+        client.w_done = 1;
     }
     return 1;
 }
@@ -388,10 +403,11 @@ int Request::read_request(client &client, infra & infra){
         }
         }
     catch (const std::runtime_error &e){
-        std::cout << "\033[1;36mError in reading : "<< e.what() << "\033[0m" << std::endl;
         client.r_done = 1;
-        if(statusCode == -1)
+        if(statusCode == -1){
+            std::cout << "\033[1;36mError in reading : "<< e.what() << "\033[0m" << std::endl;
             return 0;
+        }
     }
     if (client.r_done)
         std::cout << "\033[1;33m--------------------REQUEST-------------------------\n" << client.reqq.reqStr << "\033[0m" << std::endl;

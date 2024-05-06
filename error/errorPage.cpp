@@ -6,7 +6,7 @@
 /*   By: sel-jama <sel-jama@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/04/18 20:58:59 by sel-jama          #+#    #+#             */
-/*   Updated: 2024/05/04 22:12:38 by sel-jama         ###   ########.fr       */
+/*   Updated: 2024/05/06 22:21:55 by sel-jama         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -198,13 +198,12 @@ std::string errorPage::serveErrorPage(Request &req){
     std::cout << use.statusMsgs[req.statusCode] << std::endl;
 
     std::string pathToPage = errorPagesConfig(req);
-    std::cout << pathToPage << "<<<<<<<" << std::endl;
     if (!pathToPage.empty()){
         req.path = pathToPage;
         return use2.readContent(req);
     }
 
-    try{
+    // try{
         err.HtmlErrorPage();
         // req.path = req.matchedLocation.root + req.matchedLocation.location_name + "sock2/page.html";
         // std::cout << "path error : " << req.path << std::endl;
@@ -215,10 +214,10 @@ std::string errorPage::serveErrorPage(Request &req){
         //      << "Content-Length: " << content.length() << "\r\n"
         //      << "\r\n"
         //      << content;
-    }
-    catch(const std::runtime_error &e){
-        std::cout << "errorPage failed :" << e.what() << std::endl;
-    }
+    // }
+    // catch(const std::runtime_error &e){
+    //     std::cout << "errorPage failed :" << e.what() << std::endl;
+    // }
     // std::cout << err.html << std::endl;
     return err.html;
 }

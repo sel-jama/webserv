@@ -42,6 +42,10 @@ class infra
         void initselect();
         void selecttoinfinity();
 
+        //accept or else
+        //void accept_new_connection(int i);
+        //void handle_old_cnx(int i);
+
         //check - debug
         void printInfra();
         void checkInfraData();

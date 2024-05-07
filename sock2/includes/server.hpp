@@ -15,8 +15,7 @@ class server
 	public:
 		uint16_t                            port;
 		std::string                         adress;
-		// std::vector<std::string>            serverName;
-		std::string							serverNName;
+		std::vector<std::string>            serverName;
 		long long                           clientMaxBodySize;
 		std::map<std::string, std::string>  errorPages;
 
@@ -36,16 +35,22 @@ class server
 		
 		struct addrinfo *servinfo;
 
+
+		//setter
+		// void setPort(const uint16_t &);
+		// void setAdress(const std::string &);
+		// void setServerName(const std::vector<std::string> &);
+		// void setClientMaxBodySize(long long int &);
 		
 		//getter
 		const uint16_t                  &getPort()const;
 		const std::string               &getAdress()const;
-		const std::string				&getServerNName()const;
+		const std::vector<std::string>  &getServerName()const;
 		const long long                 &getClientMaxBodySize()const;
 		const std::vector<location>     &getLocations()const;
 		//from configfile -> to server
 		void setlisten(std::vector<std::string>::const_iterator &);
-		void setServerName(std::vector<std::string>::const_iterator &, int &);
+		void setServerName(std::vector<std::string>::const_iterator &, std::vector<std::string> &, int &,const std::vector<std::string> &);
 		void setClientMaxBodySize(std::vector<std::string>::const_iterator &, int &);
 		void setErrorpages(std::vector<std::string>::const_iterator &,const std::vector<std::string> &);
 		void setlocation(std::vector<std::string>::const_iterator &, const std::vector<std::string> &);

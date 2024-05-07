@@ -6,7 +6,7 @@
 /*   By: sel-jama <sel-jama@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/03/24 15:33:33 by sel-jama          #+#    #+#             */
-/*   Updated: 2024/05/06 23:04:16 by sel-jama         ###   ########.fr       */
+/*   Updated: 2024/05/07 00:56:27 by sel-jama         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -364,14 +364,12 @@ int Request::send_response(client &client){
         firstChunk = 0;
     }
     
-    if (chunkPos < response.length()){
-        chunk = response.substr(chunkPos, chunkPos+1024);
-        chunk = response;
-        std::cout << chunk.length()<< std::endl;
+    if (chunkPos < response.length() - 1){
+        chunk = response.substr(chunkPos, 1024);
          if (send(client.ssocket, chunk.c_str(), chunk.length(), 0) == -1){
             std::cerr << "send failed ..." << std::endl;
             return 0;
-        }
+        }   
         chunkPos += 1024;
     }
     else{

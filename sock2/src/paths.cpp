@@ -39,7 +39,7 @@ void validNum(int ac, int num)
 
 const char *validArg(int ac, char **av)
 {
-    const char *default_conf = "configfiles/config2.conf";
+    const char *default_conf = "sock2/configfiles/config2.conf";
     if (ac == 1)
         return (default_conf);
     validNum(ac, 2);

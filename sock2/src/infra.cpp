@@ -2,6 +2,26 @@
 #include <sys/socket.h>
 #include "../../Response/Response.hpp"
 
+//---------init servers -> socket->fcntrl->setsocketopt->bind->listen->select->accept
+
+// int infra::check_port()
+// {
+//     if (port)
+// }
+
+// void infra::sockettolisten(std::vector<server>::iterator &it)
+// {
+//     // check_port();
+//     int opt = 1;
+//     socklen_t j = sizeof((*it).data_socket);
+//     if (((*it).ssocket = socket(AF_INET, SOCK_STREAM, 0)) == -1)                        throw(std::runtime_error("Error: init servers : socket()"));
+//     if (fcntl((*it).ssocket, F_SETFL, O_NONBLOCK, FD_CLOEXEC) == -1)                    throw(std::runtime_error("Error: init servers : fcntl()"));
+//     if (setsockopt((*it).ssocket, SOL_SOCKET, SO_REUSEPORT, &(opt), sizeof(opt)) == -1) throw(std::runtime_error("Error: init servers : setsockopt() SO_REUSPORT"));
+//     // if (setsockopt((*it).ssocket, SOL_SOCKET, SO_REUSEADDR, &(opt), sizeof(opt)) == -1) throw(std::runtime_error("Error: init servers : setsockopt() SO_REUSPORT"));
+//     if (bind((*it).ssocket, (const sockaddr *)&((*it).data_socket), j) != 0)           throw(std::runtime_error("Error: init servers : bind()"));
+    
+//     if (listen((*it).ssocket,10 ) == -1)                                                throw(std::runtime_error("Error: init servers : listen()"));
+// }
 void infra::sockettolisten(std::vector<server>::iterator &it)
 {
     // check_port();
@@ -49,15 +69,18 @@ void infra::selecttoinfinity()
         fd_rcopy = fd_r;
         fd_wcopy = fd_w;
         int slct = select(maxfd + 1, &fd_rcopy, &fd_wcopy, NULL, &timeout);
+        std::cout << "max fd : " << maxfd << "\n";
         if (slct == -1) throw(std::runtime_error("Error : select : lanch"));
         if (slct == 0)
         {
+            // std::cout << "ja hna" << std::endl;
             for (std::vector<server>::iterator it = servers.begin(); it != servers.end(); ++it)
                 (*it).checktime(fd_r, fd_w, maxfd);
             continue;
         }
         for (std::vector<server>::iterator it = servers.begin(); it !=servers.end(); ++it)
         {
+            // std::cout << "k==>" << k << std::endl;
             ++k;
             if (FD_ISSET((*it).ssocket, &fd_rcopy))
                 (*it).accept_new_connection(fd_r, maxfd);
@@ -100,7 +123,7 @@ infra::infra(const std::vector<std::string> &tokens)
                     if (iskey(*it))
                     {
                         if (*it == "listen") serverdata.setlisten(it);
-                        if (*it == "server_name") serverdata.setServerName(it, i);
+                        if (*it == "server_name") serverdata.setServerName(it, server_name_list, i, tokens);
                         if (*it == "client_max_body_size") serverdata.setClientMaxBodySize(it, j);
                         if (*it == "error_page") serverdata.setErrorpages(it, tokens);
                         if (*it == "location") serverdata.setlocation(it, tokens);
@@ -127,14 +150,7 @@ void infra::checkInfraData()
 {
     if (servers.empty()) throw(std::runtime_error("Error : config-file : ss ur servers !!"));
     for (std::vector<server>::iterator it = servers.begin(); it != servers.end(); ++it){(*it).checkServerData();}
-    for (std::vector<server>::iterator it = servers.begin(); it != servers.end() - 1; ++it)
-    {
-        for (std::vector<server>::iterator it2 = servers.begin() + 1; it2 != servers.end() - 1; ++it2)
-        {
-            if (((*it).port == (*it2).port) && ((*it).adress == (*it2).adress) && ((*it).serverNName == (*it2).serverNName))
-                throw(std::runtime_error("Error: config-file : duplicate server name"));
-        }
-    }
+    //check wach chi haja na9ssa ou ila chi extra checks
 }
 
 void infra::printInfra()

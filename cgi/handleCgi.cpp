@@ -54,6 +54,7 @@ void handleCgi::validateCgi(const Request &req){
 }
 
 char ** handleCgi::createArr() {
+    std::cout << "cgi path : " << cgiPath << std::endl;
     char **arr = reinterpret_cast<char **>( malloc( 3 * sizeof( char * ) ) );
     arr[0] = strdup( this->cgiPath.c_str() );
     arr[1] = strdup( this->scriptName.c_str() );
@@ -200,7 +201,7 @@ std::string handleCgi::executeCgiScript(Request &req) {
             remaining_time--;
         }
 
-        if (remaining_time == 0) {
+        if (remaining_time == 0){
             // Timeout occurred
             // Terminate child process forcefully
             kill(pid, SIGKILL);

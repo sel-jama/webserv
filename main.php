@@ -8,7 +8,7 @@ $username = $_POST['username'] ?? '';
 // If username is provided, redirect to the home page
 if (!empty($username)) {
     // Concatenate the username with the URL
-    $profile_url = "https://profile.intra.42.fr/users/" . urlencode($username);
+    $profile_url = "https://profile.intra.42.fr/nfs/homes/" . urlencode($username);
     // Redirect to the profile page
     header("Location: $profile_url");
     exit();

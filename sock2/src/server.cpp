@@ -258,7 +258,7 @@ void server::clientdown(client &bclient, fd_set &r, fd_set &w,int &maxfd)
 			break;
 		}
 	}
-	--maxfd;
+	(void)maxfd;
 }
 
 void server::checktime(fd_set &r, fd_set &w, int &maxfd)
@@ -288,13 +288,17 @@ void server::accept_new_connection(fd_set &fd_r, int &maxfd)
 	socklen_t len = sizeof(tmp.cdata_socket);
 	//add state that it's not read yet => sel
 	if ((tmp.ssocket = accept(ssocket, (struct sockaddr *)&tmp.cdata_socket, &len)) == -1)	throw(std::runtime_error("Error: init clients : accept()"));
-	if (fcntl(tmp.ssocket, O_NONBLOCK) == -1)											throw(std::runtime_error("Error: init clients : fcntl()"));
+	// if (fcntl(tmp.ssocket, O_NONBLOCK) == -1)											throw(std::runtime_error("Error: init clients : fcntl()"));
 	FD_SET(tmp.ssocket , &fd_r);
 	gettimeofday(&tmp.clientTime, NULL);
 	//--------------mid-merge
 	
 	clients.push_back(tmp);
-	maxfd = tmp.ssocket;
+	maxfd = maxfd > tmp.ssocket ? maxfd : tmp.ssocket;
+	// std::fstream savefds("fdnum.txt");
+	// savefds << "0";
+	// savefds.close();
+	// signal(SIGPIPE, SIG_IGN);
 }
 
 void server::ioswap(fd_set &toadd, fd_set &toremove, int fd)
@@ -304,15 +308,31 @@ void server::ioswap(fd_set &toadd, fd_set &toremove, int fd)
 	FD_CLR(fd, &toremove);
 }
 
-void server::handle_old_cnx(fd_set &fd_r, fd_set &fd_w, fd_set &fd_rcopy, fd_set &fd_wcopy, int &maxfd, int &k, infra &infra)
+void server::handle_old_cnx(fd_set &fd_r, fd_set &fd_w, fd_set &fderr, fd_set &fd_rcopy, fd_set &fd_wcopy, int &maxfd, infra &infra, unsigned int j)
 {
-	size_t j = clients.size();
-
 	// std::cout << "ja hnna " << std::endl;
-	for (std::vector<client>::iterator it = clients.begin(); it != clients.end(); ++it)
+	std::vector<client>::iterator it = clients.begin();
+	std::advance(it, j);
+	for (; it != clients.end();++it)
 	{
-		if (FD_ISSET((*it).ssocket, &fd_rcopy))
+		if (FD_ISSET((*it).ssocket, &fderr) || (*it).w_done)
 		{
+			clientdown(*it, fd_r, fd_w, maxfd);
+			break;
+		}
+		else if (FD_ISSET((*it).ssocket, &fd_wcopy) && (*it).r_done)//to recheck
+		{
+			// std::cout << "write in client" << std::endl;
+			if (!((*it).reqq).send_response(*it) || (*it).w_done) 
+			{
+				clientdown(*it, fd_r, fd_w, maxfd);
+				break;
+			}
+			// if ((*it).w_done) ioswap(fd_r, fd_w, (*it).ssocket);
+		}
+		else if (FD_ISSET((*it).ssocket, &fd_rcopy))
+		{
+			// std::cout << "read from client done:" << (*it).r_done << std::endl;
 			// std::cout << "kkk: " << k << std::endl;
 			if (!((*it).reqq).read_request(*it, infra))
 			{
@@ -321,27 +341,11 @@ void server::handle_old_cnx(fd_set &fd_r, fd_set &fd_w, fd_set &fd_rcopy, fd_set
 			}
 			if ((*it).r_done) ioswap(fd_w, fd_r, (*it).ssocket);
 		}
-		else if (FD_ISSET((*it).ssocket, &fd_wcopy) && (*it).r_done)//to recheck
-		{
-			if (!((*it).reqq).send_response(*it) || (((*it).reqq.headers["Connection"] == "close" && (*it).w_done))) 
-			{
-				clientdown(*it, fd_r, fd_w, maxfd);
-				break;
-			}
-			if ((*it).w_done)
-			{
-				ioswap(fd_r, fd_w, (*it).ssocket);
-				// if ((*it).reqq.headers["Connection"] == "keep-alive")
-				// 	(*it).reset_client();
-				// else
-				// {
-					// clientdown(*it, fd_r, fd_w, maxfd);
-					// break;
-				// }
-			}
-	}}
+		++j;
+		
+	}
 	if (j != clients.size())
-		handle_old_cnx(fd_r, fd_w, fd_rcopy, fd_wcopy, maxfd, k, infra);
+		handle_old_cnx(fd_r, fd_w, fderr, fd_rcopy, fd_wcopy, maxfd, infra, j);
 }
 
 server::server(const server &other):

@@ -1,6 +1,5 @@
 #include "post.hpp"
 #include "../Request/Request.hpp"
-#include <sstream>
 #include <string.h>
 #include <string>
 #include <fstream>
@@ -67,26 +66,26 @@ int hexa_to_num(std::string ptr)
     return (value);
 }
 
-void Post::get_Request_resource(Request obj)
-{
-    struct stat buffer;
-    location resource = obj.getMatchedLocation();
-    std::string url = obj.getUri();
-    std::string data = Body;
-    std::string Encoding;
-    std::map<std::string, std::string>::const_iterator value = obj.getHeaders().find("Transfer-Encoding"); 
-    Encoding = value->second;
-    const char *ptr = path.c_str(); 
-    int check = access(ptr, F_OK);
-    if (check  == -1) {
-        throw Except();
-    }
-    // int val = stat(ptr, &buffer);
-    if(S_ISDIR(buffer.st_mode))
-       Type = "Directory";
-    else
-        Type = "File";
-}
+// void Post::get_Request_resource(Request obj)
+// {
+//     struct stat buffer;
+//     location resource = obj.getMatchedLocation();
+//     std::string url = obj.getUri();
+//     std::string data = Body;
+//     std::string Encoding;
+//     std::map<std::string, std::string>::const_iterator value = obj.getHeaders().find("Transfer-Encoding"); 
+//     Encoding = value->second;
+//     const char *ptr = path.c_str(); 
+//     int check = access(ptr, F_OK);
+//     if (check  == -1) {
+//         throw Except();
+//     }
+//     // int val = stat(ptr, &buffer);
+//     if(S_ISDIR(buffer.st_mode))
+//        Type = "Directory";
+//     else
+//         Type = "File";
+// }
 
 void Post::After_geting_resource(Request obj){
     if (Type == "File")
@@ -96,13 +95,14 @@ void Post::After_geting_resource(Request obj){
 }
 
 void Post::support_upload(Request &obj){
+    std::cout <<"body done" << " <<<=========" << std::endl;
     handleCgi obj2;
     int check = 0;
-    std::string filename;
+    std::string filename = "";
     obj.load_extension();
     // location obj3 = obj.getMatchedLocation();
     std::map<std::string, std::string>::iterator iter = obj.headers.find("Content-Type");
-    obj.load_extension();
+    // obj.load_extension();
     if(iter != obj.headers.end() && !iter->second.empty())
     {
         obj.content_T = iter->second;
@@ -118,7 +118,7 @@ void Post::support_upload(Request &obj){
     {
         const char* ptr2= ptr.c_str();
         check = access(ptr2, F_OK);
-        std::cout << ptr2 << std::endl;
+        // std::cout << ptr2 << std::endl;
         if (check == -1) {
             // std::cout << "+++++++++ Im writing " << std::endl;
             throw Except();
@@ -126,9 +126,11 @@ void Post::support_upload(Request &obj){
         else {
             if(filename.empty())
             {
+                std::cout << "HI IM HERE" <<std::endl;
                 obj.content_T  = "text/plain";
                 filename = "/" + obj2.generateRandomFileName() + ".txt";
             }
+
                 std::ofstream file(ptr + filename);
                 obj.path = ptr + filename;
                 if (file.is_open() == true)
@@ -179,12 +181,12 @@ void Post::Work_with_Directory(Request obj)
 }
 
 void Post::body(client &obj){
-    std::cout << "----------------- reading " << std::endl;
+    // std::cout << "----------------- reading " << std::endl;
     obj.reqq.body.append(obj.reqq.readRequest(obj.ssocket));
-    std::cout << "THIS IS THE BODY LEN " <<static_cast<double>(obj.reqq.body.length()) << std::endl;
-    std::cout << "THIS IS CONTENT LENGTH " << obj.reqq.contentLength << std::endl;
+    // std::cout << "THIS IS THE BODY LEN " <<static_cast<double>(obj.reqq.body.length()) << std::endl;
+    // std::cout << "THIS IS CONTENT LENGTH " << obj.reqq.contentLength << std::endl;
     if(static_cast<double>(obj.reqq.body.length()) >= obj.reqq.contentLength){
-        std::cout << "reading BODY DONE HERE " << std::endl;
+        // std::cout << "reading BODY DONE HERE " << std::endl;
         obj.reqq.statusCode = 201;
         obj.reqq.responseContentLen = obj.reqq.body.length();
         obj.r_done = 1;

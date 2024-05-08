@@ -47,7 +47,7 @@ const std::string& Request::getVersion() const{
 
 void Request::load_extension()
 {
-    std::ifstream file("/Users/sel-jama/Desktop/Webserv/Request/MIME.conf");
+    std::ifstream file("/nfs/homes/sel-jama/Desktop/Webserv/Request/MIME.conf");
     std::string buffer;
     std::string secbuffer;
     std::string forvalue;
@@ -126,6 +126,7 @@ void Request::uriQuery(std::string &uri){
     }
     else
         this->queryString = "";
+    std::cout << "query " << this->queryString << std::endl;
 }
 
 // Function to parse HTTP request
@@ -358,11 +359,12 @@ int Request::send_response(client &client){
         client.w_done = 0;
         std::string content;
         try{
-            if (client.reqq.statusCode)
+            if (client.reqq.statusCode >= 300)
                 throw std::runtime_error("Request reading failed");
             content = Response::handleMethod(client);
         }
         catch (const std::runtime_error &e){
+            std::cout << e.what() << std::endl;
             if (client.reqq.method != "HEAD")
                 content = errorPage::serveErrorPage(client.reqq);
         }
@@ -379,7 +381,7 @@ int Request::send_response(client &client){
         chunkPos += 1024;
     }
     else{
-        // std::cout << "\033[1;35m---------------RESPONSE-----------------\n" <<  response.substr(0, response.find("\r\n\r\n")) <<"\033[0m" << std::endl;
+        std::cout << "\033[1;35m---------------RESPONSE-----------------\n" <<  response.substr(0, response.find("\r\n\r\n")) <<"\033[0m" << std::endl;
         resetClientRequest(client.reqq);
         client.w_done = 1;
     }
@@ -413,8 +415,8 @@ int Request::read_request(client &client, infra & infra){
             return 0;
         }
     }
-    // if (client.r_done)
-    //     std::cout << "\033[1;33m--------------------REQUEST-------------------------\n" << client.reqq.reqStr << "\033[0m" << std::endl;
+    if (client.r_done)
+        std::cout << "\033[1;33m--------------------REQUEST-------------------------\n" << client.reqq.reqStr << "\033[0m" << std::endl;
 
     return 1;
 }

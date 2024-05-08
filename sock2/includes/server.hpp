@@ -64,7 +64,7 @@ class server
 		void clientdown(client &, fd_set &, fd_set &, int &);
 		void ioswap(fd_set &, fd_set &, int);
 		void accept_new_connection(fd_set &, int &);
-		void handle_old_cnx(fd_set &, fd_set &, fd_set &, fd_set &, int &, int &, infra &);
+		void handle_old_cnx(fd_set &, fd_set &, fd_set &, fd_set &, fd_set &, int &, infra &, unsigned int);
 
 		//check - debug
 		void printServer();

@@ -63,13 +63,18 @@ void infra::initdata(std::vector<server>::iterator &it)//to be modifed
 void infra::selecttoinfinity()
 {
     signal(SIGPIPE, SIG_IGN);
-    int k = 0;
+    // int k = 0;
     while (1)
     {
+        fd_set fderr;
+        FD_ZERO(&fderr);
         fd_rcopy = fd_r;
         fd_wcopy = fd_w;
-        int slct = select(maxfd + 1, &fd_rcopy, &fd_wcopy, NULL, &timeout);
-        std::cout << "max fd : " << maxfd << "\n";
+        // ++k;
+        // std::cout << "first k: " << k << std::endl;
+        int slct = select(maxfd + 1, &fd_rcopy, &fd_wcopy, &fderr, &timeout);
+        // int slct = select(maxfd + 1, &fd_rcopy, &fd_wcopy, &fderr, NULL);
+        // std::cout << "slct: " << slct << " max fd : " << maxfd  << " and k : " << k << std::endl;
         if (slct == -1) throw(std::runtime_error("Error : select : lanch"));
         if (slct == 0)
         {
@@ -80,12 +85,14 @@ void infra::selecttoinfinity()
         }
         for (std::vector<server>::iterator it = servers.begin(); it !=servers.end(); ++it)
         {
-            // std::cout << "k==>" << k << std::endl;
-            ++k;
+            // unsigned int j = 0;
+            (*it).handle_old_cnx(fd_r, fd_w, fderr, fd_rcopy, fd_wcopy, maxfd, *this, 0);
             if (FD_ISSET((*it).ssocket, &fd_rcopy))
+            {
+                // std::cout << "read from socket" << std::endl;
                 (*it).accept_new_connection(fd_r, maxfd);
-            else
-                (*it).handle_old_cnx(fd_r, fd_w, fd_rcopy, fd_wcopy, maxfd, k, *this);
+            }
+            // else
         }
 
     }

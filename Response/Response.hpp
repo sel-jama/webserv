@@ -6,7 +6,7 @@
 /*   By: sel-jama <sel-jama@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/03/31 00:38:43 by sel-jama          #+#    #+#             */
-/*   Updated: 2024/04/25 04:56:41 by sel-jama         ###   ########.fr       */
+/*   Updated: 2024/05/08 05:04:36 by sel-jama         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -29,7 +29,7 @@ public:
     ~Response(){}
 
     static std::string handleMethod(client &client);
-    void handleGET(Request &req, int clientSocket);
+    void handleGET(Request &req);
     void handlePost(Request &req);
 };
 

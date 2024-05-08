@@ -6,7 +6,7 @@
 /*   By: sel-jama <sel-jama@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/03/31 00:44:16 by sel-jama          #+#    #+#             */
-/*   Updated: 2024/05/06 08:18:17 by sel-jama         ###   ########.fr       */
+/*   Updated: 2024/05/08 05:04:19 by sel-jama         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -18,7 +18,7 @@ std::string Response::handleMethod(client &client){
     // try{
         //std::cout << client.reqq.getMethod()  << ".....********************"<< std::endl;
         if (client.reqq.getMethod() == "GET"){
-            obj.handleGET(client.reqq, client.ssocket);
+            obj.handleGET(client.reqq);
         }
         else if (client.reqq.getMethod() == "POST"){
             std::cout << "hello im here !" << std::endl;
@@ -32,10 +32,10 @@ std::string Response::handleMethod(client &client){
     return obj.response;
 }
 
-void Response::handleGET(Request &req, int clientSocket) {
+void Response::handleGET(Request &req) {
     method get;
     
-        get.GetDataForClient(req, clientSocket);
+        get.GetDataForClient(req);
         this->response = get.getResponse();
 }
 

@@ -6,7 +6,7 @@
 /*   By: sel-jama <sel-jama@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/03/24 15:33:33 by sel-jama          #+#    #+#             */
-/*   Updated: 2024/05/07 09:10:27 by sel-jama         ###   ########.fr       */
+/*   Updated: 2024/05/08 04:27:18 by sel-jama         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -69,6 +69,7 @@ void Request::load_extension()
                     }
                 }
         }
+        file.close();
     }
     else{
         std::cerr << "MIME.conf not found .. \n" ;
@@ -96,7 +97,7 @@ std::string Request::readRequest(int &fdSocket){
     char buffer[BUFFER_SIZE];
     // std::cout << "readbytes-> " << readbytes << std::endl;
     readbytes = read(fdSocket, buffer, BUFFER_SIZE - 1);
-    std::cout << "readbytes: " << readbytes << std::endl;
+    // std::cout << "readbytes: " << readbytes << std::endl;
     if (readbytes < 0){
         statusCode = 500;
         throw std::runtime_error("Error reading from socket");
@@ -266,7 +267,7 @@ void Request::retreiveRequestedResource(const server &serve){
     path = matchedLocation.root;
     path += fileName.empty() ? "" : "/";
     path += fileName;
-    std::cout <<"path : " << path << std::endl;
+    // std::cout <<"path : " << path << std::endl;
     isFileAvailable();
     isMethodAllowed();
     isRedirect();
@@ -378,7 +379,7 @@ int Request::send_response(client &client){
         chunkPos += 1024;
     }
     else{
-        std::cout << "\033[1;35m---------------RESPONSE-----------------\n" <<  response.substr(0, response.find("\r\n\r\n")) <<"\033[0m" << std::endl;
+        // std::cout << "\033[1;35m---------------RESPONSE-----------------\n" <<  response.substr(0, response.find("\r\n\r\n")) <<"\033[0m" << std::endl;
         resetClientRequest(client.reqq);
         client.w_done = 1;
     }
@@ -386,7 +387,7 @@ int Request::send_response(client &client){
 }
 
 int Request::read_request(client &client, infra & infra){
-    std::cout << "\033[1;31m reading HEADERS here \033[0m" << std::endl;
+    // std::cout << "\033[1;31m reading HEADERS here \033[0m" << std::endl;
     client.r_done = 0;
     try{
         if (!readBody){
@@ -408,12 +409,12 @@ int Request::read_request(client &client, infra & infra){
     catch (const std::runtime_error &e){
         client.r_done = 1;
         if(statusCode == -1){
-            std::cout << "\033[1;36mError in reading : "<< e.what() << "\033[0m" << std::endl;
+            // std::cout << "\033[1;36mError in reading : "<< e.what() << "\033[0m" << std::endl;
             return 0;
         }
     }
-    if (client.r_done)
-        std::cout << "\033[1;33m--------------------REQUEST-------------------------\n" << client.reqq.reqStr << "\033[0m" << std::endl;
+    // if (client.r_done)
+    //     std::cout << "\033[1;33m--------------------REQUEST-------------------------\n" << client.reqq.reqStr << "\033[0m" << std::endl;
 
     return 1;
 }

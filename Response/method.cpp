@@ -33,8 +33,7 @@ void method::validateAll(Request &req) const{
 }
 
 //handle GET method
-void method::GetDataForClient(Request &req, int &clientSocket) {
-    (void)clientSocket;
+void method::GetDataForClient(Request &req) {
     handleCgi cgi;
     defineResourceType(req); //file or dir
     // std::cout << "************ "<<type << std::endl;
@@ -81,6 +80,7 @@ std::string method::readContent(Request &req){
     // }
     std::ostringstream content;
     content << file.rdbuf();
+    file.close();
     //content length is not set yet !!!!!!!
     // size_t contentSize = req.contentLength;
     // while (contentSize > 0) {
@@ -95,7 +95,7 @@ std::string method::readContent(Request &req){
 }
 
 void method::defineResourceType(const Request &req){
-    const std::string uri = req.getUri();
+    // const std::string uri = req.getUri();
     if (S_ISDIR(req.pathStatus.st_mode))
         type = "directory";
     else

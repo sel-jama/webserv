@@ -39,8 +39,8 @@ class method {
         const std::string &getResponse() const {return this->response;}
         std::map<int, std::string> errorPage;
         
-        void GetDataForClient(Request &, int &);
-        void handleGetRequest(int clientSocket);
+        void GetDataForClient(Request &);
+        // void handleGetRequest(int clientSocket);
         void retreiveRequestedResource(server &, Request &) const;
         const location &getMatchingLocation(server &, Request &);
         // std::string getMimeType(const std::string& fileName);

@@ -6,7 +6,7 @@
 /*   By: sel-jama <sel-jama@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/03/24 15:33:33 by sel-jama          #+#    #+#             */
-/*   Updated: 2024/05/07 00:56:27 by sel-jama         ###   ########.fr       */
+/*   Updated: 2024/05/07 09:10:27 by sel-jama         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -69,6 +69,9 @@ void Request::load_extension()
                     }
                 }
         }
+    }
+    else{
+        std::cerr << "MIME.conf not found .. \n" ;
     }
 }
 
@@ -318,6 +321,8 @@ void resetClientRequest(Request &req){
     req.chunkPos = 0;
     req.firstChunk = 1;
     req.locationHeader = "";
+    req.responseContentType = "";
+    req.responseContentLen = 0;
 }
 
 std::string Request::generateResponse(client &client, std::string &content){
@@ -381,10 +386,10 @@ int Request::send_response(client &client){
 }
 
 int Request::read_request(client &client, infra & infra){
+    std::cout << "\033[1;31m reading HEADERS here \033[0m" << std::endl;
     client.r_done = 0;
     try{
         if (!readBody){
-            // std::cout << "\033[1;31m reading HEADERS here \033[0m" << std::endl;
             // client.reqq.errorPages = server.errorPages;
             getCheckRequest(client, infra);
         }
@@ -429,7 +434,8 @@ const server &Request::getMatchedServer(const infra &infra){
     
     std::vector<server>::const_iterator i = infra.getServer().begin();
     for (; i!=infra.getServer().end(); ++i){
-        if (i->port == this->port && ((i->adress == this->ip) || (i->adress == "127.0.0.1" && this->ip == "localhost"))) //&& servername too
+        if (i->port == this->port && ((i->adress == this->ip) || (i->adress == "127.0.0.1" && this->ip == "localhost") 
+            || (i->adress == "localhost" && this->ip == "127.0.0.1")))// && this->headers["Host"] == i->serverName)
             return *i;
     }
     return *i;

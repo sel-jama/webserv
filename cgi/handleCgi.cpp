@@ -6,7 +6,7 @@
 /*   By: sel-jama <sel-jama@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/04/04 07:40:50 by sel-jama          #+#    #+#             */
-/*   Updated: 2024/05/05 22:33:12 by sel-jama         ###   ########.fr       */
+/*   Updated: 2024/05/07 23:05:50 by sel-jama         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -213,7 +213,7 @@ std::string handleCgi::executeCgiScript(Request &req) {
             throw std::runtime_error("Child process failed to execute CGI script");
         }
     }
-    req.path = req.matchedLocation.root + req.matchedLocation.location_name + "sock2/" + random;
+    req.path = req.matchedLocation.root + req.matchedLocation.location_name + "/" + random;
     output = use.readContent(req);
     response = parseCgiRsponse(output);
     std::cout << "CGI output :   \n" << response << std::endl;

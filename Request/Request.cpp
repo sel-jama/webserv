@@ -437,13 +437,27 @@ const server &Request::getMatchedServer(const infra &infra){
     
     std::vector<server>::const_iterator i = infra.getServer().begin();
     for (; i!=infra.getServer().end(); ++i){
+        // std::cout << i->serverName.size() << std::endl;
         if (i->port == this->port && ((i->adress == this->ip) || (i->adress == "127.0.0.1" && this->ip == "localhost") 
-            || (i->adress == "localhost" && this->ip == "127.0.0.1")))// && this->headers["Host"] == i->serverName)
-            return *i;
+            || (i->adress == "localhost" && this->ip == "127.0.0.1")) ){//&& matchedName(i->serverName))// && this->headers["Host"] == i->serverName)
+                for (size_t s = 0; s < i->serverName.size(); ++s){
+                    if (i->serverName[s] == this->headers["Host"])
+                        return *i;
+                }
+            }
     }
-    return *i;
-    
+    return *(infra.getServer().begin());
 }
+
+// bool Request::matchedName(const std::vector<std::string> &vec){
+//     (void )vec;
+    // std::vector<std::string>::const_iterator i = vec.begin();
+    // for (; i != vec.end(); ++i){
+    //     if (this->headers["Host"] == *i)
+    //         return true;
+    // }
+//     return false;
+// }
 
 std::string Request::getMimeType(const std::string& fileName){
     load_extension();

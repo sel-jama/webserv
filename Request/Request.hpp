@@ -121,6 +121,7 @@ class Request {
         void load_extension();
         std::string getMimeType(const std::string& fileName);
         void isRedirect();
+        bool matchedName(const std::vector<std::string> &) ;
 };
 
 #endif

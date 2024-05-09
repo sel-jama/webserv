@@ -8,35 +8,51 @@ void Delete::check_RequestedR(Request &obj){
     // if(!(obj.getUri().rfind('/', obj.getUri().size() - 1) != std::string::npos))
     //     throw Except();
     if(obj.path.empty() || obj.method != "DELETE"){
+        //not allowed
+        obj.statusCode = 405; 
         throw std::runtime_error("eror");
     }
     const char *ptr = obj.path.c_str();
     int check = access(ptr, F_OK);
     if (check  == -1) {
+        // not found 404
+        obj.statusCode = 404; 
         throw std::runtime_error("eror");
     }
+
     int val = stat(ptr, &buffer);
     (void)val;
     if(S_ISDIR(buffer.st_mode))
     {
-        if(obj1.root.size()  > obj.path.size())
+        if(obj1.root.size()  >= obj.path.size())
+        {
+            //forbiden 403
+            //check size exact root
+            obj.statusCode = 403; 
             throw std::runtime_error("eror");
+        }
        Work_with_Directory(obj);
     }
     else if(buffer.st_mode &S_IWUSR){
-        if(obj1.root.size()  > obj.path.size())
+        if(obj1.root.size()  >= obj.path.size()){
+            obj.statusCode = 403;
             throw std::runtime_error("eror");
+        }
         Work_with_file(obj);
     }
-    else
+    else{
+        obj.statusCode = 403;
         throw std::runtime_error("eror");
+    }
 }
 
 void Delete::Work_with_file(Request &obj)
 {
     std::string check;
-    if(std::remove(obj.path.c_str()) != 0)
+    if(std::remove(obj.path.c_str()) != 0){
+        obj.statusCode = 500;
             throw std::runtime_error("eror");
+    }
 }
 
 void Delete::Work_with_Directory(Request &obj){
@@ -58,25 +74,33 @@ void Delete::first_Delete(Request &obj)
                 continue;
             std::string filepath = Path + '/' + ent->d_name;
             if(ent->d_type ==  DT_DIR)
-            {
-                std::cout << filepath << std::endl;
                 R_removing(filepath);
-            }
             int val = stat(filepath.c_str(), &buffer);
             (void)val;
             if(buffer.st_mode & S_IWUSR)
             {
                 if(std::remove(filepath.c_str()) != 0 )
+                {
+                    obj.statusCode = 500;
                     throw std::runtime_error("eror");
+                }
             }
-            else
+            else{
+                obj.statusCode = 403;
                 throw std::runtime_error("eror");
+            }
         }
     }
+    else{
+        obj.statusCode = 403;
+        throw std::runtime_error("eror");
+    }
+    if(std::remove(Path.c_str()) != 0 ){
+        obj.statusCode = 500;
+        throw std::runtime_error("eror");
+    }
     else
-        throw std::runtime_error("eror");
-    if(std::remove(Path.c_str()) != 0 )
-        throw std::runtime_error("eror");
+        obj.statusCode = 204;
 }
 
 void Delete::R_removing(std::string path){
@@ -109,14 +133,23 @@ void Delete::R_removing(std::string path){
             if(buffer.st_mode &S_IWUSR)
             {
                 if(std::remove(filepath.c_str()) != 0 )
+                {
+                    obj.statusCode = 500;
                     throw std::runtime_error("eror");
+                }
             }
-            if(dir == NULL)
+            if(dir == NULL){
+                obj.statusCode = 403;
                 throw std::runtime_error("eror");
+            }
         }
     }
     else
+    {
+        obj.statusCode = 403;
         throw std::runtime_error("eror");
+    }
     std::cout << "final" << std::endl;
+    //status for deleted successfully
     return ;
 }

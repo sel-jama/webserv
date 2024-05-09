@@ -21,8 +21,6 @@ std::string Response::handleMethod(client &client){
             obj.handleGET(client.reqq);
         }
         else if (client.reqq.getMethod() == "POST"){
-            std::cout << "hello im here !" << std::endl;
-            
             obj.handlePost(client.reqq);
         }
     // }
@@ -45,6 +43,6 @@ void Response::handlePost(Request &req){
     if(!req.isChunked)
     {
         post.support_upload(req);
-        this->response = use.readContent(req);
+        // this->response = use.readContent(req);
     }
 } 

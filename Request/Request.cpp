@@ -364,6 +364,8 @@ std::string Request::generateResponse(client &client, std::string &content){
                 return response.str();
             }
             response << "Content-Length: " << responseContentLen << "\r\n\r\n";
+            if (client.reqq.headers.find("Cookie") != client.reqq.headers.end())
+                response << "Cookie: " << client.reqq.headers["Cookie"];
         }
         response << content;
         res = response.str();

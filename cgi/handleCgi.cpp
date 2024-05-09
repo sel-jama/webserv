@@ -54,7 +54,6 @@ void handleCgi::validateCgi(const Request &req){
 }
 
 char ** handleCgi::createArr() {
-    std::cout << "cgi path : " << cgiPath << std::endl;
     char **arr = reinterpret_cast<char **>( malloc( 3 * sizeof( char * ) ) );
     arr[0] = strdup( this->cgiPath.c_str() );
     arr[1] = strdup( this->scriptName.c_str() );
@@ -77,6 +76,7 @@ char **handleCgi::createGetEnv(Request &req){
     mapEnv["QUERY_STRING"] = req.getQuryString();
 	mapEnv["SERVER_PROTOCOL"] = "HTTP/1.1";
 	mapEnv["SERVER_SOFTWARE"] = "Webserv/1.0";
+    mapEnv["HTTP_COOKIE"] = headers["Cookie"];
 
     
     char	**env = new char*[mapEnv.size() + 1];
@@ -254,7 +254,7 @@ char **handleCgi::createPostEnv(Request &req){
     mapEnv["QUERY_STRING"] = req.getQuryString();
 	mapEnv["SERVER_PROTOCOL"] = "HTTP/1.1";
     mapEnv["PATH_INFO"] = req.path;
-
+    mapEnv["HTTP_COOKIE"] = headers["Cookie"];
     
     char	**env = new char*[mapEnv.size() + 1];
 	int	j = 0;
@@ -269,9 +269,12 @@ char **handleCgi::createPostEnv(Request &req){
 }
 
 void handleCgi::executeCgiBody(Request &req){
+    setScriptName(req.cgi_File);
+    std::cout << "Cgi post is ready to run .. " << std::endl;
     // std::string randomFile = generateRandomFileName();
     // std::string pathtofile = req.matchedLocation.upload_path + "/" + randomFile;
     
+    std::cout << "req.cgi_File2.c_str() :" << req.cgi_File2.c_str() << std::endl;
     std::ofstream outputFile(req.cgi_File2.c_str());
     if (!outputFile.is_open()){
         req.statusCode = 500;
@@ -286,6 +289,7 @@ void handleCgi::executeCgiBody(Request &req){
 
     else if (pid == 0){
         std::string cgiBody = req.cgi_File;
+        std::cout << "file >>> " << req.cgi_File << std::endl;
         if (freopen(cgiBody.c_str(), "r", stdin) == NULL
             || freopen(req.cgi_File2.c_str(), "w", stdout) == NULL){
             req.statusCode = 500;

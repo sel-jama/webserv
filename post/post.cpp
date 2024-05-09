@@ -89,10 +89,9 @@ int hexa_to_num(std::string ptr)
 // }
 
 void Post::After_geting_resource(Request obj){
-    if (Type == "File")
         Work_with_file(obj); 
-    else
-        Work_with_Directory(obj);
+    // else
+    //     Work_with_Directory(obj);
 }
 
 void Post::support_upload(Request &obj){
@@ -134,12 +133,14 @@ void Post::support_upload(Request &obj){
                 filename = ptr + filename;
                 std::ofstream file(filename.c_str());
                 obj.cgi_File = filename; 
-                obj.cgi_File2 = ptr;
+                obj.cgi_File2 = obj.path;
                 obj.path = ptr + filename; //
                 if (file.is_open() == true)
                 {
                     file << obj.body << std::endl;
                     file.close();
+                    Work_with_file(obj);
+                    obj.statusCode = 201;
                 }
                 else
                     throw Except();
@@ -324,30 +325,30 @@ void Post::chunked_body2(client &obj){
 
 
 void Post::Work_with_file(Request &obj){
-   location capt = obj.getMatchedLocation();
-    std::map<std::string, std::string> get = capt.cgi;
-    std::map<std::string, std::string>::iterator iter = get.begin();
-    std::string search;
-    std::string tmp;
-    int integ = 0;
+//    location capt = obj.getMatchedLocation();
+//     std::map<std::string, std::string> get = capt.cgi;
+//     std::map<std::string, std::string>::iterator iter = get.begin();
+    // std::string search;
+    // size_t tmp;
+    // int integ = 0;
 
-    for(iter = get.begin(); iter != get.end(); iter++)
-    {
-        search = iter->first;
-        search = "." + search;
-        tmp = obj.path.rfind(search);
-        if(tmp.size() != std::string::npos){
-            integ = 1;
-            break;
-        }
-    }
-    if(integ == 1){
+    // for(iter = get.begin(); iter != get.end(); iter++)
+    // {
+    //     search = iter->first;
+    //     search = "." + search;
+    //     tmp = obj.path.rfind(search);
+    //     if(tmp != std::string::npos){
+    //         integ = 1;
+    //         break;
+    //     }
+    // }
+    // if(integ == 1){
         method use;
         handleCgi cgi;
         if (use.loacationHasCgi(obj, cgi)){
             cgi.executeCgiBody(obj);
         }
-    }
+    // }
     else{
         //403 forbiden
         throw Except();

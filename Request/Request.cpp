@@ -285,7 +285,7 @@ void Request::retreiveRequestedResource(const server &serve){
     path = matchedLocation.root;
     path += fileName.empty() ? "" : "/";
     path += fileName;
-    std::cout <<"path : " << path << std::endl;
+    // std::cout <<"path : " << path << std::endl;
     isFileAvailable();
     isMethodAllowed();
     isRedirect();

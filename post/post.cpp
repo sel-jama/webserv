@@ -94,8 +94,8 @@ void Post::After_geting_resource(Request obj){
     //     Work_with_Directory(obj);
 }
 
-void Post::support_upload(Request &obj){
-    std::cout <<"body done" << " <<<=========" << std::endl;
+void Post::support_upload(Request &obj)
+{
     handleCgi obj2;
     int check = 0;
     std::string filename = "";
@@ -113,15 +113,17 @@ void Post::support_upload(Request &obj){
         location capt = obj.getMatchedLocation();
         std::string  ptr = capt.upload_path;
         if(ptr.empty())
-            throw Except();
+        {
+            obj.statusCode = 500;
+            throw std::runtime_error("eror");
+        }
     else
     {
         const char* ptr2= ptr.c_str();
         check = access(ptr2, F_OK);
-        // std::cout << ptr2 << std::endl;
         if (check == -1) {
-            // std::cout << "+++++++++ Im writing " << std::endl;
-            throw Except();
+            obj.statusCode = 404;
+            throw std::runtime_error("eror");
         }
         else {
             if(filename.empty())
@@ -142,8 +144,10 @@ void Post::support_upload(Request &obj){
                     Work_with_file(obj);
                     obj.statusCode = 201;
                 }
-                else
-                    throw Except();
+                else{
+                    // obj.statusCode = 
+                    throw std::runtime_error("eror");
+                }
         }   
     }
 }

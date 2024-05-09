@@ -19,7 +19,7 @@ class Delete{
         void check_RequestedR(Request &obj);
         void Work_with_file(Request &obj);
         void Work_with_Directory(Request &obj);
-        void R_removing(std::string path);
+        void R_removing(std::string path, Request &obj);
         void first_Delete(Request &obj);
 };
 

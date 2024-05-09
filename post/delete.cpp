@@ -74,7 +74,7 @@ void Delete::first_Delete(Request &obj)
                 continue;
             std::string filepath = Path + '/' + ent->d_name;
             if(ent->d_type ==  DT_DIR)
-                R_removing(filepath);
+                R_removing(filepath, obj);
             int val = stat(filepath.c_str(), &buffer);
             (void)val;
             if(buffer.st_mode & S_IWUSR)
@@ -103,7 +103,7 @@ void Delete::first_Delete(Request &obj)
         obj.statusCode = 204;
 }
 
-void Delete::R_removing(std::string path){
+void Delete::R_removing(std::string path, Request &obj){
     DIR *dir;
     struct dirent *ent;
     std::string saver;
@@ -125,7 +125,7 @@ void Delete::R_removing(std::string path){
             {
                 saver = path;
                 path = path + "/" + filepath2;
-                R_removing(path);
+                R_removing(path, obj);
                 path = saver;
             } 
             int val = stat(filepath.c_str(), &buffer);

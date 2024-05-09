@@ -241,14 +241,14 @@ char **handleCgi::createPostEnv(Request &req){
 	if (headers.find("Auth-Scheme") != headers.end() && headers["Auth-Scheme"] != "")
 		mapEnv["AUTH_TYPE"] = headers["Authorization"];
 
-	mapEnv["REDIRECT_STATUS"] = "200";
+	mapEnv["REDIRECT_STATUS"] = "201";
 	mapEnv["SCRIPT_NAME"] = req.path;
 	mapEnv["SCRIPT_FILENAME"] = scriptName;
-	mapEnv["REQUEST_METHOD"] = req.getMethod();
+	mapEnv["REQUEST_METHOD"] = "POST";
     std::ostringstream oss;
     oss << req.responseContentLen;
 	mapEnv["CONTENT_LENGTH"] = oss.str();
-	mapEnv["CONTENT_TYPE"] = headers["Content-Type"];
+	mapEnv["CONTENT_TYPE"] = req.responseContentType;
 	mapEnv["SERVER_NAME"] = headers["Hostname"];
 	mapEnv["SERVER_PORT"] = req.port;
 	mapEnv["SERVER_PROTOCOL"] = "HTTP/1.1";

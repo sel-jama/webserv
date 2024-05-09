@@ -106,13 +106,17 @@ std::string Request::readRequest(int &fdSocket){
     buffer[readbytes] = '\0';
     buff.write(buffer, readbytes);
     std::string request(buff.str());
-    reqStr.append(request);
+    // reqStr.append(request);
     if (!readBody){
-        cutOffBodySegment(reqStr);
-        if (headersDone)
+        cutOffBodySegment(request);
+        if (headersDone){
             readBody = 1;
+            // return reqStr;
+        }
     }
-    return reqStr;
+    // if (!readBody)
+    //     return reqStr;
+    return request;
 }
 
 void Request::uriQuery(std::string &uri){
@@ -222,7 +226,7 @@ bool Request::allowedMethod(location& location) const {
 
 //start here
 int    Request::getCheckRequest(client &client, const infra &infra) {
-        client.reqq.readRequest(client.ssocket);
+        client.reqq.reqStr.append(client.reqq.readRequest(client.ssocket));
         client.wakt = time(NULL);
         if (!client.reqq.headersDone)
             return 1;
@@ -385,6 +389,12 @@ int Request::send_response(client &client){
             std::cerr << e.what() << std::endl;
             if (client.reqq.method != "HEAD")
                 content = errorPage::serveErrorPage(client.reqq);
+        }
+        catch (const std::bad_alloc &e){
+            std::cerr << e.what() << std::endl;
+            return 0;
+            // if (client.reqq.method != "HEAD")
+            //     content = errorPage::serveErrorPage(client.reqq);
         }
         response = generateResponse(client, content);
         firstChunk = 0;

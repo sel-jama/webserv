@@ -251,7 +251,6 @@ char **handleCgi::createPostEnv(Request &req){
 	mapEnv["CONTENT_TYPE"] = headers["Content-Type"];
 	mapEnv["SERVER_NAME"] = headers["Hostname"];
 	mapEnv["SERVER_PORT"] = req.port;
-    mapEnv["QUERY_STRING"] = req.getQuryString();
 	mapEnv["SERVER_PROTOCOL"] = "HTTP/1.1";
     mapEnv["PATH_INFO"] = req.path;
     mapEnv["HTTP_COOKIE"] = headers["Cookie"];

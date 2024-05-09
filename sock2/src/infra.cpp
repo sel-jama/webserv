@@ -71,10 +71,10 @@ void infra::selecttoinfinity()
         fd_rcopy = fd_r;
         fd_wcopy = fd_w;
         // ++k;
-        // std::cout << "first k: " << k << std::endl;
+        // std::cout << "first k: " << std::endl;
         int slct = select(maxfd + 1, &fd_rcopy, &fd_wcopy, &fderr, &timeout);
         // int slct = select(maxfd + 1, &fd_rcopy, &fd_wcopy, &fderr, NULL);
-        // std::cout << "slct: " << slct << " max fd : " << maxfd  << " and k : " << k << std::endl;
+        // std::cout << "slct: " << slct << " max fd : " << maxfd  << std::endl;
         if (slct == -1) throw(std::runtime_error("Error : select : lanch"));
         if (slct == 0)
         {

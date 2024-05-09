@@ -113,10 +113,13 @@ int ParseRequest::parseMethod(std::string &method) const{
 }
 
 int ParseRequest::parseHeaders(std::map<std::string, std::string> &headers, std::string &method) const{
-    int ret = checkUnknownHeader(headers);
-    if (ret)
-        return ret;
+    // int ret = checkUnknownHeader(headers);
+    // if (ret)
+    //     return ret;
     
+    if (headers.find("Host") == headers.end())
+        return 400;
+
     if (headers.find("Transfer-Encoding") != headers.end()
         && headers["Transfer-Encoding"] != "chunked")
             // throw std::runtime_error("501 Not Implemented : Transfer-Encoding must be chuncked");

@@ -47,7 +47,7 @@ const std::string& Request::getVersion() const{
 
 void Request::load_extension()
 {
-    std::ifstream file("/nfs/homes/sel-jama/Desktop/Webserv/Request/MIME.conf");
+    std::ifstream file("MIME.conf");
     std::string buffer;
     std::string secbuffer;
     std::string forvalue;
@@ -70,9 +70,6 @@ void Request::load_extension()
                 }
         }
         file.close();
-    }
-    else{
-        std::cerr << "MIME.conf not found .. \n" ;
     }
 }
 
@@ -97,7 +94,6 @@ std::string Request::readRequest(int &fdSocket){
     char buffer[BUFFER_SIZE];
     // std::cout << "readbytes-> " << readbytes << std::endl;
     readbytes = read(fdSocket, buffer, BUFFER_SIZE - 1);
-    // std::cout << "readbytes: " << readbytes << std::endl;
     if (readbytes < 0){
         statusCode = 500;
         throw std::runtime_error("Error reading from socket");
@@ -109,12 +105,13 @@ std::string Request::readRequest(int &fdSocket){
     buffer[readbytes] = '\0';
     buff.write(buffer, readbytes);
     std::string request(buff.str());
+    reqStr.append(request);
     if (!readBody){
-        cutOffBodySegment(request);
+        cutOffBodySegment(reqStr);
         if (headersDone)
             readBody = 1;
     }
-    return request;
+    return reqStr;
 }
 
 void Request::uriQuery(std::string &uri){
@@ -126,14 +123,33 @@ void Request::uriQuery(std::string &uri){
     }
     else
         this->queryString = "";
-    std::cout << "query " << this->queryString << std::endl;
 }
+
+void trim(std::string &str){
+    // Trim leading whitespace
+    while (!str.empty() && std::isspace(str[0]))
+        str.erase(0, 1);
+
+    // Trim trailing whitespace
+    while (!str.empty() && std::isspace(str[str.length() - 1]))
+        str.erase(str.length() - 1);
+}
+
 
 // Function to parse HTTP request
 void Request::requestPartitioning(Request &saver, std::string& request) {
     std::stringstream iss(request);
 
     iss >> saver.method >> saver.uri >> saver.version;
+    if (saver.method.empty() || saver.uri.empty() || saver.version.empty())
+    {
+        statusCode = 400;
+        throw std::runtime_error("bad request line");
+    }
+    else if (saver.uri.length() > 1024){
+        statusCode = 414;
+        throw std::runtime_error("URI too long");
+    }
     uriQuery(saver.uri);
     // Parse header
     std::string headerLine("");
@@ -150,19 +166,17 @@ void Request::requestPartitioning(Request &saver, std::string& request) {
         if (pos != std::string::npos) {
             std::string key = headerLine.substr(0, pos);
             std::string value = headerLine.substr(pos + 1);
-            while (!key.empty() && isspace(key.front())) key.erase(0, 1);
-            while (!key.empty() && isspace(key.back())) key.pop_back();
-            while (!value.empty() && isspace(value.front())) value.erase(0, 1);
-            while (!value.empty() && isspace(value.back())) value.pop_back();
+            trim(key);
+            trim(value);
             if (key.empty() || value.empty()){
                 saver.statusCode = 400;
-                throw std::runtime_error("bad request");
+                throw std::runtime_error("bad headers format");
             }
             saver.headers[key] = value;
         }
         else {
             saver.statusCode = 400;
-            throw std::runtime_error("bad request");
+            throw std::runtime_error("bad headers");
         }
     }
 
@@ -181,6 +195,9 @@ void Request::requestPartitioning(Request &saver, std::string& request) {
 }
 
 void Request::isReqWellFormed(Request &req){
+    for (std::map<std::string, std::string>::iterator i = headers.begin(); i != headers.end(); i++){
+        std::cout << "headers : " << i->first << std::endl;
+    }
     ParseRequest parse;
     
     statusCode = parse.parseMethod(req.method);
@@ -208,7 +225,7 @@ bool Request::allowedMethod(location& location) const {
 
 //start here
 int    Request::getCheckRequest(client &client, const infra &infra) {
-        client.reqq.reqStr.append(client.reqq.readRequest(client.ssocket));
+        client.reqq.readRequest(client.ssocket);
         if (!client.reqq.headersDone)
             return 1;
         
@@ -268,7 +285,7 @@ void Request::retreiveRequestedResource(const server &serve){
     path = matchedLocation.root;
     path += fileName.empty() ? "" : "/";
     path += fileName;
-    // std::cout <<"path : " << path << std::endl;
+    std::cout <<"path : " << path << std::endl;
     isFileAvailable();
     isMethodAllowed();
     isRedirect();
@@ -352,7 +369,6 @@ std::string Request::generateResponse(client &client, std::string &content){
 }
 
 int Request::send_response(client &client){
-    // std::cout << "\033[1;34m started responding here \033[0m" << std::endl;
     std::string chunk("");
     
     if (firstChunk){
@@ -364,7 +380,7 @@ int Request::send_response(client &client){
             content = Response::handleMethod(client);
         }
         catch (const std::runtime_error &e){
-            std::cout << e.what() << std::endl;
+            std::cerr << e.what() << std::endl;
             if (client.reqq.method != "HEAD")
                 content = errorPage::serveErrorPage(client.reqq);
         }
@@ -374,10 +390,15 @@ int Request::send_response(client &client){
     
     if (chunkPos < response.length() - 1){
         chunk = response.substr(chunkPos, 1024);
-         if (send(client.ssocket, chunk.c_str(), chunk.length(), 0) == -1){
+        int sret = send(client.ssocket, chunk.c_str(), chunk.length(), 0);
+        if (sret == -1){
             std::cerr << "send failed ..." << std::endl;
             return 0;
-        }   
+        }
+        if (sret == 0){
+            std::cerr << "Peer closed connection ..." << std::endl;
+            return 0;
+        }
         chunkPos += 1024;
     }
     else{
@@ -389,19 +410,15 @@ int Request::send_response(client &client){
 }
 
 int Request::read_request(client &client, infra & infra){
-    // std::cout << "\033[1;31m reading HEADERS here \033[0m" << std::endl;
     client.r_done = 0;
     try{
         if (!readBody){
-            // client.reqq.errorPages = server.errorPages;
             getCheckRequest(client, infra);
         }
         else{
             if(!client.reqq.isChunked)
                 Post::body(client);
             else {
-                // std::cout << "Enter" << std::endl;
-                // throw std::runtime_error("eror");
                 Post::chunked_body2(client);
                 if(client.reqq.chunked_flag == 0)
                     Post::chunked_body(client);
@@ -409,6 +426,7 @@ int Request::read_request(client &client, infra & infra){
         }
         }
     catch (const std::runtime_error &e){
+        std::cout << e.what() << std::endl;
         client.r_done = 1;
         if(statusCode == -1){
             // std::cout << "\033[1;36mError in reading : "<< e.what() << "\033[0m" << std::endl;
@@ -437,7 +455,6 @@ const server &Request::getMatchedServer(const infra &infra){
     
     std::vector<server>::const_iterator i = infra.getServer().begin();
     for (; i!=infra.getServer().end(); ++i){
-        // std::cout << i->serverName.size() << std::endl;
         if (i->port == this->port && ((i->adress == this->ip) || (i->adress == "127.0.0.1" && this->ip == "localhost") 
             || (i->adress == "localhost" && this->ip == "127.0.0.1")) ){//&& matchedName(i->serverName))// && this->headers["Host"] == i->serverName)
                 for (size_t s = 0; s < i->serverName.size(); ++s){

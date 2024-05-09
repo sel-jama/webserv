@@ -91,6 +91,17 @@ char **handleCgi::createGetEnv(Request &req){
     return env;
 }
 
+void trimcgi(std::string &str) {
+    // Trim leading whitespace
+    while (!str.empty() && std::isspace(str[0]))
+        str.erase(0, 1);
+
+    // Trim trailing whitespace
+    while (!str.empty() && std::isspace(str[str.length() - 1]))
+        str.erase(str.length() - 1);
+}
+
+
 std::string handleCgi::parseCgiRsponse(std::string &cgiOutput){
     std::string ret;
     std::stringstream ss("");
@@ -118,10 +129,8 @@ std::string handleCgi::parseCgiRsponse(std::string &cgiOutput){
                 {
                     std::string key = headerLine.substr(0, pos);
                     std::string value = headerLine.substr(pos + 1);
-                    while (!key.empty() && isspace(key.front())) key.erase(0, 1);
-                    while (!key.empty() && isspace(key.back())) key.pop_back();
-                    while (!value.empty() && isspace(value.front())) value.erase(0, 1);
-                    while (!value.empty() && isspace(value.back())) value.pop_back();
+                    trimcgi(key);
+                    trimcgi(value);
                     if (key.empty() || value.empty()){
                         generateHeaders = 1;
                     }

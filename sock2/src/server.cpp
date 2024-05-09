@@ -74,6 +74,15 @@ void server::setErrorpages(std::vector<std::string>::const_iterator &it, const s
 	errorPages[*(pages.begin())] = *(pages.end() - 1) ;
 }
 
+int string_to_int(const std::string& str) {
+    int result;
+    std::istringstream iss(str);
+    if (!(iss >> result)) {
+		throw (std::runtime_error( "Error: Conversion failed for string "));
+    }
+    return result;
+}
+
 void server::setClientMaxBodySize(std::vector<std::string>::const_iterator &it, int &j)
 {
 	++it;
@@ -81,7 +90,7 @@ void server::setClientMaxBodySize(std::vector<std::string>::const_iterator &it, 
 	if (j != 1)throw(std::runtime_error("Error : config-file :bad config file\" ClientMaxBodySize :only one ClientMaxBodySize per server\""));
 	if (!alldigit(*it)) throw(std::runtime_error("Error : config-file :bad config file\" ClientMaxBodySize : only numbers pls\""));
 	//check hna ila kaynin chi norms
-	clientMaxBodySize = std::stoi(*it);
+	clientMaxBodySize = string_to_int(*it);
 	++it;
 	if (*it != ";") throw(std::runtime_error("Error : config-file :bad config file\" ClientMaxBodySize :add \";\"after ClientMaxBodySize\""));
 	++it;
@@ -97,9 +106,6 @@ void server::setServerName(std::vector<std::string>::const_iterator &it, std::ve
 		if ((*it).empty())throw(std::runtime_error("Error : config-file :bad config file\" server-name: empty server name\""));
 		for (std::vector<std::string>::const_iterator it2 = infra_names.begin(); it2 != infra_names.end(); ++it2)
 			if ((*it2) == (*it))throw(std::runtime_error("Error : config-file :bad config file\" server-name :can't have 2 same server-name in different servers\""));
-		//check if server name khssou itekteb bchi tari9a mou3ayana
-		/////////////
-		////////////
 		infra_names.push_back(*it);
 		serverName.push_back(*it);
 		++it;
@@ -111,9 +117,7 @@ void server::setServerName(std::vector<std::string>::const_iterator &it, std::ve
 void server::setlisten(std::vector<std::string>::const_iterator &it)
 {
 	std::vector<std::string> tokens;
-	// adrrtokens;
 	std::string token;
-	//  taken;
 	++it;
 	std::string tmp = *it;
 	++it;
@@ -129,7 +133,7 @@ void server::setlisten(std::vector<std::string>::const_iterator &it)
 		//hadi anrje3 liha mnin nchuf lblan dyal adress , wach khassha tkoun specefik =>127.0.0.1 ou lmachine
 		adress = tokens.at(0);
 		if (!alldigit(tokens.at(1))) throw(std::runtime_error("Error : config-file :bad config file\" listen => adjust ur port number Max : 65535\""));
-		int i = std::stoi(tokens.at(1));
+		int i = string_to_int(tokens.at(1));
 		if (i < 0 || i > 65535) throw(std::runtime_error("Error : config-file :bad config file\" listen => adjust ur port number Max : 65535\""));
 		port = i;
 	}
@@ -140,72 +144,23 @@ void server::setlisten(std::vector<std::string>::const_iterator &it)
 
 server::server()
 {
-	//error-page number
-	// errorPages["300"] = "";
-	// errorPages["301"] = "";
-	// errorPages["400"] = "";
-	// errorPages["403"] = "";
-	// errorPages["404"] = "";
-	// errorPages["405"] = "";
-	// errorPages["408"] = "";
-	// errorPages["409"] = "";
-	// errorPages["411"] = "";
-	// errorPages["413"] = "";
-	// errorPages["500"] = "";
-	// errorPages["501"] = "";
-	// errorPages["504"] = "";
-	// errorPages["505"] = "";
-	//client max body size
 	clientMaxBodySize = 0;
-
-
 }
 
 
-// void server::setErrorpages(std::vector<std::string>::const_iterator &it, const std::vector<std::string> &tokens)
-// {
-// 	++it;
-// 	std::vector<std::string> pages;
-// 	while(*it != ";" && it != tokens.end())
-// 	{
-// 		pages.push_back(*it);
-// 		++it;
-// 	}
-// 	if (pages.size() <= 1)throw(std::runtime_error("Error : config-file :bad config file\" Error-pages :check number of arguments in  error-pages\""));
-// 	if (*it != ";") throw(std::runtime_error("Error : config-file :bad config file\" Error-pages :add \";\"at the end of the path of error-pages\""));
-// 	++it;
-// 	std::string path;
-// 	std::vector<std::string>::const_iterator it2 = pages.end() - 1;
-// 	int state = 0;
-// 	if ((*it2).at(0) == '/' && ((*it2).at(1) == '~' || !(*it2).empty())) path = *it2;
-// 	for (std::vector<std::string>::iterator it3 = pages.begin(); it3 != pages.end(); ++it3)
-// 	{
-// 		for (std::map<std::string, std::string>::iterator ito = errorPages.begin(); ito != errorPages.end() ; ++ito)
-// 		{
-// 			if ((*it3) == (ito)->first)
-// 			{
-// 				errorPages[*it3] = path;
-// 				state = 1;
-// 				break;
-// 			}
-// 		}
-// 		if (state == 0) throw(std::runtime_error("Error : config-file :bad config file\" Error-pages : give valide error-pages please\""));
-// 	}
-// }
 
 
 server::~server(){}
 
-// server::server(const server &ser):()
-// {}
+
 
 const u_int16_t & server::getPort()const{return(port);}
 const std::string & server::getAdress()const{return(adress);}
 const long long & server::getClientMaxBodySize()const{return(clientMaxBodySize);}
 const std::vector<std::string> & server::getServerName()const{return(serverName);}
 
-//added by sel-jama
 const std::vector<location> &server::getLocations()const{return locations;}
+
 
 
 void server::checkServerData()
@@ -308,32 +263,27 @@ void server::ioswap(fd_set &toadd, fd_set &toremove, int fd)
 	FD_CLR(fd, &toremove);
 }
 
-void server::handle_old_cnx(fd_set &fd_r, fd_set &fd_w, fd_set &fderr, fd_set &fd_rcopy, fd_set &fd_wcopy, int &maxfd, infra &infra, unsigned int j)
+void server::handle_old_cnx(fd_set &fd_r, fd_set &fd_w, fd_set &fd_rcopy, fd_set &fd_wcopy, int &maxfd, infra &infra, unsigned int j)
 {
-	// std::cout << "ja hnna " << std::endl;
 	std::vector<client>::iterator it = clients.begin();
 	std::advance(it, j);
 	for (; it != clients.end();++it)
 	{
-		if (FD_ISSET((*it).ssocket, &fderr) || (*it).w_done)
+		if ((*it).w_done)
 		{
 			clientdown(*it, fd_r, fd_w, maxfd);
 			break;
 		}
 		else if (FD_ISSET((*it).ssocket, &fd_wcopy) && (*it).r_done)//to recheck
 		{
-			// std::cout << "write in client" << std::endl;
 			if (!((*it).reqq).send_response(*it) || (*it).w_done) 
 			{
 				clientdown(*it, fd_r, fd_w, maxfd);
 				break;
 			}
-			// if ((*it).w_done) ioswap(fd_r, fd_w, (*it).ssocket);
 		}
 		else if (FD_ISSET((*it).ssocket, &fd_rcopy))
 		{
-			// std::cout << "read from client done:" << (*it).r_done << std::endl;
-			// std::cout << "kkk: " << k << std::endl;
 			if (!((*it).reqq).read_request(*it, infra))
 			{
 				clientdown(*it, fd_r, fd_w, maxfd);
@@ -345,7 +295,7 @@ void server::handle_old_cnx(fd_set &fd_r, fd_set &fd_w, fd_set &fderr, fd_set &f
 		
 	}
 	if (j != clients.size())
-		handle_old_cnx(fd_r, fd_w, fderr, fd_rcopy, fd_wcopy, maxfd, infra, j);
+		handle_old_cnx(fd_r, fd_w, fd_rcopy, fd_wcopy, maxfd, infra, j);
 }
 
 server::server(const server &other):

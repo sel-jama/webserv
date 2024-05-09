@@ -19,7 +19,7 @@
 Request::Request() : method(""), uri(""), 
 version(""), body(""), reqStr(""), responseContentType(""), responseContentLen(0), fileName(""),
 contentLength(0), readbytes(0), readBody(0), firstRead(1)
-,headersDone(0), statusCode(0), statusMsg(""), isChunked(0), cgi(0), chunkPos(0), firstChunk(1), locationHeader("") ,r(0){
+,headersDone(0), statusCode(0), statusMsg(""), isChunked(0), cgi(0), chunkPos(0), firstChunk(1), locationHeader(""), cgi_File(""), cgi_File2("") ,r(0){
     to_de = 0 ;flag = 0; saver_count = 0; tmp = 0;
 }
 
@@ -342,6 +342,8 @@ void resetClientRequest(Request &req){
     req.locationHeader = "";
     req.responseContentType = "";
     req.responseContentLen = 0;
+    req.cgi_File = "";
+    req.cgi_File2 = "";
 }
 
 std::string Request::generateResponse(client &client, std::string &content){

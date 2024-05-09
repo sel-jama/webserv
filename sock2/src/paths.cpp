@@ -20,7 +20,7 @@ std::string trim(const std::string& str)
 void validPath(char *str)
 {
     std::string name = trim(str);
-    std::ifstream file(name);
+    std::ifstream file(name.c_str());
     if (!file.is_open())throw(std::runtime_error("Error: can't open/find your file !!"));
 }
 

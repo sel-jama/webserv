@@ -4,30 +4,12 @@
 
 //---------init servers -> socket->fcntrl->setsocketopt->bind->listen->select->accept
 
-// int infra::check_port()
-// {
-//     if (port)
-// }
-
-// void infra::sockettolisten(std::vector<server>::iterator &it)
-// {
-//     // check_port();
-//     int opt = 1;
-//     socklen_t j = sizeof((*it).data_socket);
-//     if (((*it).ssocket = socket(AF_INET, SOCK_STREAM, 0)) == -1)                        throw(std::runtime_error("Error: init servers : socket()"));
-//     if (fcntl((*it).ssocket, F_SETFL, O_NONBLOCK, FD_CLOEXEC) == -1)                    throw(std::runtime_error("Error: init servers : fcntl()"));
-//     if (setsockopt((*it).ssocket, SOL_SOCKET, SO_REUSEPORT, &(opt), sizeof(opt)) == -1) throw(std::runtime_error("Error: init servers : setsockopt() SO_REUSPORT"));
-//     // if (setsockopt((*it).ssocket, SOL_SOCKET, SO_REUSEADDR, &(opt), sizeof(opt)) == -1) throw(std::runtime_error("Error: init servers : setsockopt() SO_REUSPORT"));
-//     if (bind((*it).ssocket, (const sockaddr *)&((*it).data_socket), j) != 0)           throw(std::runtime_error("Error: init servers : bind()"));
-    
-//     if (listen((*it).ssocket,10 ) == -1)                                                throw(std::runtime_error("Error: init servers : listen()"));
-// }
 void infra::sockettolisten(std::vector<server>::iterator &it)
 {
     // check_port();
     int opt = 1;
     if (((*it).ssocket = socket(AF_INET, SOCK_STREAM, 0)) == -1)                        throw(std::runtime_error("Error: init servers : socket()"));
-    if (fcntl((*it).ssocket, F_SETFL, O_NONBLOCK, FD_CLOEXEC) == -1)                                         throw(std::runtime_error("Error: init servers : fcntl()"));
+    // if (fcntl((*it).ssocket, F_SETFL, O_NONBLOCK, FD_CLOEXEC) == -1)                                         throw(std::runtime_error("Error: init servers : fcntl()"));
     if (setsockopt((*it).ssocket, SOL_SOCKET, SO_REUSEPORT, &(opt), sizeof(opt)) == -1) throw(std::runtime_error("Error: init servers : setsockopt() SO_REUSPORT"));
     if (bind((*it).ssocket, (*it).servinfo->ai_addr, (*it).servinfo->ai_addrlen) == -1)           throw(std::runtime_error("Error: init servers : bind()"));
     if (listen((*it).ssocket, SOMAXCONN ) == -1)                                                throw(std::runtime_error("Error: init servers : listen()"));
@@ -44,15 +26,22 @@ void infra::initselect()
         if ((*it).ssocket > maxfd) maxfd = (*it).ssocket;
     }
     timeout.tv_sec = 100;
+    timeout.tv_usec = 0;
 }
 
 
+
+std::string int_to_string(int value) {
+    std::ostringstream oss;
+    oss << value;
+    return oss.str();
+}
 void infra::initdata(std::vector<server>::iterator &it)//to be modifed
 {
     struct addrinfo hints;
     memset(&hints, 0, sizeof hints);
     std::string ip2 = (*it).getAdress();
-    std::string port2 = std::to_string((*it).getPort());
+    std::string port2 = int_to_string((*it).getPort());
     hints.ai_family = AF_INET;
     hints.ai_socktype = SOCK_STREAM;
     hints.ai_flags = AI_PASSIVE;
@@ -63,36 +52,25 @@ void infra::initdata(std::vector<server>::iterator &it)//to be modifed
 void infra::selecttoinfinity()
 {
     signal(SIGPIPE, SIG_IGN);
-    // int k = 0;
     while (1)
     {
-        fd_set fderr;
-        FD_ZERO(&fderr);
         fd_rcopy = fd_r;
         fd_wcopy = fd_w;
-        // ++k;
-        // std::cout << "first k: " << std::endl;
-        int slct = select(maxfd + 1, &fd_rcopy, &fd_wcopy, &fderr, &timeout);
-        // int slct = select(maxfd + 1, &fd_rcopy, &fd_wcopy, &fderr, NULL);
-        // std::cout << "slct: " << slct << " max fd : " << maxfd  << std::endl;
+        int slct = select(1024, &fd_rcopy, &fd_wcopy, NULL, &timeout);
         if (slct == -1) throw(std::runtime_error("Error : select : lanch"));
         if (slct == 0)
         {
-            // std::cout << "ja hna" << std::endl;
             for (std::vector<server>::iterator it = servers.begin(); it != servers.end(); ++it)
                 (*it).checktime(fd_r, fd_w, maxfd);
             continue;
         }
         for (std::vector<server>::iterator it = servers.begin(); it !=servers.end(); ++it)
         {
-            // unsigned int j = 0;
-            (*it).handle_old_cnx(fd_r, fd_w, fderr, fd_rcopy, fd_wcopy, maxfd, *this, 0);
+            (*it).handle_old_cnx(fd_r, fd_w, fd_rcopy, fd_wcopy, maxfd, *this, 0);
             if (FD_ISSET((*it).ssocket, &fd_rcopy))
             {
-                // std::cout << "read from socket" << std::endl;
                 (*it).accept_new_connection(fd_r, maxfd);
             }
-            // else
         }
 
     }
@@ -157,7 +135,14 @@ void infra::checkInfraData()
 {
     if (servers.empty()) throw(std::runtime_error("Error : config-file : ss ur servers !!"));
     for (std::vector<server>::iterator it = servers.begin(); it != servers.end(); ++it){(*it).checkServerData();}
-    //check wach chi haja na9ssa ou ila chi extra checks
+    for (std::vector<server>::iterator it = servers.begin(); it != servers.end() - 1; ++it)
+    {
+        for (std::vector<server>::iterator it2 = servers.begin() + 1; it2 != servers.end(); ++it2)
+        {
+            if ((*it).port == (*it2).port) throw(std::runtime_error("Duplicate port numbers"));
+        }
+    }
+
 }
 
 void infra::printInfra()

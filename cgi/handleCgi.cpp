@@ -169,7 +169,7 @@ std::string handleCgi::executeCgiScript(Request &req) {
     std::string random = generateRandomFileName();
 
     // Open random file for writing
-    std::ofstream outputFile(random);
+    std::ofstream outputFile(random.c_str());
     if (!outputFile.is_open()){
         req.statusCode = 500;
         throw std::runtime_error("Failed to open random file for writing");
@@ -245,7 +245,9 @@ char **handleCgi::createPostEnv(Request &req){
 	mapEnv["SCRIPT_NAME"] = req.path;
 	mapEnv["SCRIPT_FILENAME"] = scriptName;
 	mapEnv["REQUEST_METHOD"] = req.getMethod();
-	mapEnv["CONTENT_LENGTH"] = std::to_string(req.responseContentLen);
+    std::ostringstream oss;
+    oss << req.responseContentLen;
+	mapEnv["CONTENT_LENGTH"] = oss.str();
 	mapEnv["CONTENT_TYPE"] = headers["Content-Type"];
 	mapEnv["SERVER_NAME"] = headers["Hostname"];
 	mapEnv["SERVER_PORT"] = req.port;
@@ -267,9 +269,10 @@ char **handleCgi::createPostEnv(Request &req){
 }
 
 void handleCgi::executeCgiBody(Request &req){
-    std::string randomFile = generateRandomFileName();
-    std::string pathtofile = req.matchedLocation.upload_path + "/" + randomFile;
-    std::ofstream outputFile(pathtofile);
+    // std::string randomFile = generateRandomFileName();
+    // std::string pathtofile = req.matchedLocation.upload_path + "/" + randomFile;
+    
+    std::ofstream outputFile(req.cgi_File2.c_str());
     if (!outputFile.is_open()){
         req.statusCode = 500;
         throw std::runtime_error("failed to open file ...");
@@ -282,9 +285,9 @@ void handleCgi::executeCgiBody(Request &req){
     }
 
     else if (pid == 0){
-        std::string cgiBody = req.matchedLocation.upload_path + "/Body.html";
+        std::string cgiBody = req.cgi_File;
         if (freopen(cgiBody.c_str(), "r", stdin) == NULL
-            || freopen(pathtofile.c_str(), "w", stdout) == NULL){
+            || freopen(req.cgi_File2.c_str(), "w", stdout) == NULL){
             req.statusCode = 500;
             throw std::runtime_error("failed to redirect input..");
         }

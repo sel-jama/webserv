@@ -38,7 +38,7 @@ class Request {
         std::string reqStr;
         std::string queryString;
         std::string responseContentType;
-        int responseContentLen;
+        double responseContentLen;
         location matchedLocation;
         
         std::string getit;
@@ -75,6 +75,8 @@ class Request {
         size_t chunkPos;
         int firstChunk;
         std::string locationHeader;
+        std::string cgi_File;
+        std::string cgi_File2;
 
         int r;
         Request();

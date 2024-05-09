@@ -45,7 +45,7 @@ class Post{
         void support_upload(Request &obj);
         void get_Request_resource(Request obj);
         void After_geting_resource(Request obj);
-        void Work_with_file(Request obj);
+        void Work_with_file(Request &obj);
         void Work_with_Directory(Request obj);
         static void body(client &obj);
         static void chunked_body(client &obj);

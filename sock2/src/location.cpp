@@ -35,7 +35,6 @@ void location::setuplocationName(const std::string &name)
 
 void location::setUpload(std::vector<std::string>::const_iterator &it)
 {
-    //check path?
     ++it;
     upload = *it;
     ++it;
@@ -73,15 +72,6 @@ void location::setReturn(std::vector<std::string>::const_iterator &it, int &i)
 {
     if (i == 1) throw(std::runtime_error("Error : config-file :bad config file\" return : One return per location"));
     ++i;
-    // ++it;
-    // //do i hcekc the path ?
-    // std::string tmp;
-    // tmp = *it;
-    // ++it;
-    // returns[std::stoi(tmp)] = *it;  
-    // ++it;
-    // if (*it != ";")throw(std::runtime_error("Error : config-file :bad config file\" return : finish with ;"));
-    // ++it;
     ++it;
     std::string tmp;
     while (*it != ";")
@@ -123,13 +113,17 @@ void location::setCgi(std::vector<std::string>::const_iterator &it)
 
 void location::checklocation()
 {
-    //tanchoufou return ou others //upload
     if (root.empty()) throw(std::runtime_error("Error: config-file : root => need root in location"));
     if (location_name.empty()) throw(std::runtime_error("Error: config-file : location name => need location_name in location"));
     if (upload.empty())throw(std::runtime_error("Error: config-file : upload => need upload in location"));
     if (autoindex != "on" && autoindex != "off") throw(std::runtime_error("Error: config-file : autoindex => need autoindex in location"));
     if (!HM)throw(std::runtime_error("Error: config-file : Http_methodes => need http_methods in location"));
+    if (root.find("..") != std::string::npos) throw(std::runtime_error("pb in root path"));
+    if (root.find("/..") != std::string::npos) throw(std::runtime_error("pb in root path"));
+    if (root.find("../") != std::string::npos) throw(std::runtime_error("pb in root path"));
 }
+
+
 
 void location::setIndex(std::vector<std::string>::const_iterator &it)
 {
@@ -172,14 +166,6 @@ void location::printlocation()
     std::cout << "           Get    : "  << http_methods["GET"] << std::endl;
     std::cout << "           Post   : "  << http_methods["POST"] << std::endl;
     std::cout << "           Delete : "  << http_methods["DELETE"] << std::endl;
-    // if (!returns.empty())
-    // {
-    //     std::cout << "        =>" << " returns  : " << std::endl;
-    //     for (std::map <int , std::string>::iterator j = returns.begin(); j != returns.end(); ++j)
-    //     {
-    //         std::cout << "        num : " << j->first << " path " << j->second <<std::endl; 
-    //     }
-    // }
     if (!retu.empty())
     {
         std::cout << "        =>" << " returns  : "  << retu << std::endl;

@@ -8,6 +8,7 @@
 #include <sys/stat.h>
 #include <unistd.h>
 #include <fcntl.h>
+#include "../Response/method.hpp"
 
 bool Post::getpost_i(){
     return post_indicate;
@@ -130,9 +131,11 @@ void Post::support_upload(Request &obj){
                 obj.content_T  = "text/plain";
                 filename = "/" + obj2.generateRandomFileName() + ".txt";
             }
-
-                std::ofstream file(ptr + filename);
-                obj.path = ptr + filename;
+                filename = ptr + filename;
+                std::ofstream file(filename.c_str());
+                obj.cgi_File = filename; 
+                obj.cgi_File2 = ptr;
+                obj.path = ptr + filename; //
                 if (file.is_open() == true)
                 {
                     file << obj.body << std::endl;
@@ -155,7 +158,6 @@ void Post::Work_with_Directory(Request obj)
     int integ = 0;
     std::vector<std::string>index;
     std::vector<std::string>::iterator for_index = index.begin();
-
 
     for(iter = get.begin(); iter != get.end(); iter++)
     {
@@ -181,12 +183,8 @@ void Post::Work_with_Directory(Request obj)
 }
 
 void Post::body(client &obj){
-    // std::cout << "----------------- reading " << std::endl;
     obj.reqq.body.append(obj.reqq.readRequest(obj.ssocket));
-    // std::cout << "THIS IS THE BODY LEN " <<static_cast<double>(obj.reqq.body.length()) << std::endl;
-    // std::cout << "THIS IS CONTENT LENGTH " << obj.reqq.contentLength << std::endl;
     if(static_cast<double>(obj.reqq.body.length()) >= obj.reqq.contentLength){
-        // std::cout << "reading BODY DONE HERE " << std::endl;
         obj.reqq.statusCode = 201;
         obj.reqq.responseContentLen = obj.reqq.body.length();
         obj.r_done = 1;
@@ -218,7 +216,10 @@ void Post::chunked_body(client &obj){
                 obj.reqq.content_T = "text/plain";
                 filename = "/" + obj2.generateRandomFileName() + ".txt";
             }
-            obj.reqq.file.open(obj3.upload_path + filename);
+            filename = obj3.upload_path + filename;
+            obj.reqq.file.open(filename.c_str());
+            obj.reqq.cgi_File = filename; 
+            obj.reqq.cgi_File2 = obj.reqq.path; 
             obj.reqq.flag = 1;
         }
         obj.reqq.body.append( obj.reqq.readRequest(obj.ssocket));
@@ -283,7 +284,10 @@ void Post::chunked_body2(client &obj){
                     obj.reqq.content_T = "text/plain";
                     filename = "/" + obj2.generateRandomFileName() + ".txt";
                 }
-                obj.reqq.file.open(obj3.upload_path + filename);
+                filename = obj3.upload_path+ filename;
+                obj.reqq.file.open(filename.c_str());
+                obj.reqq.cgi_File = filename;
+                obj.reqq.cgi_File2 = obj.reqq.path;
                 obj.reqq.flag = 1;
             }
             if(obj.reqq.saver_count == 0)
@@ -310,7 +314,6 @@ void Post::chunked_body2(client &obj){
             {
                 obj.reqq.file.write(obj.reqq.body.c_str(), obj.reqq.body.size() - 5);
                 obj.reqq.file.flush();
-                std::cout << "Done" << std::endl;
                 obj.reqq.statusCode = 201;
                 obj.reqq.responseContentLen = obj.reqq.to_de2;
                 obj.r_done = 1;
@@ -320,7 +323,7 @@ void Post::chunked_body2(client &obj){
     }
 
 
-void Post::Work_with_file(Request obj){
+void Post::Work_with_file(Request &obj){
    location capt = obj.getMatchedLocation();
     std::map<std::string, std::string> get = capt.cgi;
     std::map<std::string, std::string>::iterator iter = get.begin();
@@ -332,14 +335,18 @@ void Post::Work_with_file(Request obj){
     {
         search = iter->first;
         search = "." + search;
-        tmp = obj.fileName.find(search);
-        if(!tmp.empty()){
+        tmp = obj.path.rfind(search);
+        if(tmp.size() != std::string::npos){
             integ = 1;
             break;
         }
     }
     if(integ == 1){
-        
+        method use;
+        handleCgi cgi;
+        if (use.loacationHasCgi(obj, cgi)){
+            cgi.executeCgiBody(obj);
+        }
     }
     else{
         //403 forbiden

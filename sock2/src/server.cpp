@@ -243,17 +243,10 @@ void server::accept_new_connection(fd_set &fd_r, int &maxfd)
 	socklen_t len = sizeof(tmp.cdata_socket);
 	//add state that it's not read yet => sel
 	if ((tmp.ssocket = accept(ssocket, (struct sockaddr *)&tmp.cdata_socket, &len)) == -1)	throw(std::runtime_error("Error: init clients : accept()"));
-	// if (fcntl(tmp.ssocket, O_NONBLOCK) == -1)											throw(std::runtime_error("Error: init clients : fcntl()"));
 	FD_SET(tmp.ssocket , &fd_r);
 	gettimeofday(&tmp.clientTime, NULL);
-	//--------------mid-merge
-	
 	clients.push_back(tmp);
 	maxfd = maxfd > tmp.ssocket ? maxfd : tmp.ssocket;
-	// std::fstream savefds("fdnum.txt");
-	// savefds << "0";
-	// savefds.close();
-	// signal(SIGPIPE, SIG_IGN);
 }
 
 void server::ioswap(fd_set &toadd, fd_set &toremove, int fd)

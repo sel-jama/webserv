@@ -16,6 +16,7 @@
 #include "../Response/Response.hpp"
 #include "../error/errorPage.hpp"
 #include "../sock2/includes/infra.hpp"
+#include <time.h>
 Request::Request() : method(""), uri(""), 
 version(""), body(""), reqStr(""), responseContentType(""), responseContentLen(0), fileName(""),
 contentLength(0), readbytes(0), readBody(0), firstRead(1)
@@ -146,10 +147,6 @@ void Request::requestPartitioning(Request &saver, std::string& request) {
         statusCode = 400;
         throw std::runtime_error("bad request line");
     }
-    else if (saver.uri.length() > 1024){
-        statusCode = 414;
-        throw std::runtime_error("URI too long");
-    }
     uriQuery(saver.uri);
     // Parse header
     std::string headerLine("");
@@ -226,6 +223,7 @@ bool Request::allowedMethod(location& location) const {
 //start here
 int    Request::getCheckRequest(client &client, const infra &infra) {
         client.reqq.readRequest(client.ssocket);
+        client.wakt = time(NULL);
         if (!client.reqq.headersDone)
             return 1;
         
@@ -410,6 +408,7 @@ int Request::send_response(client &client){
         resetClientRequest(client.reqq);
         client.w_done = 1;
     }
+    client.wakt = time(NULL);
     return 1;
 }
 

@@ -18,6 +18,8 @@
 // #include "../sock2/includes/server.hpp"
 #include "../sock2/includes/location.hpp"
 #include <algorithm>
+#include <sys/time.h>
+
 
 class client;
 class server;

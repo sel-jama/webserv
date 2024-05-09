@@ -25,7 +25,7 @@ void infra::initselect()
         FD_SET((*it).ssocket, &fd_r);
         if ((*it).ssocket > maxfd) maxfd = (*it).ssocket;
     }
-    timeout.tv_sec = 100;
+    timeout.tv_sec = 10;
     timeout.tv_usec = 0;
 }
 
@@ -56,10 +56,11 @@ void infra::selecttoinfinity()
     {
         fd_rcopy = fd_r;
         fd_wcopy = fd_w;
-        int slct = select(1024, &fd_rcopy, &fd_wcopy, NULL, &timeout);
+        int slct = select(maxfd + 1, &fd_rcopy, &fd_wcopy, NULL, &timeout);
         if (slct == -1) throw(std::runtime_error("Error : select : lanch"));
         if (slct == 0)
         {
+            std::cout << "jit hnaya" << std::endl;
             for (std::vector<server>::iterator it = servers.begin(); it != servers.end(); ++it)
                 (*it).checktime(fd_r, fd_w, maxfd);
             continue;

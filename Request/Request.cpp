@@ -23,7 +23,7 @@ contentLength(0), readbytes(0), readBody(0), firstRead(1)
 ,headersDone(0), statusCode(0), statusMsg(""), isChunked(0), 
 cgi(0), chunkPos(0), firstChunk(1), locationHeader(""), 
 cgi_File(""), cgi_File2("") , responseDone(0) ,filePath(""), filePosition(0) ,r(0){
-    to_de = 0 ;flag = 0; saver_count = 0; tmp = 0;
+    to_de = 0 ;flag = 0; saver_count = 0; tmp = 0; chunked_flag = 0;
 }
 
 Request::~Request(){}
@@ -95,8 +95,9 @@ std::string Request::readRequest(int &fdSocket){
     //     firstRead = 0;
     // 
     char buffer[BUFFER_SIZE];
-    // std::cout << "readbytes-> " << readbytes << std::endl;
+    std::cout << "readbytes-> " << std::endl;
     readbytes = read(fdSocket, buffer, BUFFER_SIZE - 1);
+    std::cout << "done\n";
     if (readbytes < 0){
         statusCode = 500;
         throw std::runtime_error("Error reading from socket");
@@ -229,6 +230,10 @@ bool Request::allowedMethod(location& location) const {
 //start here
 int    Request::getCheckRequest(client &client, const infra &infra) {
         client.reqq.reqStr.append(client.reqq.readRequest(client.ssocket));
+        if (!client.reqq.readBody){
+            client.reqq.cutOffBodySegment(client.reqq.reqStr);
+            // return reqStr;
+        }
         client.wakt = time(NULL);
         if (!client.reqq.headersDone)
             return 1;
@@ -248,6 +253,9 @@ int    Request::getCheckRequest(client &client, const infra &infra) {
         server serve = client.reqq.getMatchedServer(infra);
         // client.reqq.errorPages = serve.errorPages;
         client.reqq.retreiveRequestedResource(serve);
+        if (!client.reqq.readBody && client.reqq.headersDone && client.reqq.method == "POST"){
+                client.reqq.readBody = 1;
+        }
     return 1;
 }
 
@@ -411,6 +419,7 @@ std::string Request::getChunk(Request &req){
     }
 
 int Request::send_response(client &client){
+    std::cout <<"sending " << std::endl;
     std::string chunk("");
     
     if (firstChunk){
@@ -448,6 +457,7 @@ int Request::send_response(client &client){
             responseDone = 1;
     }
     
+        std::cout << "c : "<<response << std::endl;
     if (chunkPos < response.length() - 1){
         if (responseDone){
             // std::cout << "\033[1;35m---------------RESPONSE-----------------\n" <<  response.substr(0, response.find("\r\n\r\n")) <<"\033[0m" << std::endl;
@@ -476,7 +486,7 @@ int Request::send_response(client &client){
         resetClientRequest(client.reqq);
         client.w_done = 1;
     }
-    // client.wakt = time(NULL);
+    client.wakt = time(NULL);
     return 1;
 }
 
@@ -487,11 +497,13 @@ int Request::read_request(client &client, infra & infra){
             getCheckRequest(client, infra);
         }
         if (readBody){
+            std::cout << "why \n";
             if(!client.reqq.isChunked)
                 Post::body(client);
             else {
                 std::cout << "hi" << std::endl;
                 Post::chunked_body2(client);
+                // std::cout << obj.reqq.r_done << std::endl;
                 if(client.reqq.chunked_flag == 0)
                     Post::chunked_body(client);
             }

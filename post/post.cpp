@@ -191,7 +191,9 @@ void Post::Work_with_Directory(Request obj)
 }
 
 void Post::body(client &obj){
+    std::cout << "came \n";
     obj.reqq.body.append(obj.reqq.readRequest(obj.ssocket));
+    std::cout << "out \n";
     if(static_cast<double>(obj.reqq.body.length()) >= obj.reqq.contentLength){
         obj.reqq.statusCode = 201;
         obj.reqq.responseContentLen = obj.reqq.body.length();
@@ -286,11 +288,7 @@ void Post::chunked_body2(client &obj){
         }
         if(!obj.reqq.body.empty() && obj.reqq.chunked_flag == 1)
         {
-<<<<<<< HEAD
-            std::cout << "hello hani" << std::endl;
-=======
             std::cout << obj.reqq.body << std::endl;
->>>>>>> refs/remotes/origin/main
             if(obj.reqq.flag == 0)
             {
                 obj.reqq.load_extension();
@@ -337,13 +335,15 @@ void Post::chunked_body2(client &obj){
                 obj.reqq.file.write(obj.reqq.body.c_str(), obj.reqq.body.size() - 5);
                 std::cout << obj.reqq.body << std::endl;
                 obj.reqq.file.flush();
-                std::cout << "salit" << std::endl;
+                std::cout << "salit <---" << std::endl;
                 obj.reqq.statusCode = 201;
                 obj.reqq.responseContentLen = obj.reqq.to_de2;
                 obj.r_done = 1;
             }
         }
-        obj.reqq.chunked_flag = 0;
+
+        //obj.reqq.chunked_flag = 0;
+        std::cout << "ay" << std::endl;
     }
 
 
@@ -371,7 +371,7 @@ void Post::Work_with_file(Request &obj){
         }
     }
     if(integ == 1){
-        method use;
+        Method use;
         handleCgi cgi;
         if (use.loacationHasCgi(obj, cgi)){
             cgi.executeCgiBody(obj);

@@ -494,6 +494,7 @@ int Request::read_request(client &client, infra & infra){
             getCheckRequest(client, infra);
         }
         if (readBody){
+            std::cout << "hie\n";
             if(!client.reqq.isChunked)
                 Post::body(client);
             else {

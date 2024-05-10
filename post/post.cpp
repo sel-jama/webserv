@@ -99,6 +99,7 @@ void Post::support_upload(Request &obj)
     handleCgi obj2;
     int check = 0;
     std::string filename = "";
+    std::string value;
     obj.load_extension();
     // location obj3 = obj.getMatchedLocation();
     std::map<std::string, std::string>::iterator iter = obj.headers.find("Content-Type");
@@ -106,10 +107,11 @@ void Post::support_upload(Request &obj)
     if(iter != obj.headers.end() && !iter->second.empty())
     {
         obj.content_T = iter->second;
-        std::map<std::string, std::string>::iterator iter2 = obj.extension.find(iter->second);
+        value = iter->second;
         std::string name = "Post_" + obj2.generateRandomFileName();
-        filename = "/"  + name + iter2->second;
+        filename = "/"  + name + obj.extension[iter->second];
     }
+
         location capt = obj.getMatchedLocation();
         std::string  ptr = capt.upload_path;
         if(ptr.empty())
@@ -128,26 +130,26 @@ void Post::support_upload(Request &obj)
         else {
             if(filename.empty())
             {
-                std::cout << "HI IM HERE" <<std::endl;
                 obj.content_T  = "text/plain";
                 filename = "/" + obj2.generateRandomFileName() + ".txt";
             }
-                filename = ptr + filename;
-                std::ofstream file(filename.c_str());
-                obj.cgi_File = filename; 
-                obj.cgi_File2 = obj.path;
-                obj.path = ptr + filename; //
-                if (file.is_open() == true)
-                {
-                    file << obj.body << std::endl;
-                    file.close();
-                    Work_with_file(obj);
-                    obj.statusCode = 201;
-                }
-                else{
-                    // obj.statusCode = 
-                    throw std::runtime_error("eror");
-                }
+            filename = ptr + filename;
+            std::ofstream file(filename.c_str());
+            obj.cgi_File = filename; 
+            obj.cgi_File2 = obj.path;
+            obj.path = filename; //
+            if (file.is_open() == true)
+            {
+                file.write(obj.body.c_str(), obj.contentLength) << std::endl;
+                file.close();
+                std::cout <<  "wa lharba 2" << std::endl;
+                Work_with_file(obj);
+                obj.statusCode = 201;
+            }
+            else{
+                obj.statusCode = 403;
+                throw std::runtime_error("eror");
+            }
         }   
     }
 }
@@ -183,7 +185,8 @@ void Post::Work_with_Directory(Request obj)
     }
     else{
        //forbiden 403
-        throw Except();
+        obj.statusCode = 403;
+        throw std::runtime_error("eror");
     }
 }
 
@@ -205,37 +208,44 @@ void Post::chunked_body(client &obj){
     handleCgi obj2;
     location obj3 = obj.reqq.getMatchedLocation();
 
-    std::map<std::string, std::string>::iterator iter = obj.reqq.headers.find("Content-Type");
+    // std::map<std::string, std::string>::iterator iter = obj.reqq.headers.find("Content-Type");
         if(obj.reqq.flag == 0)
         {
             obj.reqq.load_extension();
-             if(iter != obj.reqq.headers.end() && !iter->second.empty())
+            if(!obj.reqq.headers["Content-Type"].empty())
             {
-                obj.reqq.content_T = iter->second;
-                std::map<std::string, std::string>::iterator iter2 = obj.reqq.extension.find(iter->second);
+                obj.reqq.content_T = obj.reqq.headers["Content-Type"];
+                std::cout << obj.reqq.content_T << std::endl;
+                std::string iter2 = obj.reqq.extension[obj.reqq.headers["Content-Type"]];
                 std::string name = "Post_" + obj2.generateRandomFileName();
-                filename = "/"  + name + iter2->second;
+                filename = "/"  + name + iter2;
             }
-            else if(filename.empty())
+            else
             {
+                std::cout << "hello ana f empty" << std::endl;
                 obj.reqq.content_T = "text/plain";
                 filename = "/" + obj2.generateRandomFileName() + ".txt";
             }
             filename = obj3.upload_path + filename;
+            std::cout << "my file : " << filename << std::endl;
             obj.reqq.file.open(filename.c_str());
+            std::cout << "hello" << std::endl;
             obj.reqq.cgi_File = filename; 
             obj.reqq.cgi_File2 = obj.reqq.path; 
             obj.reqq.flag = 1;
         }
         obj.reqq.body.append( obj.reqq.readRequest(obj.ssocket));
-            if(obj.reqq.saver_count == 0)
+        if(obj.reqq.saver_count == 0)
             {
                 if (obj.reqq.body[0] == '\r' && obj.reqq.body[1] == '\n')
                     obj.reqq.body = obj.reqq.body.substr(2, obj.reqq.body.length());
                 obj.reqq.saver_count = obj.reqq.body.find("\r\n");
                 obj.reqq.tmp = obj.reqq.saver_count + 2;
                 if(obj.reqq.saver_count == 0)
-                    throw Except();
+                {
+                    obj.reqq.statusCode = 400;
+                    throw  std::runtime_error("eror");
+                }
                 obj.reqq.getit = obj.reqq.body.substr(0, obj.reqq.saver_count);
                 obj.reqq.to_de = hexa_to_num(obj.reqq.getit);
                 obj.reqq.to_de2 += obj.reqq.to_de;
@@ -268,22 +278,28 @@ void Post::chunked_body2(client &obj){
     handleCgi obj2;
     location obj3 = obj.reqq.getMatchedLocation();
 
-    std::map<std::string, std::string>::iterator iter = obj.reqq.headers.find("Content-Type");
-
+    // std::map<std::string, std::string>::iterator iter = obj.reqq.headers.find("Content-Type");
+        
         if(!obj.reqq.body.empty() && obj.reqq.body.find("\r\n0\r\n\r\n") != std::string::npos)
+        {
             obj.reqq.chunked_flag = 1;
+        }
         if(!obj.reqq.body.empty() && obj.reqq.chunked_flag == 1)
         {
+<<<<<<< HEAD
             std::cout << "hello hani" << std::endl;
+=======
+            std::cout << obj.reqq.body << std::endl;
+>>>>>>> refs/remotes/origin/main
             if(obj.reqq.flag == 0)
             {
                 obj.reqq.load_extension();
-                if(iter != obj.reqq.headers.end() && !iter->second.empty())
+                if(!obj.reqq.headers["Content-Type"].empty())
                 {
-                    obj.reqq.content_T = iter->second;
-                    std::map<std::string, std::string>::iterator iter2 = obj.reqq.extension.find(iter->second);
+                    obj.reqq.content_T = obj.reqq.headers["Content-Type"];
+                    std::string iter2 = obj.reqq.extension[obj.reqq.headers["Content-Type"]];
                     std::string name = "Post_" + obj2.generateRandomFileName();
-                    filename = "/"  + name + iter2->second;
+                    filename = "/"  + name + iter2;
                 }
                 else if(filename.empty())
                 {
@@ -332,33 +348,34 @@ void Post::chunked_body2(client &obj){
 
 
 void Post::Work_with_file(Request &obj){
-//    location capt = obj.getMatchedLocation();
-//     std::map<std::string, std::string> get = capt.cgi;
-//     std::map<std::string, std::string>::iterator iter = get.begin();
-    // std::string search;
-    // size_t tmp;
-    // int integ = 0;
+   location capt = obj.getMatchedLocation();
+    std::map<std::string, std::string> get = capt.cgi;
+    std::map<std::string, std::string>::iterator iter = get.begin();
+    std::string search;
+    unsigned long tmp1 = 0;
+    int integ = 0;
 
-    // for(iter = get.begin(); iter != get.end(); iter++)
-    // {
-    //     search = iter->first;
-    //     search = "." + search;
-    //     tmp = obj.path.rfind(search);
-    //     if(tmp != std::string::npos){
-    //         integ = 1;
-    //         break;
-    //     }
-    // }
-    // if(integ == 1){
-        Method use;
+    (void)tmp1;
+    for(iter = get.begin(); iter != get.end(); iter++)
+    {
+        search = iter->first;
+        search = "." + search;
+        tmp1 = obj.path.find(search);
+        // std::cout << tmp1 << std::endl;
+        // std::cout << search << "<- here "<< std::endl;
+        // std::cout << obj.cgi_File2 << " <- here2 "<< std::endl;
+        if(obj.cgi_File2.find(search) != std::string::npos){
+            // std::cout << "kayn hna" << std::endl;
+            integ = 1;
+            break;
+        }
+    }
+    if(integ == 1){
+        method use;
         handleCgi cgi;
         if (use.loacationHasCgi(obj, cgi)){
             cgi.executeCgiBody(obj);
         }
-    // }
-    else{
-        //403 forbiden
-        throw Except();
     }
 }
 

@@ -6,7 +6,7 @@
 /*   By: sel-jama <sel-jama@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/03/31 00:44:16 by sel-jama          #+#    #+#             */
-/*   Updated: 2024/05/08 05:04:19 by sel-jama         ###   ########.fr       */
+/*   Updated: 2024/05/06 08:18:17 by sel-jama         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -21,8 +21,13 @@ std::string Response::handleMethod(client &client){
             obj.handleGET(client.reqq);
         }
         else if (client.reqq.getMethod() == "POST"){
+
+            std::cout << "hello im here !" << std::endl;
+            
             obj.handlePost(client.reqq);
         }
+        else if (client.reqq.getMethod() == "DELETE")
+            obj.handleDelete(client.reqq);
     // }
     // catch(const std::runtime_error &e){
     //         return "";
@@ -53,7 +58,14 @@ void Response::handlePost(Request &req){
     Method use;
     if(!req.isChunked)
     {
+        std::cout << "Wa lharba" << std::endl;
         post.support_upload(req);
-        // this->response = use.readContent(req);
+        this->response = use.readContent(req);
     }
-} 
+}
+
+void Response::handleDelete(Request &req){
+    Delete del;
+
+    del.check_RequestedR(req);
+}

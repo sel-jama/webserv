@@ -12,13 +12,11 @@
 
 class Post{
     private:
-        // std::map<std::string, std::string> extension;
         bool post_indicate;
         bool chunked_indicate;
         std::string string_saver;
         std::string path;
         size_t reading_count;
-        // int count;
         size_t content_lenght;
     public:
         Post(){};

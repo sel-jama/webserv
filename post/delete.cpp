@@ -1,6 +1,7 @@
 #include "delete.hpp"
 
 void Delete::check_RequestedR(Request &obj){
+    std::cout << "hani " << std::endl;
     struct stat buffer;
     location obj1 = obj.getMatchedLocation();
 
@@ -80,27 +81,23 @@ void Delete::first_Delete(Request &obj)
             if(buffer.st_mode & S_IWUSR)
             {
                 if(std::remove(filepath.c_str()) != 0 )
-                {
                     obj.statusCode = 500;
-                    throw std::runtime_error("eror");
-                }
             }
-            else{
+            else
                 obj.statusCode = 403;
-                throw std::runtime_error("eror");
-            }
         }
     }
     else{
         obj.statusCode = 403;
         throw std::runtime_error("eror");
     }
-    if(std::remove(Path.c_str()) != 0 ){
-        obj.statusCode = 500;
+    closedir(dir);
+    if( std::remove(Path.c_str()) != 0){
+        if(obj.statusCode == 0)
+            obj.statusCode = 500;
         throw std::runtime_error("eror");
     }
-    else
-        obj.statusCode = 204;
+    obj.statusCode = 204;
 }
 
 void Delete::R_removing(std::string path, Request &obj){
@@ -133,23 +130,14 @@ void Delete::R_removing(std::string path, Request &obj){
             if(buffer.st_mode &S_IWUSR)
             {
                 if(std::remove(filepath.c_str()) != 0 )
-                {
                     obj.statusCode = 500;
-                    throw std::runtime_error("eror");
-                }
             }
-            if(dir == NULL){
+            if(dir == NULL)
                 obj.statusCode = 403;
-                throw std::runtime_error("eror");
-            }
         }
     }
     else
-    {
         obj.statusCode = 403;
-        throw std::runtime_error("eror");
-    }
-    std::cout << "final" << std::endl;
-    //status for deleted successfully
+    closedir(dir);
     return ;
 }

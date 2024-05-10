@@ -229,13 +229,6 @@ bool Request::allowedMethod(location& location) const {
 //start here
 int    Request::getCheckRequest(client &client, const infra &infra) {
         client.reqq.reqStr.append(client.reqq.readRequest(client.ssocket));
-        if (!client.reqq.readBody){
-            client.reqq.cutOffBodySegment(client.reqq.reqStr);
-            if (client.reqq.headersDone){
-                client.reqq.readBody = 1;
-            // return reqStr;
-        }
-    }
         client.wakt = time(NULL);
         if (!client.reqq.headersDone)
             return 1;
@@ -483,7 +476,7 @@ int Request::send_response(client &client){
         resetClientRequest(client.reqq);
         client.w_done = 1;
     }
-    client.wakt = time(NULL);
+    // client.wakt = time(NULL);
     return 1;
 }
 

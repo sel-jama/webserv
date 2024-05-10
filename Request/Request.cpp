@@ -365,7 +365,7 @@ std::string Request::generateResponse(client &client, std::string &content){
     client.reqq.responseContentType = getMimeType(client.reqq.fileName);
     if (!responseContentLen)
             responseContentLen = content.length();
-    if (client.reqq.method == "POST" || client.reqq.method == "DELETE")
+    if ((client.reqq.method == "POST" || client.reqq.method == "DELETE") && client.reqq.statusCode < 300)
         responseContentLen = 0;
     std::string res;
     std::stringstream response;

@@ -218,7 +218,7 @@ void handleCgi::checkTimeout(Request &req){
                     req.path = req.matchedLocation.root + "/" + random;
                     std::string output = use.readContent(req);
                     response = parseCgiRsponse(output);
-                    std::cout << "CGI output :   \n" << response << std::endl;
+                    // std::cout << "CGI output :   \n" << response << std::endl;
                     std::remove(random.c_str());
                 }
                 else{
@@ -275,11 +275,11 @@ char **handleCgi::createPostEnv(Request &req){
 void handleCgi::executeCgiBody(Request &req){
     req.cgi = 1;
     setScriptName(req.cgi_File);
-    std::cout << "Cgi post is ready to run .. " << std::endl;
-    // std::string randomFile = generateRandomFileName();
-    // std::string pathtofile = req.matchedLocation.upload_path + "/" + randomFile;
+    // std::cout << "Cgi post is ready to run .. " << std::endl;
+    std::string randomFile = generateRandomFileName();
+    req.cgi_File2 = req.matchedLocation.upload_path + "/" + randomFile;
     
-    std::cout << "req.cgi_File2.c_str() :" << req.cgi_File2.c_str() << std::endl;
+    // std::cout << "req.cgi_File2.c_str() :" << req.cgi_File2.c_str() << std::endl;
     std::ofstream outputFile(req.cgi_File2.c_str());
     if (!outputFile.is_open()){
         req.statusCode = 500;
@@ -294,7 +294,7 @@ void handleCgi::executeCgiBody(Request &req){
 
     else if (pid == 0){
         std::string cgiBody = req.cgi_File;
-        std::cout << "file >>> " << req.cgi_File << std::endl;
+        // std::cout << "file >>> " << req.cgi_File << std::endl;
         if (freopen(cgiBody.c_str(), "r", stdin) == NULL
             || freopen(req.cgi_File2.c_str(), "w", stdout) == NULL){
             req.statusCode = 500;

@@ -262,6 +262,7 @@ void server::handle_old_cnx(fd_set &fd_r, fd_set &fd_w, fd_set &fd_rcopy, fd_set
 	std::advance(it, j);
 	for (; it != clients.end();++it)
 	{
+		// std::cout << "dkhel lboucle" << std::endl;
 		if ((*it).w_done)
 		{
 			clientdown(*it, fd_r, fd_w, maxfd);
@@ -277,6 +278,7 @@ void server::handle_old_cnx(fd_set &fd_r, fd_set &fd_w, fd_set &fd_rcopy, fd_set
 		}
 		else if (FD_ISSET((*it).ssocket, &fd_rcopy))
 		{
+			
 			if (!((*it).reqq).read_request(*it, infra))
 			{
 				clientdown(*it, fd_r, fd_w, maxfd);

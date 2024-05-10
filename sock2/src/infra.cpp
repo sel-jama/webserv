@@ -9,7 +9,7 @@ void infra::sockettolisten(std::vector<server>::iterator &it)
     // check_port();
     int opt = 1;
     if (((*it).ssocket = socket(AF_INET, SOCK_STREAM, 0)) == -1)                        throw(std::runtime_error("Error: init servers : socket()"));
-    // if (fcntl((*it).ssocket, F_SETFL, O_NONBLOCK, FD_CLOEXEC) == -1)                                         throw(std::runtime_error("Error: init servers : fcntl()"));
+    if (fcntl((*it).ssocket, F_SETFL, O_NONBLOCK, FD_CLOEXEC) == -1)                     throw(std::runtime_error("Error: init servers : fcntl("));
     if (setsockopt((*it).ssocket, SOL_SOCKET, SO_REUSEPORT, &(opt), sizeof(opt)) == -1) throw(std::runtime_error("Error: init servers : setsockopt() SO_REUSPORT"));
     if (bind((*it).ssocket, (*it).servinfo->ai_addr, (*it).servinfo->ai_addrlen) == -1)           throw(std::runtime_error("Error: init servers : bind()"));
     if (listen((*it).ssocket, SOMAXCONN ) == -1)                                                throw(std::runtime_error("Error: init servers : listen()"));
@@ -25,7 +25,7 @@ void infra::initselect()
         FD_SET((*it).ssocket, &fd_r);
         if ((*it).ssocket > maxfd) maxfd = (*it).ssocket;
     }
-    timeout.tv_sec = 100;
+    timeout.tv_sec = 10;
     timeout.tv_usec = 0;
 }
 

@@ -1,5 +1,5 @@
 CXX = c++
-CXXFLAGS = -Wall -Wextra -Werror -fsanitize=address -std=c++98
+CXXFLAGS = -Wall -Wextra -Werror -fsanitize=address -g3 -std=c++98
 Name = Webserver
 
 SRC = sock2/main.cpp sock2/src/config.cpp sock2/src/paths.cpp sock2/src/infra.cpp sock2/src/server.cpp sock2/src/utils.cpp sock2/src/client.cpp sock2/src/location.cpp \

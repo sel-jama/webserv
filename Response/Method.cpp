@@ -1,7 +1,7 @@
 /* ************************************************************************** */
 /*                                                                            */
 /*                                                        :::      ::::::::   */
-/*   method.cpp                                     :+:      :+:    :+:   */
+/*   Method.cpp                                     :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
 /*   By: sel-jama <sel-jama@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
@@ -10,10 +10,10 @@
 /*                                                                            */
 /* ************************************************************************** */
 
-#include "method.hpp"
+#include "Method.hpp"
 #include "../Request/Request.hpp"
 
-bool method::loacationHasCgi(Request &req, handleCgi &cgi) {
+bool Method::loacationHasCgi(Request &req, handleCgi &cgi) {
     try{
         cgi.setScriptName(req.fileName);
         cgi.validateCgi(req);
@@ -25,16 +25,15 @@ bool method::loacationHasCgi(Request &req, handleCgi &cgi) {
     return true;
 }
 
-void method::validateAll(Request &req) const{
+void Method::validateAll(Request &req) const{
     if (!(req.pathStatus.st_mode& S_IRUSR)){
         req.statusCode = 403;
         throw std::runtime_error("forbiden : permission denied");
     }
 }
 
-//handle GET method
-void method::GetDataForClient(Request &req) {
-    handleCgi cgi;
+//handle GET Method
+void Method::GetDataForClient(Request &req){
     defineResourceType(req); //file or dir
     // std::cout << "************ "<<type << std::endl;
     if (type == "file") {
@@ -42,10 +41,13 @@ void method::GetDataForClient(Request &req) {
         validateAll(req);  //toFix
         if (loacationHasCgi(req, cgi)){
             std::cout << "CGI .... " << std::endl;
-            content = cgi.executeCgiScript(req);
+            cgi.executeCgiScript(req);
         }
-        else
-            content = readContent(req);
+        else{
+            req.filePath = req.path;
+            // content = readContent(req);
+            req.responseContentLen =  req.pathStatus.st_size;
+        }
     }
     else
         handleDirectory(req);
@@ -61,7 +63,7 @@ void method::GetDataForClient(Request &req) {
     
 }
 
-std::string method::readContent(Request &req){
+std::string Method::readContent(Request &req){
     // std::cout << "got here" << std::endl;
     // req.path = "../error/page.html";
     std::ifstream file(req.path.c_str());
@@ -94,15 +96,16 @@ std::string method::readContent(Request &req){
     return content.str();
 }
 
-void method::defineResourceType(const Request &req){
+void Method::defineResourceType(Request &req){
     // const std::string uri = req.getUri();
     if (S_ISDIR(req.pathStatus.st_mode))
         type = "directory";
     else
         type = "file";
+    // req.type = type;
 }
 
-void method::handleDirectory(Request &req){
+void Method::handleDirectory(Request &req){
     handleCgi cgi;
     // size_t uriLength = req.getUri().length() - 1;
     // if (req.getUri().at(uriLength) == '/'){
@@ -114,7 +117,7 @@ void method::handleDirectory(Request &req){
             req.path += "/" + req.fileName;
             validateAll(req);
             if (loacationHasCgi(req, cgi))
-                this->content = cgi.executeCgiScript(req);
+                cgi.executeCgiScript(req);
             else
                 this->content = readContent(req);
         }
@@ -124,7 +127,7 @@ void method::handleDirectory(Request &req){
 
 }
 
-// void method::handleClient(server &serve, Request &req, int &clientSocket) {
+// void Method::handleClient(server &serve, Request &req, int &clientSocket) {
 //     char buffer[BUFFER_SIZE];
 //     retreiveRequestedResource(serve, req);
 //     int bytes_received = recv(clientSocket, buffer, BUFFER_SIZE - 1, 0);
@@ -137,7 +140,7 @@ void method::handleDirectory(Request &req){
 //     handle_get_request(clientSocket);
 // }
 
-bool method::isDirHasIndexFiles(Request &req) const{
+bool Method::isDirHasIndexFiles(Request &req) const{
     DIR *dir;
     struct dirent *ent;
 
@@ -169,7 +172,7 @@ bool method::isDirHasIndexFiles(Request &req) const{
     return false;
 }
 
-void method::autoIndexing(Request &req){
+void Method::autoIndexing(Request &req){
     (void)req;
     if (req.getMatchedLocation().autoindex == "on")
         directoryListing(req);
@@ -179,7 +182,7 @@ void method::autoIndexing(Request &req){
     }
 }
 
-void method::directoryListing(Request &req){
+void Method::directoryListing(Request &req){
     std::stringstream page;
 
     DIR* directory = opendir(req.path.c_str());

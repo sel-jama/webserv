@@ -8,7 +8,7 @@
 #include <sys/stat.h>
 #include <unistd.h>
 #include <fcntl.h>
-#include "../Response/method.hpp"
+// #include "../Response/"
 
 bool Post::getpost_i(){
     return post_indicate;
@@ -274,6 +274,7 @@ void Post::chunked_body2(client &obj){
             obj.reqq.chunked_flag = 1;
         if(!obj.reqq.body.empty() && obj.reqq.chunked_flag == 1)
         {
+            std::cout << "hello hani" << std::endl;
             if(obj.reqq.flag == 0)
             {
                 obj.reqq.load_extension();
@@ -318,7 +319,9 @@ void Post::chunked_body2(client &obj){
             if(obj.reqq.body.find("\r\n0\r\n\r\n") != std::string::npos)
             {
                 obj.reqq.file.write(obj.reqq.body.c_str(), obj.reqq.body.size() - 5);
+                std::cout << obj.reqq.body << std::endl;
                 obj.reqq.file.flush();
+                std::cout << "salit" << std::endl;
                 obj.reqq.statusCode = 201;
                 obj.reqq.responseContentLen = obj.reqq.to_de2;
                 obj.r_done = 1;
@@ -347,7 +350,7 @@ void Post::Work_with_file(Request &obj){
     //     }
     // }
     // if(integ == 1){
-        method use;
+        Method use;
         handleCgi cgi;
         if (use.loacationHasCgi(obj, cgi)){
             cgi.executeCgiBody(obj);

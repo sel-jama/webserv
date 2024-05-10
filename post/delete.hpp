@@ -6,7 +6,7 @@
 #include "dirent.h"
 #include <map>
 // #include "../Cgi/handleCgi.hpp"
-// #include "../Response/method.hpp"
+// #include "../Response/"
 
 class handleCgi;
 class Delete{

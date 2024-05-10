@@ -23,6 +23,7 @@
 #include <cstdlib>
 #include <ctime>
 #include <signal.h>
+#define CGI_TIMEOUT 10
 
 class Request;
 
@@ -31,11 +32,14 @@ class handleCgi {
         std::string scriptName;
         std::string cgiPath;
         pid_t pid;
+        time_t counter;
+        std::string random;
 
 public:
+    std::string response;
     handleCgi();
     // handleCgi(const std::map<std::string, std::string>& requestHeaders, const std::string& requestMethod, const std::string& requestPath, const std::string& requestQuery, const std::string& requestBody, const std::string& scriptName);
-    std::string executeCgiScript(Request &req);
+    void executeCgiScript(Request &req);
     char** createArr();
     char** createEnv();
     void validateCgi(const Request &req);
@@ -48,6 +52,7 @@ public:
     void executeCgiBody(Request &req);
     char **createGetEnv(Request &req);
     std::string parseCgiRsponse(std::string &);
+    void checkTimeout(Request &req);
 };
 
 #endif

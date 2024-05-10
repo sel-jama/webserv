@@ -12,7 +12,7 @@
 
 #include "handleCgi.hpp"
 #include "../Request/Request.hpp"
-#include "../Response/method.hpp"
+#include "../Response/Method.hpp"
 
 handleCgi::handleCgi(){
 }
@@ -158,15 +158,15 @@ std::string handleCgi::parseCgiRsponse(std::string &cgiOutput){
     return ret;
 }
 
-std::string handleCgi::executeCgiScript(Request &req) {
+void handleCgi::executeCgiScript(Request &req) {
+    req.cgi = 1;
     scriptName = req.path;
     // validateCgi(req);
     std::string response;
     std::string output;
-    method use;
     
     // Create random file name to avoid mixing up clients' files
-    std::string random = generateRandomFileName();
+    random = generateRandomFileName();
 
     // Open random file for writing
     std::ofstream outputFile(random.c_str());
@@ -175,61 +175,66 @@ std::string handleCgi::executeCgiScript(Request &req) {
         throw std::runtime_error("Failed to open random file for writing");
     }
 
-    pid_t pid = fork();
+    pid = fork();
     if (pid == -1){
         req.statusCode = 500;
         throw std::runtime_error("Fork failed");
     }
     
     else if (pid == 0) {
-        // Redirect stdout to the random file
         if (freopen(random.c_str(), "w", stdout) == NULL){
             req.statusCode = 500;
             throw std::runtime_error("Failed to redirect stdout");
         }
-        // Execute the CGI script
         char **const arr = createArr();
         char **const env = createGetEnv(req);
-        // const char *arr[] = {cgiPath.c_str(), scriptName.c_str() ,NULL};
         execve(cgiPath.c_str(), arr, env);
         req.statusCode = 500;
         throw std::runtime_error("Failed to execute CGI script");
         
     } else {
-        // Close the file descriptor inherited by the child
+        counter = time(NULL);
         outputFile.close();
-
-        // Set a maximum execution time (adjust as needed)
-        int max_execution_time = 10; // Seconds
-
-        int status;
-        int remaining_time = max_execution_time;
-        while (remaining_time > 0 && (waitpid(pid, &status, WNOHANG)) == 0) {
-            // Child process is notdone yet
-            sleep(1);
-            remaining_time--;
-        }
-
-        if (remaining_time == 0){
-            // Timeout occurred
-            // Terminate child process forcefully
-            kill(pid, SIGKILL);
-            req.statusCode = 504;
-            throw std::runtime_error("CGI script execution timed out");
-        }
-
-        if (!WIFEXITED(status) || WEXITSTATUS(status) != 0) {
-            req.statusCode = 500;
-            throw std::runtime_error("Child process failed to execute CGI script");
-        }
+        checkTimeout(req);
     }
-    req.path = req.matchedLocation.root + req.matchedLocation.location_name + "/" + random;
-    output = use.readContent(req);
-    response = parseCgiRsponse(output);
-    std::cout << "CGI output :   \n" << response << std::endl;
-    req.cgi = 1;
-    std::remove(random.c_str());
-    return response;
+}
+
+void handleCgi::checkTimeout(Request &req){
+        int status;
+        int result = waitpid(pid, &status, WNOHANG);
+            if (result == -1){
+                // Handle waitpid error
+                kill(pid, SIGKILL);
+                req.statusCode = 500;
+                throw std::runtime_error("Error waiting for CGI script");
+            }else if(result > 0){
+                if (!WIFEXITED(status) || WEXITSTATUS(status) != 0) {
+                    std::remove(random.c_str());
+                    req.statusCode = 500;
+                    throw std::runtime_error("Child process failed to execute CGI script");
+                }
+                if (req.method != "POST"){
+                    Method use;
+                    req.path = req.matchedLocation.root + "/" + random;
+                    std::string output = use.readContent(req);
+                    response = parseCgiRsponse(output);
+                    std::cout << "CGI output :   \n" << response << std::endl;
+                    std::remove(random.c_str());
+                }
+                else{
+                    req.statusCode = 201;
+                    //set response content type
+                    //set response content len
+                } 
+            }
+            else {
+                if(time(NULL) - counter >= CGI_TIMEOUT){
+                    kill(pid, SIGKILL);
+                    std::remove(random.c_str());
+                    req.statusCode = 504;
+                    throw std::runtime_error("CGI timeout");
+                }
+            }
 }
 
 //POST CGI >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
@@ -268,6 +273,7 @@ char **handleCgi::createPostEnv(Request &req){
 }
 
 void handleCgi::executeCgiBody(Request &req){
+    req.cgi = 1;
     setScriptName(req.cgi_File);
     std::cout << "Cgi post is ready to run .. " << std::endl;
     // std::string randomFile = generateRandomFileName();
@@ -300,28 +306,10 @@ void handleCgi::executeCgiBody(Request &req){
         execve(this->cgiPath.c_str(), arr, env);
         req.statusCode = 500;
         throw std::runtime_error("execve failed");
-    }
-
-    else{
+    } else {
+        counter = time(NULL);
         outputFile.close();
-        int timeMax = 10;
-
-        int status;
-        int remainingTime = timeMax;
-        while (remainingTime > 0 && (waitpid(pid, &status, WNOHANG)) == 0){
-            sleep(1);
-            remainingTime--;
-        }
-        if (!remainingTime){
-            kill(pid, SIGKILL);
-            req.statusCode = 504;
-            throw std::runtime_error("time out cgi");
-        }
-
-        if(!WIFEXITED(status) || WEXITSTATUS(status) != 0){
-            req.statusCode = 500;
-            throw std::runtime_error("chiled process failed");
-        }
+        checkTimeout(req);
     }
 }
 

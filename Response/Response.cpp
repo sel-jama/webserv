@@ -30,16 +30,27 @@ std::string Response::handleMethod(client &client){
     return obj.response;
 }
 
-void Response::handleGET(Request &req) {
-    method get;
+void Response::handleGET(Request &req){
+    // method get;
     
-        get.GetDataForClient(req);
-        this->response = get.getResponse();
+    req.get.GetDataForClient(req);
+    // if (req.cgi){
+    //     get.cgi.checkTimeout(req);
+    //     if (!get.cgi.response.empty())
+    //         this->response = get.cgi.response;
+    //     else{
+    //         req.cgi = 0;
+    //         req.statusCode = 500;
+    //         throw std::runtime_error("something went wrong");
+    //     }
+    // }
+ 
+        this->response = req.get.getResponse();
 }
 
 void Response::handlePost(Request &req){
     Post post;
-    method use;
+    Method use;
     if(!req.isChunked)
     {
         post.support_upload(req);

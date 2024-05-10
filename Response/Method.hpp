@@ -1,7 +1,7 @@
 /* ************************************************************************** */
 /*                                                                            */
 /*                                                        :::      ::::::::   */
-/*   method.hpp                                     :+:      :+:    :+:   */
+/*   Method.hpp                                     :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
 /*   By: sel-jama <sel-jama@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
@@ -21,7 +21,7 @@ class Request;
 class server;
 class location;
 
-class method {
+class Method {
     private:
         int code;
         //std::string path;   //path to dir or file
@@ -32,9 +32,9 @@ class method {
 
         std::string content;  //retreived content
         // std::string autoindexPage;
-        
 
     public:
+        handleCgi cgi;
 
         const std::string &getResponse() const {return this->response;}
         std::map<int, std::string> errorPage;
@@ -47,7 +47,7 @@ class method {
         std::string readContent(Request &req) ;
         //setters
 
-        void defineResourceType(const Request &);
+        void defineResourceType(Request &);
         void handleDirectory(Request &) ;
         bool isDirHasIndexFiles(Request &) const;
         void autoIndexing(Request &) ;

@@ -20,7 +20,9 @@
 Request::Request() : method(""), uri(""), 
 version(""), body(""), reqStr(""), responseContentType(""), responseContentLen(0), fileName(""),
 contentLength(0), readbytes(0), readBody(0), firstRead(1)
-,headersDone(0), statusCode(0), statusMsg(""), isChunked(0), cgi(0), chunkPos(0), firstChunk(1), locationHeader(""), cgi_File(""), cgi_File2("") ,r(0){
+,headersDone(0), statusCode(0), statusMsg(""), isChunked(0), 
+cgi(0), chunkPos(0), firstChunk(1), locationHeader(""), 
+cgi_File(""), cgi_File2("") , responseDone(0) ,filePath(""), filePosition(0) ,r(0){
     to_de = 0 ;flag = 0; saver_count = 0; tmp = 0;
 }
 
@@ -103,16 +105,19 @@ std::string Request::readRequest(int &fdSocket){
         statusCode = -1;
         throw std::runtime_error("Peer closed the connection");
     }
+    else
+        recentAction = time(NULL);
+
     buffer[readbytes] = '\0';
     buff.write(buffer, readbytes);
     std::string request(buff.str());
     // reqStr.append(request);
     // if (!readBody){
     //     cutOffBodySegment(request);
-    //     if (headersDone){
-    //         readBody = 1;
+        // if (headersDone){
+        //     readBody = 1;
     //         // return reqStr;
-    //     }
+    // }
     // }
     // if (!readBody)
     //     return reqStr;
@@ -196,9 +201,6 @@ void Request::requestPartitioning(Request &saver, std::string& request) {
 }
 
 void Request::isReqWellFormed(Request &req){
-    for (std::map<std::string, std::string>::iterator i = headers.begin(); i != headers.end(); i++){
-        std::cout << "headers : " << i->first << std::endl;
-    }
     ParseRequest parse;
     
     statusCode = parse.parseMethod(req.method);
@@ -263,7 +265,7 @@ int sameUntilIndex(const std::string &uri, const std::string &locationName){
     return i;
 }
 
-const location& Request::getMatchingLocation(const server& serve) {
+const location& Request::getMatchingLocation(const server& serve){
     int maxCounter = -1; 
     size_t maxIndex = 0;
 
@@ -353,33 +355,67 @@ void resetClientRequest(Request &req){
     req.responseContentLen = 0;
     req.cgi_File = "";
     req.cgi_File2 = "";
+    req.filePath = "";
+    req.responseDone = 0;
+    // req.filePos = 0;
 }
 
 std::string Request::generateResponse(client &client, std::string &content){
     client.reqq.responseContentType = getMimeType(client.reqq.fileName);
     if (!responseContentLen)
             responseContentLen = content.length();
-        std::string res;
-        std::stringstream response;
-        errorPage msg;
-        if (!client.reqq.statusCode)
-            client.reqq.statusCode = 200;
-        response << "HTTP/1.1 " << client.reqq.statusCode << " " << msg.statusMsgs[client.reqq.statusCode] << "\r\n";
-        if (!client.reqq.cgi){
-            response << "Content-Type: " << responseContentType << "\r\n";
-            if (!client.reqq.locationHeader.empty()){
-                response << "Location: " << client.reqq.locationHeader << "\r\n";
-                response << "Content-Length: 0\r\n\r\n";
-                return response.str();
-            }
-            response << "Content-Length: " << responseContentLen << "\r\n\r\n";
-            if (client.reqq.headers.find("Cookie") != client.reqq.headers.end())
-                response << "Cookie: " << client.reqq.headers["Cookie"];
+    if (client.reqq.method == "POST" || client.reqq.method == "DELETE")
+        responseContentLen = 0;
+    std::string res;
+    std::stringstream response;
+    errorPage msg;
+    if (!client.reqq.statusCode)
+    client.reqq.statusCode = 200;
+    response << "HTTP/1.1 " << client.reqq.statusCode << " " << msg.statusMsgs[client.reqq.statusCode] << "\r\n";
+    if (!client.reqq.cgi || client.reqq.statusCode >= 300){
+        response << "Content-Type: " << responseContentType << "\r\n";
+        if (!client.reqq.locationHeader.empty()){
+            response << "Location: " << client.reqq.locationHeader << "\r\n";
+            response << "Content-Length: 0\r\n\r\n";
+            return response.str();
         }
-        response << content;
-        res = response.str();
-        return res;
+        response << "Content-Length: " << responseContentLen << "\r\n\r\n";
+        if (client.reqq.headers.find("Cookie") != client.reqq.headers.end())
+            response << "Cookie: " << client.reqq.headers["Cookie"];
+    }
+        // if (client.reqq.cgi) || client.reqq.statusCode >= 300 || client.reqq.type== "directory"){
+        //     responseDone = 1;
+    response << content;
+        // }
+    res = response.str();
+    return res;
 }
+
+std::string Request::getChunk(Request &req){
+        std::ifstream file(req.filePath.c_str());
+        if (!file.is_open()) {
+            req.statusCode = 500;
+            throw std::runtime_error("Failed to read requested content");
+        }
+
+        // Seek to the position where we left off last time
+        file.seekg(filePosition);
+
+        char buffer[1024];
+
+        std::ostringstream content;
+        std::streamsize bytesRead = file.readsome(buffer, 1024);
+        
+        if (bytesRead > 0) {
+            content.write(buffer, bytesRead);
+            filePosition = file.tellg(); // Update file position
+        }
+        else
+            return "";
+
+        file.close();
+        return content.str();
+    }
 
 int Request::send_response(client &client){
     std::string chunk("");
@@ -388,34 +424,56 @@ int Request::send_response(client &client){
         client.w_done = 0;
         std::string content;
         try{
-            if (client.reqq.statusCode >= 300)
-                throw std::runtime_error("Request reading failed");
-            content = Response::handleMethod(client);
+            if (!client.reqq.cgi){
+                if (client.reqq.statusCode >= 300)
+                    throw std::runtime_error("Request reading failed");
+                content = Response::handleMethod(client);
+            }
+            if (content.empty() && client.reqq.cgi){
+                client.reqq.get.cgi.checkTimeout(client.reqq);
+                if (!client.reqq.get.cgi.response.empty())
+                    content = client.reqq.get.cgi.response;
+                else{
+                    client.w_done = 0;
+                    return 1;
+                }
+            }
         }
         catch (const std::runtime_error &e){
-            std::cerr << e.what() << std::endl;
+            std::cout << e.what() << std::endl;
             if (client.reqq.method != "HEAD")
                 content = errorPage::serveErrorPage(client.reqq);
-        }
-        catch (const std::bad_alloc &e){
-            std::cerr << e.what() << std::endl;
-            return 0;
-            // if (client.reqq.method != "HEAD")
-            //     content = errorPage::serveErrorPage(client.reqq);
         }
         response = generateResponse(client, content);
         firstChunk = 0;
     }
+
+    else if (client.reqq.method == "GET" && !client.reqq.filePath.empty()){
+        chunkPos = 0;
+        response = getChunk(client.reqq);
+        if (response.empty())
+            responseDone = 1;
+    }
     
     if (chunkPos < response.length() - 1){
-        chunk = response.substr(chunkPos, 1024);
+        if (responseDone){
+            // std::cout << "\033[1;35m---------------RESPONSE-----------------\n" <<  response.substr(0, response.find("\r\n\r\n")) <<"\033[0m" << std::endl;
+            resetClientRequest(client.reqq);
+            client.w_done = 1;
+            client.wakt = time(NULL);
+            return 1;
+        }
+        if (client.reqq.filePath.empty())
+            chunk = response.substr(chunkPos, 1024);
+        else
+            chunk = response;
         int sret = send(client.ssocket, chunk.c_str(), chunk.length(), 0);
         if (sret == -1){
             std::cerr << "send failed ..." << std::endl;
             return 0;
         }
         if (sret == 0){
-            std::cerr << "Peer closed connection ..." << std::endl;
+            std::cerr << "Peer closed connection ... " << std::endl;
             return 0;
         }
         chunkPos += 1024;
@@ -435,10 +493,11 @@ int Request::read_request(client &client, infra & infra){
         if (!readBody){
             getCheckRequest(client, infra);
         }
-        else{
+        if (readBody){
             if(!client.reqq.isChunked)
                 Post::body(client);
             else {
+                std::cout << "hi" << std::endl;
                 Post::chunked_body2(client);
                 if(client.reqq.chunked_flag == 0)
                     Post::chunked_body(client);
@@ -508,4 +567,14 @@ std::string Request::getMimeType(const std::string& fileName){
         }
     }
     return "text/html";
+}
+
+bool Request::checkReadingTimout(const client &client){
+    if (!headersDone && time(NULL) - recentAction >= REQUEST_TIMEOUT)
+        return true;
+    if (readBody && !client.r_done && time(NULL) - recentAction >= REQUEST_TIMEOUT)
+        return true;
+    std::cout << "check timout " << std::endl;
+    return false;
+
 }

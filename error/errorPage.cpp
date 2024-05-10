@@ -12,7 +12,7 @@
 
 #include "errorPage.hpp"
 #include "../Request/Request.hpp"
-#include "../Response/method.hpp"
+#include "../Response/Method.hpp"
 
 errorPage::errorPage(std::string msg, int code) : msg(msg), code(code) {
 }
@@ -132,7 +132,7 @@ std::string errorPagesConfig(Request &req){
 
 std::string errorPage::serveErrorPage(Request &req){
     errorPage use;
-    method use2;
+    Method use2;
     // std::string content;
     // std::ostringstream response;
     // use.setstatusMsgs();

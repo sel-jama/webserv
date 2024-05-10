@@ -282,6 +282,10 @@ void server::handle_old_cnx(fd_set &fd_r, fd_set &fd_w, fd_set &fd_rcopy, fd_set
 				clientdown(*it, fd_r, fd_w, maxfd);
 				break;
 			}
+			if (((*it).reqq).checkReadingTimout(*it)){
+				(*it).r_done = 1;
+				(*it).reqq.statusCode = 408;
+			}
 			if ((*it).r_done) ioswap(fd_w, fd_r, (*it).ssocket);
 		}
 		++j;

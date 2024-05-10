@@ -14,7 +14,7 @@
 #define RESPONSE_HPP
 
 #include <string>
-#include "method.hpp"
+#include "Method.hpp"
 #include "../Request/Request.hpp"
 #include "../sock2/includes/client.hpp"
 #include "../post/post.hpp"

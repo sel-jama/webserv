@@ -17,6 +17,7 @@
 // #include "../sock2/includes/client.hpp"
 // #include "../sock2/includes/server.hpp"
 #include "../sock2/includes/location.hpp"
+#include "../Response/Method.hpp"
 #include <algorithm>
 #include <sys/time.h>
 
@@ -25,6 +26,7 @@ class client;
 class server;
 class infra;
 // class location;
+#define REQUEST_TIMEOUT 10
 
 class Request {
     public:
@@ -79,6 +81,13 @@ class Request {
         std::string locationHeader;
         std::string cgi_File;
         std::string cgi_File2;
+        Method get;
+        time_t recentAction;
+        int responseDone;
+        std::string filePath;
+        std::streampos filePosition;
+        // double filePos;
+        // std::string type;
 
         int r;
         Request();
@@ -125,7 +134,11 @@ class Request {
         void load_extension();
         std::string getMimeType(const std::string& fileName);
         void isRedirect();
-        bool matchedName(const std::vector<std::string> &) ;
+        bool matchedName(const std::vector<std::string> &);
+        bool checkReadingTimout(const client &client);
+        char *readChunk(const char* filename);
+        std::string getChunk(Request &req);
+
 };
 
 #endif

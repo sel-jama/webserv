@@ -38,12 +38,12 @@ class ParseRequest {
         int parseMethod(std::string &method) const;
         int parseUri(std::string &uri) const;
         int parseVersion(std::string &version) const;
-        int parseHeaders(std::map<std::string, std::string> &headers, std::string &method) const;
-        // int parseBody(std::string &body, long long &maxBodySize) const;
+        int parseHeaders(std::map<std::string, std::string> &headers, std::string &method);
 
         void setHttpHeaders();
         const std::deque<std::string> &getHttpHeaders() const;
-        int checkUnknownHeader(std::map<std::string, std::string> & ) const; 
+        int checkUnknownHeader(std::map<std::string, std::string> & ) const;
+        void lowerString(std::string &);
 };
 
 #endif

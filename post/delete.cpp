@@ -50,9 +50,26 @@ void Delete::check_RequestedR(Request &obj){
 void Delete::Work_with_file(Request &obj)
 {
     std::string check;
-    if(std::remove(obj.path.c_str()) != 0){
+    struct stat buffer;
+
+    int val = stat(obj.path.c_str(), &buffer);
+    if(val != 0)
+    {
         obj.statusCode = 500;
+        throw std::runtime_error("eror");
+    }
+    if(buffer.st_mode &S_IWUSR)
+    {
+        obj.statusCode = 204;
+        if(std::remove(obj.path.c_str()) != 0){
+            obj.statusCode = 500;
             throw std::runtime_error("eror");
+        }
+    }
+    else
+    {
+        obj.statusCode = 403;
+        throw std::runtime_error("eror");
     }
 }
 
@@ -126,7 +143,11 @@ void Delete::R_removing(std::string path, Request &obj){
                 path = saver;
             } 
             int val = stat(filepath.c_str(), &buffer);
-            (void)val;
+            if(val != 0)
+            {
+                obj.statusCode = 500;
+                throw std::runtime_error("eror");
+            }
             if(buffer.st_mode &S_IWUSR)
             {
                 if(std::remove(filepath.c_str()) != 0 )

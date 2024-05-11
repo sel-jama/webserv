@@ -278,6 +278,7 @@ const location& Request::getMatchingLocation(const server& serve){
 
     for (size_t i = 0; i < serve.getLocations().size(); ++i) {
         int counter = sameUntilIndex(getUri(), serve.getLocations().at(i).location_name);
+        // std::cout << getUri() << " " << serve.getLocations().at(i).location_name << " " << counter << std::endl;
         if (counter > maxCounter) {
             maxCounter = counter;
             maxIndex = i;
@@ -302,8 +303,10 @@ void Request::retreiveRequestedResource(const server &serve){
     
     path = matchedLocation.root;
     path += fileName.empty() ? "" : "/";
+    std::cout << "location name: " <<  matchedLocation.location_name << std::endl;
+    std::cout <<"path : " << path << std::endl;
     path += fileName;
-    // std::cout <<"path : " << path << std::endl;
+    std::cout <<"path : " << path << std::endl;
     isFileAvailable();
     isMethodAllowed();
     isRedirect();

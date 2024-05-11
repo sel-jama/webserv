@@ -139,7 +139,7 @@ class Request {
         bool checkReadingTimout(const client &client);
         char *readChunk(const char* filename);
         std::string getChunk(Request &req);
-
+        void checkRequestLine(Request &saver, std::string &line);
 };
 
 #endif

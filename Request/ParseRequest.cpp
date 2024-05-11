@@ -128,7 +128,6 @@ int ParseRequest::parseHeaders(std::map<std::string, std::string> &headers, std:
         std::string key = i->first;
         lowerString(key);
         copy.push_back(key);
-        //tolower
     }
     if (std::find(copy.begin(), copy.end(), std::string("host")) == copy.end())
         return 400;

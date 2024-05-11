@@ -152,21 +152,40 @@ void trim(std::string &str){
         str.erase(str.length() - 1);
 }
 
+void Request::checkRequestLine(Request &saver, std::string &line){
+    std::stringstream ss(line);
 
-// Function to parse HTTP request
-void Request::requestPartitioning(Request &saver, std::string& request) {
-    std::stringstream iss(request);
+    // iss >> saver.method >> saver.uri >> saver.version;
+    std::cout << "lien " << line << std::endl;
+    std::getline(ss, saver.method, ' ');
+    std::getline(ss, saver.uri, ' ');
+    std::getline(ss, saver.version);
+    std::cout << "m:"<<saver.method << std::endl;
+        std::cout << "m:"<<saver.version << std::endl;
+    std::cout << "m:"<<saver.uri << std::endl;
 
-    iss >> saver.method >> saver.uri >> saver.version;
     if (saver.method.empty() || saver.uri.empty() || saver.version.empty())
     {
         statusCode = 400;
         throw std::runtime_error("bad request line");
     }
-    uriQuery(saver.uri);
-    // Parse header
+    if (std::isspace(saver.method.back()) || std::isspace(saver.method.at(0)) ||
+        std::isspace(saver.version.back()) || std::isspace(saver.version.at(0)) ||
+        std::isspace(saver.uri.back()) || std::isspace(saver.uri.at(0))){
+            statusCode = 400;
+            throw std::runtime_error("bad requestLine");
+    }
+}
+
+// Function to parse HTTP request
+void Request::requestPartitioning(Request &saver, std::string& request) {
+    std::stringstream iss(request);
     std::string headerLine("");
     std::getline(iss, headerLine, '\n');
+
+    checkRequestLine(saver, headerLine);
+    uriQuery(saver.uri);
+    // Parse header
     while (std::getline(iss, headerLine, '\n')){
         if (headerLine == "\r")
             break;

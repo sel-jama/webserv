@@ -56,8 +56,10 @@ void Method::GetDataForClient(Request &req){
 
 std::string Method::readContent(Request &req){
 	std::ifstream file(req.path.c_str());
+	std::cout << "path " << req.path.c_str() << std::endl;
 	if (!file.is_open())
 	{
+		std::remove(req.path.c_str());
 		req.statusCode = 500;
 		throw std::runtime_error("set error page : failed to read requested content");
 		std::cerr << "failed to read content" << std::endl;

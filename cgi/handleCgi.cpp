@@ -215,7 +215,7 @@ void handleCgi::checkTimeout(Request &req){
                 }
                 if (req.method != "POST"){
                     Method use;
-                    req.path = req.matchedLocation.root + "/" + random;
+                    req.path = req.matchedLocation.root  + random;
                     std::string output = use.readContent(req);
                     response = parseCgiRsponse(output);
                     // std::cout << "CGI output :   \n" << response << std::endl;

@@ -67,11 +67,12 @@ void infra::selecttoinfinity()
         }
         for (std::vector<server>::iterator it = servers.begin(); it !=servers.end(); ++it)
         {
-            (*it).handle_old_cnx(fd_r, fd_w, fd_rcopy, fd_wcopy, maxfd, *this, 0);
             if (FD_ISSET((*it).ssocket, &fd_rcopy))
             {
                 (*it).accept_new_connection(fd_r, maxfd);
             }
+            else 
+                (*it).handle_old_cnx(fd_r, fd_w, fd_rcopy, fd_wcopy, maxfd, *this, 0);
         }
 
     }

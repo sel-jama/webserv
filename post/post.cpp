@@ -94,71 +94,78 @@ void Post::After_geting_resource(Request obj){
     //     Work_with_Directory(obj);
 }
 
+// std::ofstream Request::file;
+
 void Post::support_upload(Request &obj)
 {
     handleCgi obj2;
     int check = 0;
-    std::string filename = "";
+    // std::string filename = "";
     std::string value;
     obj.load_extension();
     location obj3 = obj.getMatchedLocation();
     // std::map<std::string, std::string>::iterator iter = obj.headers["Content-Type"];
     // obj.load_extension();
-            if(obj3.upload != "on" || (obj3.upload == "on" && obj3.upload_path.empty()))
-            {
-                obj.statusCode = 403;
-                throw std::runtime_error("rja3");
-            }
+    // if(obj.flag2 == 0)
+    // {
+                if(obj3.upload != "on" || (obj3.upload == "on" && obj3.upload_path.empty()))
+                {
+                    obj.statusCode = 403;
+                    throw std::runtime_error("rja3");
+                }
+                if(!obj.headers["Content-Type"].empty())
+                {
+                    obj.content_T = obj.headers["Content-Type"];
+                    value = obj.headers["Content-Type"];
+                    std::string name = "Post_" + obj2.generateRandomFileName();
+                    obj.filename__ = "/"  + name + obj.extension[obj.headers["Content-Type"]];
+                }
+                location capt = obj.getMatchedLocation();
+                std::string  ptr = capt.upload_path;
+                if(ptr.empty())
+                {
+                    obj.statusCode = 500;
+                    throw std::runtime_error("eror");
+                }
+            // else
+            // {
+                    const char* ptr2= obj.getMatchedLocation().upload_path.c_str();
+                    check = access(ptr2, F_OK);
+                    if (check == -1) {
+                        obj.statusCode = 404;
+                        throw std::runtime_error("eror");
+                    }
+                if(obj.filename__.empty())
+                {
+                    obj.content_T  = "text/plain";
+                    obj.filename__ = "/" + obj2.generateRandomFileName() + ".txt";
+                }
 
-    if(!obj.headers["Content-Type"].empty())
-    {
-        obj.content_T = obj.headers["Content-Type"];
-        value = obj.headers["Content-Type"];
-        std::string name = "Post_" + obj2.generateRandomFileName();
-        filename = "/"  + name + obj.extension[obj.headers["Content-Type"]];
-    }
+                    obj.filename__ =  obj.getMatchedLocation().upload_path + obj.filename__;
+                    // std::ofstream file(filename.c_str());
+                    obj.file.open(obj.filename__.c_str());
+                    obj.cgi_File = obj.filename__; 
+                    obj.cgi_File2 = obj.path;
+                    obj.path = obj.filename__; //
+                    obj.flag2 = 1;
+                    std::cout << "dkhel" << std::endl;
 
-        location capt = obj.getMatchedLocation();
-        std::string  ptr = capt.upload_path;
-        if(ptr.empty())
-        {
-            obj.statusCode = 500;
-            throw std::runtime_error("eror");
-        }
-    else
-    {
-        const char* ptr2= ptr.c_str();
-        check = access(ptr2, F_OK);
-        if (check == -1) {
-            obj.statusCode = 404;
-            throw std::runtime_error("eror");
-        }
-        else {
-            if(filename.empty())
-            {
-                obj.content_T  = "text/plain";
-                filename = "/" + obj2.generateRandomFileName() + ".txt";
-            }
-            filename = ptr + filename;
-            std::ofstream file(filename.c_str());
-            obj.cgi_File = filename; 
-            obj.cgi_File2 = obj.path;
-            obj.path = filename; //
-            if (file.is_open() == true)
-            {
-                file.write(obj.body.c_str(), obj.contentLength) << std::endl;
-                file.close();
-                std::cout <<  "wa lharba 2" << std::endl;
-                Work_with_file(obj);
-                obj.statusCode = 201;
-            }
-            else{
-                obj.statusCode = 403;
-                throw std::runtime_error("eror");
-            }
-        }   
-    }
-}
+        // }
+        // obj.size_body += tmp.length();
+        // std::cout << "size tmp : " << obj.size_body << std::endl;
+        // std::cout << "content lenght: " << obj.contentLength << std::endl;
+        // obj.file.write(tmp.c_str(), tmp.size());
+            // obj.file.close();
+            // std::cout <<  "wa lharba 2" << std::endl;
+            // Work_with_file(obj);
+            // obj.statusCode = 201;
+            // else{
+            //     obj.statusCode = 403;
+            //     throw std::runtime_error("eror");
+            // }
+}   
+    // }
+
 
 void Post::body(client &obj){
     if(obj.reqq.matchedLocation.upload != "on" || (obj.reqq.matchedLocation.upload == "on" && obj.reqq.matchedLocation.upload_path.empty()))
@@ -166,9 +173,38 @@ void Post::body(client &obj){
         obj.reqq.statusCode = 403;
         throw std::runtime_error("rja3");
     }
-    if(!(static_cast<double>(obj.reqq.body.length()) >= obj.reqq.contentLength))
-        obj.reqq.body.append(obj.reqq.readRequest(obj.ssocket));
-    if(static_cast<double>(obj.reqq.body.length()) >= obj.reqq.contentLength){
+    if(!(obj.reqq.size_body >= obj.reqq.contentLength))
+    {
+        // struct stat buffer;
+        // if(obj.reqq.flag2 == 0)
+        //     Post::support_upload(obj.reqq);
+        // // obj.reqq.size_body += obj.reqq.readRequest(obj.ssocket).length();
+        // if(!obj.reqq.body.empty())
+        // {
+        //     obj.reqq.file.write(obj.reqq.body.c_str(), obj.reqq.body.size());
+        //     obj.reqq.size_body += obj.reqq.body.size();
+        //     if(obj.reqq.size_body >= obj.reqq.contentLength){
+        //         std::cout << "helllllllo" << std::endl;
+        //         obj.reqq.file.close();
+        //         obj.reqq.statusCode = 201;
+        //         obj.reqq.responseContentLen = obj.reqq.body.length();
+        //         obj.r_done = 1;
+        //         return;
+        //     }
+        //     obj.reqq.body = "";
+        // }
+        std::stringstream ss(obj.reqq.readRequest(obj.ssocket));
+        obj.reqq.file.write(ss.str().c_str(), ss.str().size());
+        obj.reqq.size_body += ss.str().size();
+        std::cout << "size tmp : " << obj.reqq.size_body << std::endl;
+        std::cout << "content lenght: " << obj.reqq.contentLength << std::endl;
+    }
+    if(obj.reqq.size_body >= obj.reqq.contentLength){
+        // std::cout << "Hello" << std::endl;        std::cout << "Hello" << std::endl;
+
+        // Post::support_upload(obj.reqq , (obj.reqq.readRequest(obj.ssocket)));
+        std::cout << "helllllllo" << std::endl;
+        obj.reqq.file.close();
         obj.reqq.statusCode = 201;
         obj.reqq.responseContentLen = obj.reqq.body.length();
         obj.r_done = 1;

@@ -59,8 +59,8 @@ void Response::handlePost(Request &req){
     if(!req.isChunked)
     {
         std::cout << "Wa lharba" << std::endl;
-        post.support_upload(req);
-        this->response = use.readContent(req);
+        // post.support_upload(req);
+        // this->response = use.readContent(req);
     }
 }
 

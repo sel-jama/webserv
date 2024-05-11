@@ -48,9 +48,14 @@ class Request {
         std::string getit;
         std::string r_s;
         int flag;
+        std::string filname_s;
+        // std::ofstream file;
+        int flag2;
         size_t saver_count;
         int tmp;
         static std::ofstream file; 
+        std::string filename__;
+        size_t size_body;
         size_t to_de;
         size_t to_de2;
         std::string content_T;
@@ -59,7 +64,7 @@ class Request {
         std::string fileName;
         // std::string bodySaver;
         struct stat pathStatus;
-        double contentLength; 
+        size_t contentLength; 
         int readbytes;
         int readBody;
         int chunked_flag;

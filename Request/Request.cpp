@@ -459,7 +459,6 @@ int Request::send_response(client &client){
         responseHeaders = response;
         firstChunk = 0;
     }
-
     else if (client.reqq.method == "GET" && !client.reqq.filePath.empty()){
         chunkPos = 0;
         response = getChunk(client.reqq);

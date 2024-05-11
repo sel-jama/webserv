@@ -114,12 +114,21 @@ void Method::handleDirectory(Request &req){
         //no index files and no cgi
         // else if (req.getMatchedLocation().cgi.size() == 0)
         else{
+            struct stat status;
             req.path += "/" + req.fileName;
-            validateAll(req);
-            if (loacationHasCgi(req, cgi))
-                cgi.executeCgiScript(req);
-            else
-                this->content = readContent(req);
+            if (stat(req.path.c_str(), &status) != 0){
+                req.statusCode = 500;
+                throw std::runtime_error("stat failed");
+            }
+            if (S_ISDIR(status.st_mode))
+                handleDirectory(req);
+            else{
+                validateAll(req);
+                if (loacationHasCgi(req, cgi))
+                    cgi.executeCgiScript(req);
+                else
+                    this->content = readContent(req);
+            }
         }
 
     // }

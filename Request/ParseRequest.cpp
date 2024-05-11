@@ -11,6 +11,7 @@
 /* ************************************************************************** */
 
 #include "ParseRequest.hpp"
+#include <algorithm>
 
 ParseRequest::ParseRequest() {
     // setMethods();
@@ -112,12 +113,24 @@ int ParseRequest::parseMethod(std::string &method) const{
     return 0;
 }
 
-int ParseRequest::parseHeaders(std::map<std::string, std::string> &headers, std::string &method) const{
+void ParseRequest::lowerString(std::string& key){
+    for(size_t i=0; i<key.size(); i++){
+        key[i] = tolower(key[i]);
+    }
+}
+
+int ParseRequest::parseHeaders(std::map<std::string, std::string> &headers, std::string &method){
     // int ret = checkUnknownHeader(headers);
     // if (ret)
     //     return ret;
-    
-    if (headers.find("Host") == headers.end())
+    std::vector<std::string> copy;
+    for(std::map<std::string, std::string>::iterator i = headers.begin(); i != headers.end(); ++i){
+        std::string key = i->first;
+        lowerString(key);
+        copy.push_back(key);
+        //tolower
+    }
+    if (std::find(copy.begin(), copy.end(), std::string("host")) == copy.end())
         return 400;
 
     if (headers.find("Transfer-Encoding") != headers.end()

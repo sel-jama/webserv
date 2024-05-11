@@ -95,7 +95,7 @@ std::string Request::readRequest(int &fdSocket){
     //     firstRead = 0;
     // 
     char buffer[BUFFER_SIZE];
-    // std::cout << "readbytes-> " << std::endl;
+    std::cout << "readbytes-> " << std::endl;
     // int flags = fcntl(fdSocket, F_GETFL, 0);
 
     // flags |= O_NONBLOCK;
@@ -103,7 +103,7 @@ std::string Request::readRequest(int &fdSocket){
     readbytes = read(fdSocket, buffer, BUFFER_SIZE - 1);
     // readbytes = recv(fdSocket, buffer, BUFFER_SIZE - 1, 0);
 
-    // std::cout << "done\n";
+    std::cout << "done\n";
     if (readbytes < 0){
         statusCode = 500;
         throw std::runtime_error("Error reading from socket");
@@ -276,9 +276,9 @@ const location& Request::getMatchingLocation(const server& serve){
     int maxCounter = -1; 
     size_t maxIndex = 0;
 
-    for (size_t i = 0; i < serve.getLocations().size(); ++i) {
+    for (size_t i = 0; i < serve.getLocations().size(); ++i){
         int counter = sameUntilIndex(getUri(), serve.getLocations().at(i).location_name);
-        if (counter > maxCounter) {
+        if (counter > maxCounter){
             maxCounter = counter;
             maxIndex = i;
         }
@@ -295,6 +295,7 @@ const location& Request::getMatchingLocation(const server& serve){
 
 void Request::retreiveRequestedResource(const server &serve){
     matchedLocation = getMatchingLocation(serve);
+    std::cout << "images : " << matchedLocation.location_name << std::endl;
     //see the root of the location retrieved and join it with the uri then look for it using access
     //pass "/"
     std::string url = getUri().substr(1);
@@ -372,8 +373,10 @@ std::string Request::generateResponse(client &client, std::string &content){
     client.reqq.responseContentType = getMimeType(client.reqq.fileName);
     if (!responseContentLen)
             responseContentLen = content.length();
-    if ((client.reqq.method == "POST" || client.reqq.method == "DELETE") && client.reqq.statusCode < 300)
+    if ((client.reqq.method == "POST" || client.reqq.method == "DELETE") && client.reqq.statusCode < 300){
         responseContentLen = 0;
+        content = "";
+    }
     std::string res;
     std::stringstream response;
     errorPage msg;
@@ -479,6 +482,7 @@ int Request::send_response(client &client){
             chunk = response.substr(chunkPos, 1024);
         else
             chunk = response;
+        std::cout << chunk << std::endl;
         int sret = send(client.ssocket, chunk.c_str(), chunk.length(), 0);
         if (sret == -1){
             std::cerr << "send failed ..." << std::endl;
@@ -504,18 +508,23 @@ int Request::read_request(client &client, infra & infra){
     try{
         if (!readBody){
             getCheckRequest(client, infra);
+            // if(static_cast<double>(client.reqq.body.length()) >= client.reqq.contentLength){
+            //     client.reqq.statusCode = 201;
+            //     client.reqq.responseContentLen = client.reqq.body.length();
+            //     client.r_done = 1;
+            // }
         }
-        if (readBody){
+        else{
+            std::cout << "confusing\n";
             if(!client.reqq.isChunked)
                 Post::body(client);
-            else {
+            else{
                 Post::chunked_body2(client);
-                // std::cout << obj.reqq.r_done << std::endl;
                 if(client.reqq.chunked_flag == 0)
                     Post::chunked_body(client);
             }
         }
-        }
+    }
     catch (const std::runtime_error &e){
         std::cout << e.what() << std::endl;
         client.r_done = 1;
@@ -557,16 +566,6 @@ const server &Request::getMatchedServer(const infra &infra){
     return *(infra.getServer().begin());
 }
 
-// bool Request::matchedName(const std::vector<std::string> &vec){
-//     (void )vec;
-    // std::vector<std::string>::const_iterator i = vec.begin();
-    // for (; i != vec.end(); ++i){
-    //     if (this->headers["Host"] == *i)
-    //         return true;
-    // }
-//     return false;
-// }
-
 std::string Request::getMimeType(const std::string& fileName){
     load_extension();
     size_t dotPos = fileName.find_last_of('.');
@@ -586,7 +585,6 @@ bool Request::checkReadingTimout(const client &client){
         return true;
     if (readBody && !client.r_done && time(NULL) - recentAction >= REQUEST_TIMEOUT)
         return true;
-    // std::cout << "check timout " << std::endl;
     return false;
 
 }

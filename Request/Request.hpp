@@ -86,6 +86,7 @@ class Request {
         int responseDone;
         std::string filePath;
         std::streampos filePosition;
+        std::string responseHeaders;
         // double filePos;
         // std::string type;
 

@@ -22,7 +22,7 @@ version(""), body(""), reqStr(""), responseContentType(""), responseContentLen(0
 contentLength(0), readbytes(0), readBody(0), firstRead(1)
 ,headersDone(0), statusCode(0), statusMsg(""), isChunked(0), 
 cgi(0), chunkPos(0), firstChunk(1), locationHeader(""), 
-cgi_File(""), cgi_File2("") , responseDone(0) ,filePath(""), filePosition(0) ,r(0){
+cgi_File(""), cgi_File2("") , responseDone(0) ,filePath(""), filePosition(0), responseHeaders(""),r(0){
     to_de = 0 ;flag = 0; saver_count = 0; tmp = 0; chunked_flag = 0;
 }
 
@@ -96,7 +96,13 @@ std::string Request::readRequest(int &fdSocket){
     // 
     char buffer[BUFFER_SIZE];
     std::cout << "readbytes-> " << std::endl;
+    // int flags = fcntl(fdSocket, F_GETFL, 0);
+
+    // flags |= O_NONBLOCK;
+    // fcntl(fdSocket, F_SETFL, flags);
     readbytes = read(fdSocket, buffer, BUFFER_SIZE - 1);
+    // readbytes = recv(fdSocket, buffer, BUFFER_SIZE - 1, 0);
+
     std::cout << "done\n";
     if (readbytes < 0){
         statusCode = 500;
@@ -358,6 +364,7 @@ void resetClientRequest(Request &req){
     req.cgi_File2 = "";
     req.filePath = "";
     req.responseDone = 0;
+    req.responseHeaders = "";
     // req.filePos = 0;
 }
 
@@ -371,7 +378,7 @@ std::string Request::generateResponse(client &client, std::string &content){
     std::stringstream response;
     errorPage msg;
     if (!client.reqq.statusCode)
-    client.reqq.statusCode = 200;
+        client.reqq.statusCode = 200;
     response << "HTTP/1.1 " << client.reqq.statusCode << " " << msg.statusMsgs[client.reqq.statusCode] << "\r\n";
     if (!client.reqq.cgi || client.reqq.statusCode >= 300){
         response << "Content-Type: " << responseContentType << "\r\n";
@@ -389,6 +396,7 @@ std::string Request::generateResponse(client &client, std::string &content){
     response << content;
         // }
     res = response.str();
+    // std::cout <<"here :" <<res << std::endl;
     return res;
 }
 
@@ -419,7 +427,6 @@ std::string Request::getChunk(Request &req){
     }
 
 int Request::send_response(client &client){
-    std::cout <<"sending " << std::endl;
     std::string chunk("");
     
     if (firstChunk){
@@ -443,10 +450,13 @@ int Request::send_response(client &client){
         }
         catch (const std::runtime_error &e){
             std::cout << e.what() << std::endl;
-            if (client.reqq.method != "HEAD")
+            if (client.reqq.method != "HEAD"){
                 content = errorPage::serveErrorPage(client.reqq);
+                responseContentLen = content.length();
+            }
         }
         response = generateResponse(client, content);
+        responseHeaders = response;
         firstChunk = 0;
     }
 
@@ -457,10 +467,10 @@ int Request::send_response(client &client){
             responseDone = 1;
     }
     
-        std::cout << "c : "<<response << std::endl;
+        // std::cout << "c : "<<response << std::endl;
     if (chunkPos < response.length() - 1){
         if (responseDone){
-            // std::cout << "\033[1;35m---------------RESPONSE-----------------\n" <<  response.substr(0, response.find("\r\n\r\n")) <<"\033[0m" << std::endl;
+            std::cout << "\033[1;35m---------------RESPONSE-----------------\n" <<  responseHeaders <<"\033[0m" << std::endl;
             resetClientRequest(client.reqq);
             client.w_done = 1;
             client.wakt = time(NULL);
@@ -497,11 +507,9 @@ int Request::read_request(client &client, infra & infra){
             getCheckRequest(client, infra);
         }
         if (readBody){
-            std::cout << "why \n";
             if(!client.reqq.isChunked)
                 Post::body(client);
             else {
-                std::cout << "hi" << std::endl;
                 Post::chunked_body2(client);
                 // std::cout << obj.reqq.r_done << std::endl;
                 if(client.reqq.chunked_flag == 0)
@@ -579,7 +587,7 @@ bool Request::checkReadingTimout(const client &client){
         return true;
     if (readBody && !client.r_done && time(NULL) - recentAction >= REQUEST_TIMEOUT)
         return true;
-    std::cout << "check timout " << std::endl;
+    // std::cout << "check timout " << std::endl;
     return false;
 
 }

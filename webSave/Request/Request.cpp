@@ -577,7 +577,7 @@ bool Request::checkReadingTimout(const client &client){
         return true;
     if (readBody && !client.r_done && time(NULL) - recentAction >= REQUEST_TIMEOUT)
         return true;
-    std::cout << "check timout " << std::endl;
+    // std::cout << "check timout " << std::endl;
     return false;
 
 }

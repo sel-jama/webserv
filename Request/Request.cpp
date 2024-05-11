@@ -95,7 +95,7 @@ std::string Request::readRequest(int &fdSocket){
     //     firstRead = 0;
     // 
     char buffer[BUFFER_SIZE];
-    std::cout << "readbytes-> " << std::endl;
+    // std::cout << "readbytes-> " << std::endl;
     // int flags = fcntl(fdSocket, F_GETFL, 0);
 
     // flags |= O_NONBLOCK;
@@ -103,7 +103,7 @@ std::string Request::readRequest(int &fdSocket){
     readbytes = read(fdSocket, buffer, BUFFER_SIZE - 1);
     // readbytes = recv(fdSocket, buffer, BUFFER_SIZE - 1, 0);
 
-    std::cout << "done\n";
+    // std::cout << "done\n";
     if (readbytes < 0){
         statusCode = 500;
         throw std::runtime_error("Error reading from socket");

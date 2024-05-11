@@ -102,14 +102,14 @@ void Post::support_upload(Request &obj)
     std::string value;
     obj.load_extension();
     // location obj3 = obj.getMatchedLocation();
-    std::map<std::string, std::string>::iterator iter = obj.headers.find("Content-Type");
+    // std::map<std::string, std::string>::iterator iter = obj.headers["Content-Type"];
     // obj.load_extension();
-    if(iter != obj.headers.end() && !iter->second.empty())
+    if(!obj.headers["Content-Type"].empty())
     {
-        obj.content_T = iter->second;
-        value = iter->second;
+        obj.content_T = obj.headers["Content-Type"];
+        value = obj.headers["Content-Type"];
         std::string name = "Post_" + obj2.generateRandomFileName();
-        filename = "/"  + name + obj.extension[iter->second];
+        filename = "/"  + name + obj.extension[obj.headers["Content-Type"]];
     }
 
         location capt = obj.getMatchedLocation();
@@ -154,45 +154,9 @@ void Post::support_upload(Request &obj)
     }
 }
 
-void Post::Work_with_Directory(Request obj)
-{
-    
-    location capt = obj.getMatchedLocation();
-    std::map<std::string, std::string> get = capt.cgi;
-    std::map<std::string, std::string>::iterator iter = get.begin();
-    std::string search;
-    std::string tmp;
-    int integ = 0;
-    std::vector<std::string>index;
-    std::vector<std::string>::iterator for_index = index.begin();
-
-    for(iter = get.begin(); iter != get.end(); iter++)
-    {
-        search = iter->first;
-        search = "." + search;
-        if(for_index != index.end())
-              tmp = *for_index;
-        tmp = tmp.find(search);
-        if(!tmp.empty()){
-            integ = 1;
-            break;
-        }
-        for_index++;
-    }
-    if(integ == 1){
-        //found it;
-        //do cgi work
-    }
-    else{
-       //forbiden 403
-        obj.statusCode = 403;
-        throw std::runtime_error("eror");
-    }
-}
-
 void Post::body(client &obj){
-    std::cout << "came \n";
-    std::cout << "out \n";
+    if(!(static_cast<double>(obj.reqq.body.length()) >= obj.reqq.contentLength))
+        obj.reqq.body.append(obj.reqq.readRequest(obj.ssocket));
     if(static_cast<double>(obj.reqq.body.length()) >= obj.reqq.contentLength){
         obj.reqq.statusCode = 201;
         obj.reqq.responseContentLen = obj.reqq.body.length();
@@ -200,7 +164,6 @@ void Post::body(client &obj){
     }
     else
     { 
-        obj.reqq.body.append(obj.reqq.readRequest(obj.ssocket));
         obj.r_done = 0;
     }
 }
@@ -318,8 +281,10 @@ void Post::chunked_body2(client &obj){
                     obj.reqq.body = obj.reqq.body.substr(2, obj.reqq.body.length());
                 obj.reqq.saver_count = obj.reqq.body.find("\r\n");
                 obj.reqq.tmp = obj.reqq.saver_count + 2;
-                if(obj.reqq.saver_count == 0)
-                    throw Except();
+                if(obj.reqq.saver_count == 0){
+                    obj.reqq.statusCode = 400;
+                    throw std::runtime_error("eror");
+                }
                 obj.reqq.getit = obj.reqq.body.substr(0, obj.reqq.saver_count);
                 obj.reqq.to_de = hexa_to_num(obj.reqq.getit);
                 obj.reqq.to_de2 += obj.reqq.to_de;

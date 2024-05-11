@@ -42,7 +42,7 @@ class Request {
         std::string reqStr;
         std::string queryString;
         std::string responseContentType;
-        double responseContentLen;
+        size_t responseContentLen;
         location matchedLocation;
         
         std::string getit;

@@ -95,7 +95,7 @@ std::string Request::readRequest(int &fdSocket){
     //     firstRead = 0;
     // 
     char buffer[BUFFER_SIZE];
-    std::cout << "readbytes-> " << std::endl;
+    // std::cout << "readbytes-> " << std::endl;
     // int flags = fcntl(fdSocket, F_GETFL, 0);
 
     // flags |= O_NONBLOCK;
@@ -103,7 +103,7 @@ std::string Request::readRequest(int &fdSocket){
     readbytes = read(fdSocket, buffer, BUFFER_SIZE - 1);
     // readbytes = recv(fdSocket, buffer, BUFFER_SIZE - 1, 0);
 
-    std::cout << "done\n";
+    // std::cout << "done\n";
     if (readbytes < 0){
         statusCode = 500;
         throw std::runtime_error("Error reading from socket");
@@ -269,6 +269,9 @@ int sameUntilIndex(const std::string &uri, const std::string &locationName){
     size_t i = 0;
     while (uri[i] && locationName[i] && uri[i] == locationName[i])
         i++;
+
+    if (!uri[i] && locationName[i])
+        i = -1;
     return i;
 }
 
@@ -284,10 +287,11 @@ const location& Request::getMatchingLocation(const server& serve){
         }
     }
 
-    if (maxCounter == -1){
-        statusCode = 404;
-        throw std::runtime_error("404 Not Found: No matching location");
-    }
+    // if (maxCounter == -1){
+    //     statusCode = 404;
+    //     throw std::runtime_error("404 Not Found: No matching location");
+    // }
+
 
     const location& matchingLocation = serve.getLocations().at(maxIndex);
     return matchingLocation;
@@ -298,17 +302,17 @@ void Request::retreiveRequestedResource(const server &serve){
     std::cout << "images : " << matchedLocation.location_name << std::endl;
     //see the root of the location retrieved and join it with the uri then look for it using access
     //pass "/"
-    std::string url = getUri().substr(1);
+    std::string url = getUri();
     fileName = url;
     
     path = matchedLocation.root;
-    path += fileName.empty() ? "" : "/";
+    // path += fileName.empty() ? "" : "/";
     std::cout << "location name: " <<  matchedLocation.location_name << std::endl;
     std::cout <<"path : " << path << std::endl;
-    path += fileName;
+    path += fileName.substr(matchedLocation.location_name.length());
     std::cout <<"path : " << path << std::endl;
-    isFileAvailable();
     isMethodAllowed();
+    isFileAvailable();
     isRedirect();
 }
 
@@ -382,6 +386,7 @@ std::string Request::generateResponse(client &client, std::string &content){
     std::string res;
     std::stringstream response;
     errorPage msg;
+    // std::cout << "c " << client.reqq.responseContentLen << std::endl;
     if (!client.reqq.statusCode)
         client.reqq.statusCode = 200;
     response << "HTTP/1.1 " << client.reqq.statusCode << " " << msg.statusMsgs[client.reqq.statusCode] << "\r\n";
@@ -474,7 +479,7 @@ int Request::send_response(client &client){
         // std::cout << "c : "<<response << std::endl;
     if (chunkPos < response.length() - 1){
         if (responseDone){
-            std::cout << "\033[1;35m---------------RESPONSE-----------------\n" <<  responseHeaders <<"\033[0m" << std::endl;
+            // std::cout << "\033[1;35m---------------RESPONSE-----------------\n" <<  responseHeaders <<"\033[0m" << std::endl;
             resetClientRequest(client.reqq);
             client.w_done = 1;
             client.wakt = time(NULL);
@@ -484,7 +489,7 @@ int Request::send_response(client &client){
             chunk = response.substr(chunkPos, 1024);
         else
             chunk = response;
-        std::cout << chunk << std::endl;
+        // std::cout << chunk << std::endl;
         int sret = send(client.ssocket, chunk.c_str(), chunk.length(), 0);
         if (sret == -1){
             std::cerr << "send failed ..." << std::endl;
@@ -497,7 +502,7 @@ int Request::send_response(client &client){
         chunkPos += 1024;
     }
     else{
-        std::cout << "\033[1;35m---------------RESPONSE-----------------\n" <<  response.substr(0, response.find("\r\n\r\n")) <<"\033[0m" << std::endl;
+        // std::cout << "\033[1;35m---------------RESPONSE-----------------\n" <<  response.substr(0, response.find("\r\n\r\n")) <<"\033[0m" << std::endl;
         resetClientRequest(client.reqq);
         client.w_done = 1;
     }
@@ -517,7 +522,7 @@ int Request::read_request(client &client, infra & infra){
             // }
         }
         else{
-            std::cout << "confusing\n";
+            // std::cout << "confusing\n";
             if(!client.reqq.isChunked)
                 Post::body(client);
             else{
@@ -535,8 +540,8 @@ int Request::read_request(client &client, infra & infra){
             return 0;
         }
     }
-    if (client.r_done)
-        std::cout << "\033[1;33m--------------------REQUEST-------------------------\n" << client.reqq.reqStr << "\033[0m" << std::endl;
+    // if (client.r_done)
+        // std::cout << "\033[1;33m--------------------REQUEST-------------------------\n" << client.reqq.reqStr << "\033[0m" << std::endl;
 
     return 1;
 }

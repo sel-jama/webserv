@@ -101,9 +101,15 @@ void Post::support_upload(Request &obj)
     std::string filename = "";
     std::string value;
     obj.load_extension();
-    // location obj3 = obj.getMatchedLocation();
+    location obj3 = obj.getMatchedLocation();
     // std::map<std::string, std::string>::iterator iter = obj.headers["Content-Type"];
     // obj.load_extension();
+            if(obj3.upload != "on" || (obj3.upload == "on" && obj3.upload_path.empty()))
+            {
+                obj.statusCode = 403;
+                throw std::runtime_error("rja3");
+            }
+
     if(!obj.headers["Content-Type"].empty())
     {
         obj.content_T = obj.headers["Content-Type"];
@@ -155,6 +161,11 @@ void Post::support_upload(Request &obj)
 }
 
 void Post::body(client &obj){
+    if(obj.reqq.matchedLocation.upload != "on" || (obj.reqq.matchedLocation.upload == "on" && obj.reqq.matchedLocation.upload_path.empty()))
+    {
+        obj.reqq.statusCode = 403;
+        throw std::runtime_error("rja3");
+    }
     if(!(static_cast<double>(obj.reqq.body.length()) >= obj.reqq.contentLength))
         obj.reqq.body.append(obj.reqq.readRequest(obj.ssocket));
     if(static_cast<double>(obj.reqq.body.length()) >= obj.reqq.contentLength){
@@ -175,6 +186,11 @@ void Post::chunked_body(client &obj){
     handleCgi obj2;
     location obj3 = obj.reqq.getMatchedLocation();
 
+    if(obj3.upload != "on" || (obj3.upload == "on" && obj3.upload_path.empty()))
+    {
+        obj.reqq.statusCode = 403;
+        throw std::runtime_error("rja3");
+    }
     // std::map<std::string, std::string>::iterator iter = obj.reqq.headers.find("Content-Type");
         if(obj.reqq.flag == 0)
         {
@@ -310,7 +326,7 @@ void Post::chunked_body2(client &obj){
         }
 
         //obj.reqq.chunked_flag = 0;
-        std::cout << "ay" << std::endl;
+        // std::cout << "ay" << std::endl;
     }
 
 

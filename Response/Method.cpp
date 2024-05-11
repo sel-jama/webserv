@@ -47,6 +47,7 @@ void Method::GetDataForClient(Request &req){
             req.filePath = req.path;
             // content = readContent(req);
             req.responseContentLen =  req.pathStatus.st_size;
+            std::cout <<"here " << req.responseContentLen<< std::endl;
         }
     }
     else
@@ -203,10 +204,12 @@ void Method::directoryListing(Request &req){
 
     page << "<html><head><title>Index of " << req.path.c_str() << "</title></head><body><h1>Index of " << req.path.c_str() << "</h1><ul>" << std::endl;
 
+    req.fileName += req.fileName.back() == '/' ? "" : "/";
+
     struct dirent* entry;
     while ((entry = readdir(directory)) != NULL) {
         if (strcmp(entry->d_name, ".") != 0 && strcmp(entry->d_name, "..") != 0) {
-            page << "<li><a href=\"" << req.fileName + "/" + entry->d_name << "\">" << entry->d_name << "</a></li>" << std::endl;
+            page << "<li><a href=\"" << req.fileName + entry->d_name << "\">" << entry->d_name << "</a></li>" << std::endl;
         }
     }
 

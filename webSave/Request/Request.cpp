@@ -89,27 +89,28 @@ void Request::cutOffBodySegment(std::string &request){
 }
 
 std::string Request::readRequest(int &fdSocket){
-    std::stringstream buff("");
-    // if (readBody && firstRead){
-    //     buff << bodySaver; 
-    //     firstRead = 0;
-    // 
+    // std::stringstream buff("");
+    // // if (readBody && firstRead){
+    // //     buff << bodySaver; 
+    // //     firstRead = 0;
+    // // 
     char buffer[BUFFER_SIZE];
-    // std::cout << "readbytes-> " << readbytes << std::endl;
+    std::cout << "readbytes-> "  << fdSocket << " << " << std::endl;
     readbytes = read(fdSocket, buffer, BUFFER_SIZE - 1);
-    if (readbytes < 0){
-        statusCode = 500;
-        throw std::runtime_error("Error reading from socket");
-    }
-    else if (readbytes == 0){
-        statusCode = -1;
-        throw std::runtime_error("Peer closed the connection");
-    }
-    else
-        recentAction = time(NULL);
+    std::cout << "readbytes-sdf.nas,mfbwa,j> "  << std::endl;
+    // if (readbytes < 0){
+    //     statusCode = 500;
+    //     throw std::runtime_error("Error reading from socket");
+    // }
+    // else if (readbytes == 0){
+    //     statusCode = -1;
+    //     throw std::runtime_error("Peer closed the connection");
+    // }
+    // else
+    //     recentAction = time(NULL);
 
-    buffer[readbytes] = '\0';
-    buff.write(buffer, readbytes);
+    // buffer[readbytes] = '\0';
+    // buff.write(buffer, readbytes);
     std::string request(buff.str());
     // reqStr.append(request);
     // if (!readBody){
@@ -121,6 +122,7 @@ std::string Request::readRequest(int &fdSocket){
     // }
     // if (!readBody)
     //     return reqStr;
+    std::string request = "yo";
     return request;
 }
 

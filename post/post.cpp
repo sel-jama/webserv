@@ -192,7 +192,6 @@ void Post::Work_with_Directory(Request obj)
 
 void Post::body(client &obj){
     std::cout << "came \n";
-    obj.reqq.body.append(obj.reqq.readRequest(obj.ssocket));
     std::cout << "out \n";
     if(static_cast<double>(obj.reqq.body.length()) >= obj.reqq.contentLength){
         obj.reqq.statusCode = 201;
@@ -200,7 +199,10 @@ void Post::body(client &obj){
         obj.r_done = 1;
     }
     else
+    { 
+        obj.reqq.body.append(obj.reqq.readRequest(obj.ssocket));
         obj.r_done = 0;
+    }
 }
 
 std::ofstream Request::file;

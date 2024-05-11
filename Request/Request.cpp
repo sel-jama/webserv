@@ -23,7 +23,7 @@ contentLength(0), readbytes(0), readBody(0), firstRead(1)
 ,headersDone(0), statusCode(0), statusMsg(""), isChunked(0), 
 cgi(0), chunkPos(0), firstChunk(1), locationHeader(""), 
 cgi_File(""), cgi_File2("") , responseDone(0) ,filePath(""), filePosition(0), responseHeaders(""),r(0){
-    to_de = 0 ;flag = 0; saver_count = 0; tmp = 0; chunked_flag = 0;
+    size_body = 0; to_de = 0 ;flag = 0; saver_count = 0; tmp = 0; chunked_flag = 0; flag2 = 0; filename__ = "";
 }
 
 Request::~Request(){}
@@ -372,6 +372,9 @@ void resetClientRequest(Request &req){
     req.filePath = "";
     req.responseDone = 0;
     req.responseHeaders = "";
+    req.flag2 = 0;
+    req.filename__ = "";
+    req.size_body = 0;
     // req.filePos = 0;
 }
 
@@ -515,16 +518,37 @@ int Request::read_request(client &client, infra & infra){
     try{
         if (!readBody){
             getCheckRequest(client, infra);
+            if(client.reqq.flag2 == 0)
+                Post::support_upload(client.reqq);
+        // client.reqq.size_body += client.reqq.readRequest(client.ssocket).length();
+            if(!client.reqq.body.empty())
+            {
+                // std::cout << "hehe " << client.reqq.size_body << std::endl;
+                client.reqq.file.write(client.reqq.body.c_str(), client.reqq.body.size());
+                client.reqq.size_body += client.reqq.body.size();
+                if(client.reqq.body.size() == client.reqq.contentLength){
+                    std::cout << "helllllllo" << std::endl;
+                    client.reqq.file.close();
+                    client.reqq.statusCode = 201;
+                    client.reqq.responseContentLen = client.reqq.body.length();
+                    client.r_done = 1;
+                    // return;
+                }
+                client.reqq.body = "";
+            }
             // if(static_cast<double>(client.reqq.body.length()) >= client.reqq.contentLength){
             //     client.reqq.statusCode = 201;
             //     client.reqq.responseContentLen = client.reqq.body.length();
             //     client.r_done = 1;
             // }
         }
-        else{
+        else if(readBody){
             // std::cout << "confusing\n";
             if(!client.reqq.isChunked)
+            {
+                // std::cout << "hani ana -><<<<<<<<<<<<<<<" << std::endl;
                 Post::body(client);
+            }
             else{
                 Post::chunked_body2(client);
                 if(client.reqq.chunked_flag == 0)

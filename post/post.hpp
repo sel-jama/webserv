@@ -40,7 +40,7 @@ class Post{
         size_t get_last_read();
         size_t get_content_lenght();
         void load_extension();
-        void support_upload(Request &obj);
+        static void support_upload(Request &obj);
         void get_Request_resource(Request obj);
         void After_geting_resource(Request obj);
         void Work_with_file(Request &obj);

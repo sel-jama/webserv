@@ -400,12 +400,9 @@ std::string Request::generateResponse(client &client, std::string &content){
     std::string res;
     std::stringstream response;
     errorPage msg;
-    // if (!client.reqq.statusCode){
-    //     if (client.reqq.method == "GET")
-    //         client.reqq.statusCode = 200;
-    //     else
-    //         responseContentLen = 500;
-    // }
+    if (!client.reqq.statusCode){
+        client.reqq.statusCode = 200;
+    }
     response << "HTTP/1.1 " << client.reqq.statusCode << " " << msg.statusMsgs[client.reqq.statusCode] << "\r\n";
     if (!client.reqq.cgi || client.reqq.statusCode >= 300){
         response << "Content-Type: " << responseContentType << "\r\n";
@@ -448,16 +445,7 @@ std::string Request::getChunk(Request &req){
 
         file.close();
         return content.str();
-}
-
-void Request::checkSatusCode(Request &req){
-    if (!req.statusCode){
-        if (req.method == "GET")
-            req.statusCode = 200;
-        else
-            req.statusCode = 500;
     }
-}
 
 int Request::send_response(client &client){
     std::string chunk("");
@@ -466,13 +454,12 @@ int Request::send_response(client &client){
         client.w_done = 0;
         std::string content;
         try{
-            if (!client.reqq.cgi){
-                checkSatusCode(client.reqq);
+            if (!client.reqq.cgi || client.reqq.statusCode >= 300){
                 if (client.reqq.statusCode >= 300)
                     throw std::runtime_error("Request reading failed");
                 content = Response::handleMethod(client);
             }
-            if (content.empty() && client.reqq.cgi){
+            if (client.reqq.cgi){
                 client.reqq.get.cgi.checkTimeout(client.reqq);
                 if (!client.reqq.get.cgi.response.empty())
                     content = client.reqq.get.cgi.response;

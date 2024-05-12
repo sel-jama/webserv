@@ -189,6 +189,7 @@ void handleCgi::executeCgiScript(Request &req) {
 
     pid = fork();
     if (pid == -1){
+        std::remove(random.c_str());
         outputFile.close();
         req.statusCode = 500;
         throw std::runtime_error("Fork failed");
@@ -202,6 +203,7 @@ void handleCgi::executeCgiScript(Request &req) {
         char **const arr = createArr();
         char **const env = createGetEnv(req);
         execve(cgiPath.c_str(), arr, env);
+        std::remove(random.c_str());
         cleanUp(arr, env);
         req.statusCode = 500;
         throw std::runtime_error("Failed to execute CGI script");
@@ -218,6 +220,7 @@ void handleCgi::checkTimeout(Request &req){
         int result = waitpid(pid, &status, WNOHANG);
             if (result == -1){
                 // Handle waitpid error
+                std::remove(random.c_str());
                 kill(pid, SIGKILL);
                 req.statusCode = 500;
                 throw std::runtime_error("Error waiting for CGI script");
@@ -229,7 +232,8 @@ void handleCgi::checkTimeout(Request &req){
                 }
                 if (req.method != "POST"){
                     Method use;
-                    req.path = req.matchedLocation.root  + random;
+                    req.path = req.matchedLocation.root +random;
+                    std::cout << "path " << req.path << std::endl;
                     std::string output = use.readContent(req);
                     response = parseCgiRsponse(output);
                     std::remove(random.c_str());
@@ -297,6 +301,7 @@ void handleCgi::executeCgiBody(Request &req){
 
     pid_t pid = fork();
     if (pid == -1){
+        std::remove(random.c_str());
         req.statusCode = 500;
         throw std::runtime_error("fork failed");
     }
@@ -312,6 +317,7 @@ void handleCgi::executeCgiBody(Request &req){
         char **const arr = createArr();
         char **const env = createPostEnv(req);
         execve(this->cgiPath.c_str(), arr, env);
+        std::remove(random.c_str());
         cleanUp(arr, env);
         req.statusCode = 500;
         throw std::runtime_error("execve failed");

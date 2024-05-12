@@ -124,9 +124,7 @@ std::string toString(int value) {
 
 std::string errorPagesConfig(Request &req){
     std::string err = toString(req.statusCode);
-    std::cout << "here" << req.errorPages[err]  << std::endl;
     if (!req.errorPages[err].empty()){
-        std::cout << req.errorPages[err] << std::endl;
         std::string pathToerrorPage = req.errorPages[err];
         struct stat status;
         if (stat(pathToerrorPage.c_str(), &status) == 0 && status.st_mode &S_IRUSR) //error page file found && permission
@@ -138,13 +136,9 @@ std::string errorPagesConfig(Request &req){
 std::string errorPage::serveErrorPage(Request &req){
     errorPage use;
     Method use2;
-    // std::string content;
-    // std::ostringstream response;
-    // use.setstatusMsgs();
     errorPage err(use.statusMsgs[req.statusCode], req.statusCode);
 
     std::string pathToPage = errorPagesConfig(req);
-    std::cout << "hi " << pathToPage << std::endl;
     if (!pathToPage.empty()){
         req.path = pathToPage;
         return use2.readContent(req);

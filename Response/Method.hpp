@@ -17,6 +17,7 @@
 #include "../Request/Global.hpp"
 #include "../cgi/handleCgi.hpp"
 #include "dirent.h"
+#include <string>
 class Request;
 class server;
 class location;

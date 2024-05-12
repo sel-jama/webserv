@@ -66,29 +66,9 @@ void ParseRequest::setHttpHeaders() {
     ngxHttpHeaders.push_back("Cookie");  //Specifies the date and time at which the message was originated
 }
 
-// void ParseRequest::setMethods(void) {
-//     this->methods.push_back("GET");
-//     this->methods.push_back("POST");
-//     this->methods.push_back("DELETE");
-// }
-
 void ParseRequest::setUriAllowedChars(void) {
     this->uriAllowedChars = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789 ._~:/?#[]@!$&'()*+,;=%";
 }
-
-// bool ParseRequest::checkMethod(const std::string &method) const {
-//     if (method == "GET" || method == "POST" || method == "DELETE")
-//         return "true";
-//     return "false";
-// }
-
-// bool ParseRequest::unsupportedMethod(const std::string &method) const{
-//     for (size_t i = 0; i < this->methods.size(); i++){
-//         if (this->methods[i] == method)
-//             return true;
-//     }
-//     return false;
-// }
 
 bool ParseRequest::charOccured(char c) const{
     for(size_t i = 0; i < uriAllowedChars.size(); i++){
@@ -109,7 +89,6 @@ bool ParseRequest::checkUriAllowedChars(std::string &uri) const{
 int ParseRequest::parseMethod(std::string &method) const{
     if (method != "GET" && method != "POST" && method != "DELETE")
         return 501;
-        // throw std::runtime_error("501 Not Implemented : Method not supported");
     return 0;
 }
 
@@ -120,9 +99,6 @@ void ParseRequest::lowerString(std::string& key){
 }
 
 int ParseRequest::parseHeaders(std::map<std::string, std::string> &headers, std::string &method){
-    // int ret = checkUnknownHeader(headers);
-    // if (ret)
-    //     return ret;
     std::vector<std::string> copy;
     for(std::map<std::string, std::string>::iterator i = headers.begin(); i != headers.end(); ++i){
         std::string key = i->first;
@@ -134,30 +110,25 @@ int ParseRequest::parseHeaders(std::map<std::string, std::string> &headers, std:
 
     if (headers.find("Transfer-Encoding") != headers.end()
         && headers["Transfer-Encoding"] != "chunked")
-            // throw std::runtime_error("501 Not Implemented : Transfer-Encoding must be chuncked");
             return 501;
     
     char *end;
     if (method == "POST" && headers.find("Transfer-Encoding") == headers.end() && (headers.find("Content-Length") == headers.end() || strtod(headers.at("Content-Length").c_str(), &end) == 0))
         return 411;
-        // throw std::runtime_error("400 Bad Request : Messing headers");
-    
-    //setContentLength(headers);
     return 0;
 }
 
 int ParseRequest::parseUri(std::string &uri) const {
     /*if => Request uri contain a character not allowded => bad request 400*/
-    // if ((uri.size() >= 1 && uri[0] != '/') || checkUriAllowedChars(uri) == false)
-    //     // throw std::runtime_error("400 Bad Request : bad URI");
+    // if (checkUriAllowedChars(uri) == false)
     //     return 400;
+        // throw std::runtime_error("400 Bad Request : bad URI");
 
     if (uri.size() > MAX_SIZE)
         return 414;
  
     if (uri.find("/../") != std::string::npos|| uri.find("/..") != std::string::npos || uri.find("../") != std::string::npos)
         return 400;
-        // throw std::runtime_error("414 Request-URI Too Long");
     return 0;
 }
 

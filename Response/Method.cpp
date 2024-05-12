@@ -39,13 +39,11 @@ void Method::GetDataForClient(Request &req){
 		//if location does not have cgi
 		validateAll(req);
 		if (loacationHasCgi(req, cgi)){
-			std::cout << "CGI .... " << std::endl;
 			cgi.executeCgiScript(req);
 		}
 		else{
 			req.filePath = req.path;
 			req.responseContentLen =  req.pathStatus.st_size;
-			std::cout <<"here " << req.responseContentLen<< std::endl;
 		}
 	}
 	else
@@ -56,7 +54,6 @@ void Method::GetDataForClient(Request &req){
 
 std::string Method::readContent(Request &req){
 	std::ifstream file(req.path.c_str());
-	std::cout << "path " << req.path.c_str() << std::endl;
 	if (!file.is_open())
 	{
 		std::remove(req.path.c_str());
@@ -90,7 +87,9 @@ void Method::handleDirectory(Request &req){
 	if (isDirHasIndexFiles(req) == false)
 		autoIndexing(req);
 	else{
-		req.path +=  req.fileName;
+		req.path += (!req.path.empty() && req.path.at(req.path.length()-1) == '/') ? "" : "/";
+		req.path += req.fileName;
+		// std::cout << "path " << req.path << std::endl;
 		if (stat(req.path.c_str(), &status) != 0){
 			req.statusCode = 500;
 			throw std::runtime_error("stat failed");
@@ -111,28 +110,33 @@ bool Method::isDirHasIndexFiles(Request &req) const{
 	DIR *dir;
 	struct dirent *ent;
 
-	// Open directory
 	if ((dir = opendir(req.path.c_str()))) {
-		// Iterate through directory entries
 		while ((ent = readdir(dir)) != NULL) {
 			std::string filename = ent->d_name;
-			// size_t pos = filename.find('.');
 
-			// filename.substr(0, pos);
 			for (std::vector<std::string>::iterator it = req.matchedLocation.index.begin(); it != req.matchedLocation.index.end(); ++it){
-				if (filename == *it)  { //compare with index files in location later
+				if (filename == *it)  { //compare with index files in location
+					std::string path = req.path;
+					path += (!req.path.empty() && path.at(path.length()-1) == '/') ? "" : "/";
+					path += filename;
+					struct stat file;
+    				if (stat(path.c_str(), &file) != 0){
+						req.statusCode = 500;
+						throw std::runtime_error("error stat");
+					}
+    
+    				bool readable = (file.st_mode & S_IRUSR) != 0;
+					if (!readable)
+						break;
 					req.fileName = *it;
 					closedir(dir);
-					// req.path += filename;
 					return true;
 				}
 			}
 		}
 		closedir(dir);
 	} else {
-		// Unable to open directory
 		req.statusCode = 500;
-		std::cerr << "Unable to open directory: " << req.path << std::endl;
 	}
 
 	// No index file found
@@ -161,7 +165,7 @@ void Method::directoryListing(Request &req){
 
 	page << "<html><head><title>Index of " << req.path.c_str() << "</title></head><body><h1>Index of " << req.path.c_str() << "</h1><ul>" << std::endl;
 
-	req.fileName += req.fileName.back() == '/' ? "" : "/";
+	req.fileName += (!req.fileName.empty() && req.fileName.at(req.fileName.length()-1) == '/') ? "" : "/";
 
 	struct dirent* entry;
 	while ((entry = readdir(directory)) != NULL) {

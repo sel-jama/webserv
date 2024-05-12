@@ -287,7 +287,7 @@ void handleCgi::executeCgiBody(Request &req){
     req.cgi = 1;
     setScriptName(req.cgi_File);
     std::string randomFile = generateRandomFileName();
-    req.cgi_File2 = req.matchedLocation.upload_path + "/" + randomFile;
+    req.cgi_File2 = req.matchedLocation.upload_path + randomFile;
     
     std::ofstream outputFile(req.cgi_File2.c_str());
     if (!outputFile.is_open()){

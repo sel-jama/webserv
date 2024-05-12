@@ -59,10 +59,7 @@ void Request::load_extension()
         while(std::getline(file, buffer))
         {
                 std::stringstream ss(buffer);
-                // std::cout << buffer << std::endl;
                 for (int i = 0; getline(ss, secbuffer, ' '); i++) {
-
-                            // std::cout << secbuffer << "."<< std::endl;
                     if (i == 0)
                         forkey = secbuffer;
                     if(i == 1)
@@ -137,7 +134,6 @@ void Request::checkRequestLine(Request &saver, std::string &line){
             err = 1;
         else if(line[i] == ' '){
             count++;
-            std::cout << count << std::endl;
             if (i == 0 || i == line.size()-1)
                 err = 1;
             else if (count >= 3)
@@ -196,9 +192,17 @@ void Request::requestPartitioning(Request &saver, std::string& request) {
 
     std::map<std::string, std::string>::const_iterator it = saver.headers.find("Content-Length");
     if (it != saver.headers.end()) {
-        contentLength = 0;
-         char *endptr;
-        contentLength = strtod(it->second.c_str(), &endptr);
+        std::stringstream ss(it->second);
+        std::cout << it->second << std::endl;
+        if (!(ss >> contentLength)){
+            saver.statusCode = 400;
+            throw std::runtime_error("bad request");
+        }
+        std::cout << contentLength <<  std::endl;
+        if (contentLength < 0){
+            saver.statusCode = 400;
+            throw std::runtime_error("bad request");
+        }
     }
     
     it = saver.headers.find("Transfer-Encoding");
@@ -254,10 +258,8 @@ int    Request::getCheckRequest(client &client, const infra &infra) {
             client.reqq.readBody = 0;
             client.r_done = 1;
         }
-        std::cout << "hhhhhherre" << std::endl;
         server serve = client.reqq.getMatchedServer(client.port_server, client.adress_server, infra);
         client.reqq.errorPages = serve.errorPages;
-        std::cout <<"hhh "<< serve.errorPages["404"] << std::endl;
         client.reqq.retreiveRequestedResource(serve);
         if (!client.reqq.readBody && client.reqq.headersDone && client.reqq.method == "POST"){
                 client.reqq.readBody = 1;
@@ -287,12 +289,6 @@ const location& Request::getMatchingLocation(const server& serve){
         }
     }
 
-    // if (maxCounter == -1){
-    //     statusCode = 404;
-    //     throw std::runtime_error("404 Not Found: No matching location");
-    // }
-
-
     const location& matchingLocation = serve.getLocations().at(maxIndex);
     return matchingLocation;
 }
@@ -302,9 +298,8 @@ void Request::retreiveRequestedResource(const server &serve){
     fileName = getUri();
     
     path = matchedLocation.root;
-    // path += fileName.empty() ? "" : "/";
     path += fileName.substr(matchedLocation.location_name.length());
-    std::cout <<"path : " << path << std::endl;
+    // std::cout <<"path : " << path << std::endl;
     isMethodAllowed();
     isFileAvailable();
     isRedirect();
@@ -389,13 +384,11 @@ std::string Request::generateResponse(client &client, std::string &content){
             return response.str();
         }
         response << "Content-Length: " << responseContentLen << "\r\n\r\n";
-        if (client.reqq.headers.find("Cookie") != client.reqq.headers.end())
-            response << "Cookie: " << client.reqq.headers["Cookie"];
+        // if (client.reqq.headers.find("Cookie") != client.reqq.headers.end())
+        //     response << "Cookie: " << client.reqq.headers["Cookie"];
     }
-        // if (client.reqq.cgi) || client.reqq.statusCode >= 300 || client.reqq.type== "directory"){
-        //     responseDone = 1;
+
     response << content;
-        // }
     res = response.str();
     return res;
 }
@@ -417,7 +410,7 @@ std::string Request::getChunk(Request &req){
         
         if (bytesRead > 0) {
             content.write(buffer, bytesRead);
-            filePosition = file.tellg(); // Update file position
+            filePosition = file.tellg(); // Update file pos
         }
         else
             return "";
@@ -449,8 +442,8 @@ int Request::send_response(client &client){
             }
         }
         catch (const std::runtime_error &e){
-            std::cout << e.what() << std::endl;
             if (client.reqq.method != "HEAD"){
+                std::cout << e.what() << std::endl;
                 content = errorPage::serveErrorPage(client.reqq);
                 responseContentLen = content.length();
             }
@@ -466,10 +459,8 @@ int Request::send_response(client &client){
             responseDone = 1;
     }
     
-        // std::cout << "c : "<<response << std::endl;
     if (chunkPos < response.length() - 1){
         if (responseDone){
-            // std::cout << "\033[1;35m---------------RESPONSE-----------------\n" <<  responseHeaders <<"\033[0m" << std::endl;
             resetClientRequest(client.reqq);
             client.w_done = 1;
             client.wakt = time(NULL);
@@ -479,7 +470,6 @@ int Request::send_response(client &client){
             chunk = response.substr(chunkPos, 1024);
         else
             chunk = response;
-        // std::cout << chunk << std::endl;
         int sret = send(client.ssocket, chunk.c_str(), chunk.length(), 0);
         if (sret == -1){
             std::cerr << "send failed ..." << std::endl;
@@ -492,7 +482,6 @@ int Request::send_response(client &client){
         chunkPos += 1024;
     }
     else{
-        // std::cout << "\033[1;35m---------------RESPONSE-----------------\n" <<  response.substr(0, response.find("\r\n\r\n")) <<"\033[0m" << std::endl;
         resetClientRequest(client.reqq);
         client.w_done = 1;
     }
@@ -505,37 +494,26 @@ int Request::read_request(client &client, infra & infra){
     try{
         if (!readBody){
             getCheckRequest(client, infra);
-            if(client.reqq.method == "POST"){
+            if(client.reqq.method == "POST" && !client.reqq.isChunked){
                 if(client.reqq.flag2 == 0)
                     Post::support_upload(client.reqq);
-            // client.reqq.size_body += client.reqq.readRequest(client.ssocket).length();
                 if(!client.reqq.body.empty())
                 {
-                    // std::cout << "hehe " << client.reqq.size_body << std::endl;
                     client.reqq.file.write(client.reqq.body.c_str(), client.reqq.body.size());
                     client.reqq.size_body += client.reqq.body.size();
                     if(client.reqq.body.size() == client.reqq.contentLength){
-                        std::cout << "helllllllo" << std::endl;
                         client.reqq.file.close();
                         client.reqq.statusCode = 201;
                         client.reqq.responseContentLen = client.reqq.body.length();
                         client.r_done = 1;
-                        // return;
                     }
                     client.reqq.body = "";
                 }
             }
-            // if(static_cast<double>(client.reqq.body.length()) >= client.reqq.contentLength){
-            //     client.reqq.statusCode = 201;
-            //     client.reqq.responseContentLen = client.reqq.body.length();
-            //     client.r_done = 1;
-            // }
         }
         else if(readBody){
-            // std::cout << "confusing\n";
             if(!client.reqq.isChunked)
             {
-                // std::cout << "hani ana -><<<<<<<<<<<<<<<" << std::endl;
                 Post::body(client);
             }
             else{
@@ -546,16 +524,11 @@ int Request::read_request(client &client, infra & infra){
         }
     }
     catch (const std::runtime_error &e){
-        std::cout << e.what() << std::endl;
         client.r_done = 1;
         if(statusCode == -1){
-            // std::cout << "\033[1;36mError in reading : "<< e.what() << "\033[0m" << std::endl;
             return 0;
         }
     }
-    // if (client.r_done)
-        // std::cout << "\033[1;33m--------------------REQUEST-------------------------\n" << client.reqq.reqStr << "\033[0m" << std::endl;
-
     return 1;
 }
 
@@ -581,15 +554,6 @@ const server &Request::getMatchedServer(uint16_t &listenport, std::string &liste
     }
     int found = 0;
     std::vector<server>::const_iterator save;
-    //     std::stringstream ss(it->second);
-    //     std::string addr, p;
-    //     getline(ss, addr, ':');
-    //     getline(ss, p);
-    //     std::cout << "add " << addr << " port  " << p << std::endl;
-    //     char *endp;
-    //     this->port = strtol(p.c_str(), &endp, 10);
-    //     this->ip = addr;
-    // }
     
     std::vector<server>::const_iterator i = infra.getServer().begin();
     save = i;
@@ -616,6 +580,7 @@ std::string Request::getMimeType(const std::string& fileName){
         std::string exe = fileName.substr(dotPos);
         std::map<std::string, std::string>::iterator it = extension.begin();
         for (; it != extension.end(); it++){
+            std::cout << it->second << std::endl;
             if (it->second == exe)
                 return it->first;
         }

@@ -205,6 +205,7 @@ void Post::body(client &obj){
         // Post::support_upload(obj.reqq , (obj.reqq.readRequest(obj.ssocket)));
         std::cout << "helllllllo" << std::endl;
         obj.reqq.file.close();
+        Work_with_file(obj.reqq);
         obj.reqq.statusCode = 201;
         obj.reqq.responseContentLen = obj.reqq.body.length();
         obj.r_done = 1;

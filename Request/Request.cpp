@@ -82,7 +82,6 @@ void Request::cutOffBodySegment(std::string &request){
     if(pos != std::string::npos){
         pos += 4;
         body = request.substr(pos);
-        // int num = request.length() - pos;
         request.erase(pos, request.length() - 1);
         headersDone = 1;
     }
@@ -90,20 +89,9 @@ void Request::cutOffBodySegment(std::string &request){
 
 std::string Request::readRequest(int &fdSocket){
     std::stringstream buff("");
-    // if (readBody && firstRead){
-    //     buff << bodySaver; 
-    //     firstRead = 0;
-    // 
     char buffer[BUFFER_SIZE];
-    // std::cout << "readbytes-> " << std::endl;
-    // int flags = fcntl(fdSocket, F_GETFL, 0);
-
-    // flags |= O_NONBLOCK;
-    // fcntl(fdSocket, F_SETFL, flags);
     readbytes = read(fdSocket, buffer, BUFFER_SIZE - 1);
-    // readbytes = recv(fdSocket, buffer, BUFFER_SIZE - 1, 0);
 
-    // std::cout << "done\n";
     if (readbytes < 0){
         statusCode = 500;
         throw std::runtime_error("Error reading from socket");
@@ -118,16 +106,7 @@ std::string Request::readRequest(int &fdSocket){
     buffer[readbytes] = '\0';
     buff.write(buffer, readbytes);
     std::string request(buff.str());
-    // reqStr.append(request);
-    // if (!readBody){
-    //     cutOffBodySegment(request);
-        // if (headersDone){
-        //     readBody = 1;
-    //         // return reqStr;
-    // }
-    // }
-    // if (!readBody)
-    //     return reqStr;
+   
     return request;
 }
 
@@ -143,30 +122,52 @@ void Request::uriQuery(std::string &uri){
 }
 
 void trim(std::string &str){
-    // Trim leading whitespace
     while (!str.empty() && std::isspace(str[0]))
         str.erase(0, 1);
 
-    // Trim trailing whitespace
     while (!str.empty() && std::isspace(str[str.length() - 1]))
         str.erase(str.length() - 1);
+}
+
+void Request::checkRequestLine(Request &saver, std::string &line){
+    int err = 0;
+    int count = 0;
+    for (size_t i = 0; i < line.size(); i++){
+        if (std::isspace((int)line[i]) && line[i] != ' ' && i != line.size()-1)
+            err = 1;
+        else if(line[i] == ' '){
+            count++;
+            std::cout << count << std::endl;
+            if (i == 0 || i == line.size()-1)
+                err = 1;
+            else if (count >= 3)
+                err = 1;
+        }
+    }
+    if (err){
+        statusCode = 400;
+        throw std::runtime_error("bad request");
+    }
+    std::istringstream ss(line);
+    ss >> saver.method >> saver.uri >> saver.version;
+    
+    if (saver.method.empty() || saver.uri.empty() || saver.version.empty())
+    {
+        statusCode = 400;
+        throw std::runtime_error("bad request line");
+    }
 }
 
 
 // Function to parse HTTP request
 void Request::requestPartitioning(Request &saver, std::string& request) {
     std::stringstream iss(request);
-
-    iss >> saver.method >> saver.uri >> saver.version;
-    if (saver.method.empty() || saver.uri.empty() || saver.version.empty())
-    {
-        statusCode = 400;
-        throw std::runtime_error("bad request line");
-    }
-    uriQuery(saver.uri);
-    // Parse header
     std::string headerLine("");
     std::getline(iss, headerLine, '\n');
+
+    checkRequestLine(saver, headerLine);
+    uriQuery(saver.uri);
+    // Parse header
     while (std::getline(iss, headerLine, '\n')){
         if (headerLine == "\r")
             break;
@@ -197,8 +198,6 @@ void Request::requestPartitioning(Request &saver, std::string& request) {
     if (it != saver.headers.end()) {
         contentLength = 0;
          char *endptr;
-        //  std::stringstream ss(it->second);
-        //  contentLength 
         contentLength = strtod(it->second.c_str(), &endptr);
     }
     
@@ -236,10 +235,9 @@ bool Request::allowedMethod(location& location) const {
 //start here
 int    Request::getCheckRequest(client &client, const infra &infra) {
         client.reqq.reqStr.append(client.reqq.readRequest(client.ssocket));
-        if (!client.reqq.readBody){
+        if (!client.reqq.readBody)
             client.reqq.cutOffBodySegment(client.reqq.reqStr);
-            // return reqStr;
-        }
+    
         client.wakt = time(NULL);
         if (!client.reqq.headersDone)
             return 1;
@@ -257,7 +255,6 @@ int    Request::getCheckRequest(client &client, const infra &infra) {
             client.r_done = 1;
         }
         server serve = client.reqq.getMatchedServer(infra);
-        // client.reqq.errorPages = serve.errorPages;
         client.reqq.retreiveRequestedResource(serve);
         if (!client.reqq.readBody && client.reqq.headersDone && client.reqq.method == "POST"){
                 client.reqq.readBody = 1;
@@ -299,16 +296,10 @@ const location& Request::getMatchingLocation(const server& serve){
 
 void Request::retreiveRequestedResource(const server &serve){
     matchedLocation = getMatchingLocation(serve);
-    std::cout << "images : " << matchedLocation.location_name << std::endl;
-    //see the root of the location retrieved and join it with the uri then look for it using access
-    //pass "/"
-    std::string url = getUri();
-    fileName = url;
+    fileName = getUri();
     
     path = matchedLocation.root;
     // path += fileName.empty() ? "" : "/";
-    std::cout << "location name: " <<  matchedLocation.location_name << std::endl;
-    std::cout <<"path : " << path << std::endl;
     path += fileName.substr(matchedLocation.location_name.length());
     std::cout <<"path : " << path << std::endl;
     isMethodAllowed();
@@ -389,7 +380,6 @@ std::string Request::generateResponse(client &client, std::string &content){
     std::string res;
     std::stringstream response;
     errorPage msg;
-    // std::cout << "c " << client.reqq.responseContentLen << std::endl;
     if (!client.reqq.statusCode)
         client.reqq.statusCode = 200;
     response << "HTTP/1.1 " << client.reqq.statusCode << " " << msg.statusMsgs[client.reqq.statusCode] << "\r\n";
@@ -409,7 +399,6 @@ std::string Request::generateResponse(client &client, std::string &content){
     response << content;
         // }
     res = response.str();
-    // std::cout <<"here :" <<res << std::endl;
     return res;
 }
 
@@ -518,7 +507,7 @@ int Request::read_request(client &client, infra & infra){
     try{
         if (!readBody){
             getCheckRequest(client, infra);
-            if (client.reqq.method == "POST"){
+            if(client.reqq.method == "POST"){
                 if(client.reqq.flag2 == 0)
                     Post::support_upload(client.reqq);
             // client.reqq.size_body += client.reqq.readRequest(client.ssocket).length();

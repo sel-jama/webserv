@@ -119,10 +119,8 @@ int ParseRequest::parseHeaders(std::map<std::string, std::string> &headers, std:
 }
 
 int ParseRequest::parseUri(std::string &uri) const {
-    /*if => Request uri contain a character not allowded => bad request 400*/
     if (checkUriAllowedChars(uri) == false)
         return 400;
-        // throw std::runtime_error("400 Bad Request : bad URI");
 
     if (uri.size() > MAX_SIZE)
         return 414;
@@ -135,43 +133,6 @@ int ParseRequest::parseUri(std::string &uri) const {
 int ParseRequest::parseVersion(std::string &version) const{
     if (version != "HTTP/1.1")
         return 501;
-    // std::stringstream ss(version);
-    
-    // std::string http;
-    // std::string vers;
-    // std::getline(ss, http, '/');
-    // std::getline(ss, vers);
-
-    // char *endptr;
-    // double v = strtod(vers.c_str(), &endptr);
-  
-    // if (http != "HTTP" || *endptr != '\0')
-    //     // throw std::runtime_error("400 Bad Request : Error occured in Http version");
-    //     return 400;
-    
-    // if (v == 0.9 || v == 2.0 || v == 1.0 || v == 3.0)
-    //     // throw std::runtime_error("501 Not Implemented : Error occured in http version");
-    //     return 501;
-    
-    // if (v != 1.1)
-    //     // throw std::runtime_error("400 Bad Request : Error occured in Http version");
-    //     return 400;
     return 0;
 }
-
-// void ParseRequest::parseBody(std::string &body, long long &maxBodySize) const{
-//     if (static_cast<long long>(body.length()) > maxBodySize)
-//         throw std::runtime_error("413 Request Entity Too Large");
-// }
-
 const std::deque<std::string> &ParseRequest::getHttpHeaders() const { return this->ngxHttpHeaders; }
-
-int ParseRequest::checkUnknownHeader(std::map<std::string, std::string> &headers) const{
-    std::map<std::string, std::string>::iterator it = headers.begin();
-    for (; it != headers.end(); it++) {
-    //     if(find(ngxHttpHeaders.begin(), ngxHttpHeaders.end(), it->first) == ngxHttpHeaders.end())
-    //         return 400;
-    //         // throw std::runtime_error("400 bad Request : unknown headers");
-    }
-    return 0;
-}

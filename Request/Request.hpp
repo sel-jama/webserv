@@ -14,8 +14,6 @@
 #define REQUEST_HPP
 
 #include "ParseRequest.hpp"
-// #include "../sock2/includes/client.hpp"
-// #include "../sock2/includes/server.hpp"
 #include "../sock2/includes/location.hpp"
 #include "../Response/Method.hpp"
 #include <algorithm>
@@ -49,7 +47,6 @@ class Request {
         std::string r_s;
         int flag;
         std::string filname_s;
-        // std::ofstream file;
         int flag2;
         size_t saver_count;
         int tmp;
@@ -59,10 +56,8 @@ class Request {
         size_t to_de;
         size_t to_de2;
         std::string content_T;
-
         std::string path;
         std::string fileName;
-        // std::string bodySaver;
         struct stat pathStatus;
         size_t contentLength; 
         int readbytes;
@@ -92,9 +87,6 @@ class Request {
         std::string filePath;
         std::streampos filePosition;
         std::string responseHeaders;
-        // double filePos;
-        // std::string type;
-
         int r;
         Request();
         ~Request();
@@ -107,10 +99,7 @@ class Request {
         const std::string& getBody(void) const;
         const std::string& getQuryString(void)const;
 
-        //setters
-        // void setMethod(const std::string );
-        // void setUri(const std::string ) ;
-        // void setVersion(const std::string );
+
 
         void requestPartitioning(Request& saver, std::string& request);
         void isReqWellFormed(Request &req);

@@ -23,8 +23,6 @@ class infra
         const infra &operator=(const infra &);
 
     public:
-        //setter 
-        //getter
         fd_set fd_r, fd_rcopy, fd_w, fd_wcopy;
         int maxfd;
         struct timeval timeout;
@@ -42,10 +40,6 @@ class infra
         void initselect();
         void selecttoinfinity();
 
-        //accept or else
-        //void accept_new_connection(int i);
-        //void handle_old_cnx(int i);
-
         //check - debug
         void printInfra();
         void checkInfraData();
@@ -54,8 +48,6 @@ class infra
         infra(const std::vector<std::string> &);
         
         int check_port();
-
-
 };
 
 #endif

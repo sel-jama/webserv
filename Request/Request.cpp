@@ -200,7 +200,6 @@ void Request::requestPartitioning(Request &saver, std::string& request) {
     std::map<std::string, std::string>::const_iterator it = saver.headers.find("content-length");
     if (it != saver.headers.end()) {
         std::stringstream ss(it->second);
-        std::cout << it->second << std::endl;
         double len;
         char *ptr;
         len = strtod(it->second.c_str(), &ptr);
@@ -212,7 +211,6 @@ void Request::requestPartitioning(Request &saver, std::string& request) {
             saver.statusCode = 400;
             throw std::runtime_error("bad request");
         }
-        std::cout << contentLength <<  std::endl;
         if (contentLength < 0){
             saver.statusCode = 400;
             throw std::runtime_error("bad request");
@@ -312,7 +310,6 @@ void Request::retreiveRequestedResource(const server &serve){
     
     path = matchedLocation.root;
     path += fileName.substr(matchedLocation.location_name.length());
-    // std::cout <<"path : " << path << std::endl;
     isMethodAllowed();
     isFileAvailable();
     isRedirect();
@@ -412,8 +409,6 @@ std::string Request::generateResponse(client &client, std::string &content){
             return response.str();
         }
         response << "Content-Length: " << responseContentLen << "\r\n\r\n";
-        // if (client.reqq.headers.find("Cookie") != client.reqq.headers.end())
-        //     response << "Cookie: " << client.reqq.headers["Cookie"];
     }
 
     response << content;
@@ -427,8 +422,6 @@ std::string Request::getChunk(Request &req){
             req.statusCode = 500;
             throw std::runtime_error("Failed to read requested content");
         }
-
-        // Seek to the position where we left off last time
         file.seekg(filePosition);
 
         char buffer[1024];
@@ -471,7 +464,6 @@ int Request::send_response(client &client){
         }
         catch (const std::runtime_error &e){
             if (client.reqq.method != "HEAD"){
-                std::cout << e.what() << std::endl;
                 content = errorPage::serveErrorPage(client.reqq);
                 responseContentLen = content.length();
             }

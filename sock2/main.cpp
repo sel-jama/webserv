@@ -10,9 +10,7 @@ int main(int ac, char **av)
 		if (ac <= 2)
 			patho = validArg(ac, av);
 		else throw (std::runtime_error("give valid arguments please"));
-		std::cout << patho << std::endl;
 		infra InfraStruct((configFile(patho).getConfigfile()));
-		InfraStruct.printInfra();
 		InfraStruct.initservers();
 	}
 	catch(const std::exception &e)

@@ -38,7 +38,6 @@ class handleCgi {
 public:
     std::string response;
     handleCgi();
-    // handleCgi(const std::map<std::string, std::string>& requestHeaders, const std::string& requestMethod, const std::string& requestPath, const std::string& requestQuery, const std::string& requestBody, const std::string& scriptName);
     void executeCgiScript(Request &req);
     char** createArr();
     char** createEnv();

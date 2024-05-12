@@ -1,13 +1,8 @@
 #include "delete.hpp"
 
 void Delete::check_RequestedR(Request &obj){
-    std::cout << "hani " << std::endl;
     struct stat buffer;
     location obj1 = obj.getMatchedLocation();
-
-    // std::cout << obj.path << std::endl;
-    // if(!(obj.getUri().rfind('/', obj.getUri().size() - 1) != std::string::npos))
-    //     throw Except();
     if(obj.path.empty() || obj.method != "DELETE"){
         //not allowed
         obj.statusCode = 405; 
@@ -28,7 +23,6 @@ void Delete::check_RequestedR(Request &obj){
         if(obj1.root.size()  >= obj.path.size())
         {
             //forbiden 403
-            //check size exact root
             obj.statusCode = 403; 
             throw std::runtime_error("eror");
         }
@@ -126,14 +120,11 @@ void Delete::R_removing(std::string path, Request &obj){
 
     dir = opendir(path.c_str());
     if (dir != NULL) {
-        std::cout << path << std::endl;
         while ((ent = readdir(dir))) {
-            std::cout << ent->d_name   << " ana " << std::endl;
             std::string filpath = ent->d_name;
             if(!std::strcmp(ent->d_name, ".") || !std::strcmp(ent->d_name, ".."))
                 continue;
             std::string filepath = path + '/' + ent->d_name;
-            std::cout << filepath << std::endl;
             char *filepath2 = const_cast<char*>(ent->d_name);
             if(ent->d_type == DT_DIR)
             {

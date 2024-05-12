@@ -5,7 +5,7 @@ location::location()
     http_methods["POST"]    = 0;
     http_methods["GET"]     = 0;
     http_methods["DELETE"]  = 0;
-    autoindex = "bo";
+    autoindex = "on";
     upload = "off";
     HM = 0;
     UP = 0; 
@@ -29,7 +29,6 @@ std::map<std::string, std::string> location::cg(){return cgi;};
 
 void location::setuplocationName(const std::string &name)
 {
-    //check path ?
     location_name = name;
 }
 
@@ -91,7 +90,6 @@ void location::setRoot(std::vector<std::string>::const_iterator &it, int &i)
     if (i == 1) throw(std::runtime_error("Error : config-file :bad config file\" root : One root per location"));
     ++i;
     ++it;
-    //do i check root ?
     root = *it;
     ++it;
     if (*it != ";")throw(std::runtime_error("Error : config-file :bad config file\" root : finish with ;"));
@@ -100,7 +98,6 @@ void location::setRoot(std::vector<std::string>::const_iterator &it, int &i)
 
 void location::setCgi(std::vector<std::string>::const_iterator &it)
 {
-    //check cgi type ?
     std::string tmp;
     ++it;
     tmp = *it;

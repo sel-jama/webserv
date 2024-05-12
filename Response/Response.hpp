@@ -35,6 +35,4 @@ public:
     void handleDelete(Request &req);
 };
 
-// void main2(const infra &infra, Request &req, int fd);
-
 #endif

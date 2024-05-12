@@ -6,7 +6,6 @@
 
 void infra::sockettolisten(std::vector<server>::iterator &it)
 {
-    // check_port();
     int opt = 1;
     if (((*it).ssocket = socket(AF_INET, SOCK_STREAM, 0)) == -1)                        throw(std::runtime_error("Error: init servers : socket()"));
     if (fcntl((*it).ssocket, F_SETFL, O_NONBLOCK, FD_CLOEXEC) == -1)                     throw(std::runtime_error("Error: init servers : fcntl("));
@@ -37,7 +36,7 @@ std::string int_to_string(int value) {
     return oss.str();
 }
 
-void infra::initdata(std::vector<server>::iterator &it)//to be modifed
+void infra::initdata(std::vector<server>::iterator &it)
 {
     struct addrinfo hints;
     memset(&hints, 0, sizeof hints);
@@ -139,18 +138,6 @@ void infra::checkInfraData()
 {
     if (servers.empty()) throw(std::runtime_error("Error : config-file : ss ur servers !!"));
     for (std::vector<server>::iterator it = servers.begin(); it != servers.end(); ++it){(*it).checkServerData();}
-    for (std::vector<server>::iterator it = servers.begin(); it != servers.end() - 1; ++it)
-    {
-        for (std::vector<server>::iterator it2 = it + 1; it2 != servers.end(); ++it2)
-        {
-            // if ((*it).port == (*it2).port) 
-            // {
-            //     std::cout << "port 1 :" << (*it).port << "\n prt 2 :"   << (*it2).port <<std::endl;
-            //     throw(std::runtime_error("Duplicate port numbers"));
-            //     }
-        }
-    }
-
 }
 
 void infra::printInfra()

@@ -25,15 +25,12 @@ class location;
 class Method {
     private:
         int code;
-        //std::string path;   //path to dir or file
         std::string response;
         std::string type;  //file or dir
         bool isAutoIndex;
         std::map<std::string, std::string> mimeTypes;
 
         std::string content;  //retreived content
-        // std::string autoindexPage;
-
     public:
         handleCgi cgi;
 
@@ -41,10 +38,8 @@ class Method {
         std::map<int, std::string> errorPage;
         
         void GetDataForClient(Request &);
-        // void handleGetRequest(int clientSocket);
         void retreiveRequestedResource(server &, Request &) const;
         const location &getMatchingLocation(server &, Request &);
-        // std::string getMimeType(const std::string& fileName);
         std::string readContent(Request &req) ;
         //setters
 

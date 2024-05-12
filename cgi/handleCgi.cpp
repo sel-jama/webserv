@@ -40,7 +40,6 @@ void handleCgi::validateCgi(const Request &req){
     size_t pos = scriptName.find(".");
     
     exe = scriptName.substr(pos + 1);
-    //exe == php
     std::map<std::string, std::string>::const_iterator it = req.matchedLocation.cgi.begin();
     for (; it != req.matchedLocation.cgi.end(); ++it){
         if (it->first == exe){
@@ -58,9 +57,6 @@ char ** handleCgi::createArr() {
     arr[0] = strdup( this->cgiPath.c_str() );
     arr[1] = strdup( this->scriptName.c_str() );
     arr[2] = NULL;
-    // if ( !arr[0] || !arr[1] ) {
-    //     return ( 500 ); 
-    // }
     return arr;
 }
 
@@ -233,7 +229,6 @@ void handleCgi::checkTimeout(Request &req){
                 if (req.method != "POST"){
                     Method use;
                     req.path = req.matchedLocation.root +random;
-                    std::cout << "path " << req.path << std::endl;
                     std::string output = use.readContent(req);
                     response = parseCgiRsponse(output);
                     std::remove(random.c_str());

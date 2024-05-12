@@ -69,12 +69,10 @@ std::string Method::readContent(Request &req){
 }
 
 void Method::defineResourceType(Request &req){
-	// const std::string uri = req.getUri();
 	if (S_ISDIR(req.pathStatus.st_mode))
 		type = "directory";
 	else
 		type = "file";
-	// req.type = type;
 }
 
 void Method::handleDirectory(Request &req){
@@ -89,7 +87,6 @@ void Method::handleDirectory(Request &req){
 	else{
 		req.path += (!req.path.empty() && req.path.at(req.path.length()-1) == '/') ? "" : "/";
 		req.path += req.fileName;
-		// std::cout << "path " << req.path << std::endl;
 		if (stat(req.path.c_str(), &status) != 0){
 			req.statusCode = 500;
 			throw std::runtime_error("stat failed");

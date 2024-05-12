@@ -24,7 +24,6 @@ void server::setlocation(std::vector<std::string>::const_iterator &it, const std
 			else if (*it == "upload_path")		tmp.setUploadPath(it);
 		}
 		else {
-			std::cout << "eror :" << *it << std::endl;
 			throw(std::runtime_error("Error : config-file :bad config file in location not a key"));
 			}
 	}
@@ -42,35 +41,9 @@ void server::setErrorpages(std::vector<std::string>::const_iterator &it, const s
 		pages.push_back(*it);
 		++it;
 	}
-	// for (std::vector<std::string>::iterator it = pages.begin(); it != pages.end(); ++it)
-	// {
-	// 	std::cout << "=== >" << *it << std::endl;
-	// }
 	if (pages.size() != 2)throw(std::runtime_error("Error : config-file :bad config file\" Error-pages :check number of arguments in  error-pages\""));
 	if (*it != ";") throw(std::runtime_error("Error : config-file :bad config file\" Error-pages :add \";\"at the end of the path of error-pages\""));
 	++it;
-	// // std::string path;
-	// // std::vector<std::string>::const_iterator it2 = pages.end() - 1;
-	// std::vector<std::string>::const_iterator it2 = pages.begin();
-	// std::cout << "====>" << *it2 << std::endl;
-
-	// // int state = 0;
-	// // std::cout << "----------->" << (*it2) << std::endl;
-	// // if ((*it2).at(0) == '/' && ((*it2).at(1) == '~' || !(*it2).empty())) path = *it2;
-	// // for (std::vector<std::string>::iterator it3 = pages.begin(); it3 != pages.end(); ++it3)
-	// // {
-	// // 	for (std::map<std::string, std::string>::iterator ito = errorPages.begin(); ito != errorPages.end() ; ++ito)
-	// // 	{
-	// // 		if ((*it3) == (ito)->first)
-	// // 		{
-	// // 			errorPages[*it3] = path;
-	// // 			state = 1;
-	// // 			break;
-	// // 		}
-	// // 	}
-	// // 	if (state == 0) throw(std::runtime_error("Error : config-file :bad config file\" Error-pages : give valide error-pages please\""));
-	// // }
-
 	errorPages[*(pages.begin())] = *(pages.end() - 1) ;
 }
 
@@ -89,7 +62,6 @@ void server::setClientMaxBodySize(std::vector<std::string>::const_iterator &it, 
 	++j;
 	if (j != 1)throw(std::runtime_error("Error : config-file :bad config file\" ClientMaxBodySize :only one ClientMaxBodySize per server\""));
 	if (!alldigit(*it)) throw(std::runtime_error("Error : config-file :bad config file\" ClientMaxBodySize : only numbers pls\""));
-	//check hna ila kaynin chi norms
 	clientMaxBodySize = string_to_int(*it);
 	++it;
 	if (*it != ";") throw(std::runtime_error("Error : config-file :bad config file\" ClientMaxBodySize :add \";\"after ClientMaxBodySize\""));
@@ -130,7 +102,6 @@ void server::setlisten(std::vector<std::string>::const_iterator &it)
 		while (std::getline(iss, token, ':')) tokens.push_back(token);
 		if (tokens.size() != 2) throw(std::runtime_error("Error : config-file :bad config file\" listen => correct way to write listen \n port:@ please :)\""));
 		if (tokens.at(1).size() > 6) throw(std::runtime_error("Error : config-file :bad config file\" listen => adjust ur port number Max : 65535\""));
-		//hadi anrje3 liha mnin nchuf lblan dyal adress , wach khassha tkoun specefik =>127.0.0.1 ou lmachine
 		adress = tokens.at(0);
 		if (!alldigit(tokens.at(1))) throw(std::runtime_error("Error : config-file :bad config file\" listen => adjust ur port number Max : 65535\""));
 		int i = string_to_int(tokens.at(1));
@@ -165,7 +136,6 @@ const std::vector<location> &server::getLocations()const{return locations;}
 
 void server::checkServerData()
 {
-	//listen manda --> check what is manda and what is not
 	if (port == 0) throw(std::runtime_error("Error : config-file :bad config file\" empty port\""));
 	if (adress.empty()) throw(std::runtime_error("Error : config-file :bad config file\" empty adress\""));
 	if (serverName.empty())throw(std::runtime_error("Error : config-file :bad config file\" empty server_name\""));
@@ -222,7 +192,6 @@ void server::checktime(fd_set &r, fd_set &w, int &maxfd)
 	for(std::vector<client>::iterator it = clients.begin(); it != clients.end(); it++)
 	{
 		if (time(NULL) - it->wakt > 10){
-				// std::cout <<"==-=-=--=-=>" << time(NULL) - it->wakt  << std::endl;
 				clientdown(*it, r, w, maxfd);
 				break;}
 				
@@ -241,7 +210,6 @@ void server::accept_new_connection(fd_set &fd_r, int &maxfd, server &serv)
 	client tmp;
 	memset(&tmp.cdata_socket, 0, sizeof(tmp.cdata_socket));
 	socklen_t len = sizeof(tmp.cdata_socket);
-	//add state that it's not read yet => sel
 	if ((tmp.ssocket = accept(ssocket, (struct sockaddr *)&tmp.cdata_socket, &len)) == -1)	throw(std::runtime_error("Error: init clients : accept()"));
 	FD_SET(tmp.ssocket , &fd_r);
 	gettimeofday(&tmp.clientTime, NULL);
@@ -253,7 +221,6 @@ void server::accept_new_connection(fd_set &fd_r, int &maxfd, server &serv)
 
 void server::ioswap(fd_set &toadd, fd_set &toremove, int fd)
 {
-	// std::cout << "hani hna" << std::endl;
 	FD_SET(fd, &toadd);
 	FD_CLR(fd, &toremove);
 }
@@ -264,13 +231,12 @@ void server::handle_old_cnx(fd_set &fd_r, fd_set &fd_w, fd_set &fd_rcopy, fd_set
 	std::advance(it, j);
 	for (; it != clients.end();++it)
 	{
-		// std::cout << "dkhel lboucle" << std::endl;
 		if ((*it).w_done)
 		{
 			clientdown(*it, fd_r, fd_w, maxfd);
 			break;
 		}
-		else if (FD_ISSET((*it).ssocket, &fd_wcopy) && (*it).r_done)//to recheck
+		else if (FD_ISSET((*it).ssocket, &fd_wcopy) && (*it).r_done)
 		{
 			if (!((*it).reqq).send_response(*it) || (*it).w_done) 
 			{
@@ -288,10 +254,6 @@ void server::handle_old_cnx(fd_set &fd_r, fd_set &fd_w, fd_set &fd_rcopy, fd_set
 			}
 			if ((*it).r_done) ioswap(fd_w, fd_r, (*it).ssocket);
 		}
-			// if (((*it).reqq).checkReadingTimout(*it)){
-			// 	(*it).r_done = 1;
-			// 	(*it).reqq.statusCode = 408;
-			// }
 		++j;
 		
 	}
@@ -312,7 +274,7 @@ server::server(const server &other):
 {}
 server& server::operator=(const server &other)
 {
-    if (this != &other) // Check for self-assignment
+    if (this != &other)
     {
         this->port = other.port;
         this->adress = other.adress;

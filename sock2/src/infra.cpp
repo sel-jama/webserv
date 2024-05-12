@@ -36,6 +36,7 @@ std::string int_to_string(int value) {
     oss << value;
     return oss.str();
 }
+
 void infra::initdata(std::vector<server>::iterator &it)//to be modifed
 {
     struct addrinfo hints;

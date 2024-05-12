@@ -116,15 +116,21 @@ void errorPage::setstatusMsgs(){
     statusMsgs[505] = "HTTP Version Not Supported";
 }
 
+std::string toString(int value) {
+    std::ostringstream oss;
+    oss << value;
+    return oss.str();
+}
+
 std::string errorPagesConfig(Request &req){
-    std::map<std::string, std::string>::iterator it = req.errorPages.begin();
-    for(; it != req.errorPages.end(); ++it){
-        std::string pathToerrorPage = it->second;
-        if (req.statusCode ==  atoi(it->first.c_str())){
-            struct stat status;
-            if (stat(pathToerrorPage.c_str(), &status) == 0 && status.st_mode &S_IRUSR) //error page file found && permission
-                return pathToerrorPage;
-        }
+    std::string err = toString(req.statusCode);
+    std::cout << "here" << req.errorPages[err]  << std::endl;
+    if (!req.errorPages[err].empty()){
+        std::cout << req.errorPages[err] << std::endl;
+        std::string pathToerrorPage = req.errorPages[err];
+        struct stat status;
+        if (stat(pathToerrorPage.c_str(), &status) == 0 && status.st_mode &S_IRUSR) //error page file found && permission
+            return pathToerrorPage;
     }
     return "";
 }
@@ -138,6 +144,7 @@ std::string errorPage::serveErrorPage(Request &req){
     errorPage err(use.statusMsgs[req.statusCode], req.statusCode);
 
     std::string pathToPage = errorPagesConfig(req);
+    std::cout << "hi " << pathToPage << std::endl;
     if (!pathToPage.empty()){
         req.path = pathToPage;
         return use2.readContent(req);

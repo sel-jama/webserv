@@ -154,11 +154,9 @@ int ParseRequest::parseUri(std::string &uri) const {
 
     if (uri.size() > MAX_SIZE)
         return 414;
-    size_t pos = uri.find("../");
-    size_t pos1 = uri.find("/../");
-    size_t pos2 = uri.find("/..");
-    if (pos == 0 || pos1 != std::string::npos || pos2 == uri.length()-3)
-        return 404;
+ 
+    if (uri.find("/../") != std::string::npos|| uri.find("/..") != std::string::npos || uri.find("../") != std::string::npos)
+        return 400;
         // throw std::runtime_error("414 Request-URI Too Long");
     return 0;
 }

@@ -118,7 +118,7 @@ void location::checklocation()
     if (upload.empty())throw(std::runtime_error("Error: config-file : upload => need upload in location"));
     if (autoindex != "on" && autoindex != "off") throw(std::runtime_error("Error: config-file : autoindex => need autoindex in location"));
     if (!HM)throw(std::runtime_error("Error: config-file : Http_methodes => need http_methods in location"));
-    if (root.find("..") != std::string::npos) throw(std::runtime_error("pb in root path"));
+    if (root.find("/../") != std::string::npos) throw(std::runtime_error("pb in root path"));
     if (root.find("/..") != std::string::npos) throw(std::runtime_error("pb in root path"));
     if (root.find("../") != std::string::npos) throw(std::runtime_error("pb in root path"));
 }

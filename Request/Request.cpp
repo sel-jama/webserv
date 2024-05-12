@@ -254,7 +254,10 @@ int    Request::getCheckRequest(client &client, const infra &infra) {
             client.reqq.readBody = 0;
             client.r_done = 1;
         }
+        std::cout << "hhhhhherre" << std::endl;
         server serve = client.reqq.getMatchedServer(infra);
+        client.reqq.errorPages = serve.errorPages;
+        std::cout <<"hhh "<< serve.errorPages["404"] << std::endl;
         client.reqq.retreiveRequestedResource(serve);
         if (!client.reqq.readBody && client.reqq.headersDone && client.reqq.method == "POST"){
                 client.reqq.readBody = 1;
@@ -316,13 +319,8 @@ void Request::isMethodAllowed(){
 
 void Request::isFileAvailable() {
     if (stat(path.c_str(), &pathStatus) != 0) {
-        if (errno == ENOENT) {
             statusCode = 404;
             throw std::runtime_error("404 Not Found: Requested Resource not found");
-        } else{
-            statusCode = 500;
-            throw std::runtime_error("Error checking file availability");
-        }
     }
 }
 

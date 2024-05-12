@@ -27,12 +27,12 @@ void ParseRequest::setHttpHeaders() {
     ngxHttpHeaders.push_back("If-None-Match"); //Specifies a condition for successful resource retrieval based on entity tags.
     ngxHttpHeaders.push_back("User-Agent"); //Identifies the client making the request, typically the browser or user agent software
     ngxHttpHeaders.push_back("Referer"); //The URL of the web page that linked to the resource being requested
-    ngxHttpHeaders.push_back("Content-Length"); //The size of the message body in bytes
+    ngxHttpHeaders.push_back("content-length"); //The size of the message body in bytes
     ngxHttpHeaders.push_back("Content-Range");  //Specifies the range of bytes in the message body being sent or requested.
-    ngxHttpHeaders.push_back("Content-Type"); //Specifies the media type of the message body.
+    ngxHttpHeaders.push_back("content-type"); //Specifies the media type of the message body.
     ngxHttpHeaders.push_back("Range");  //Specifies the range of bytes being requested in a GET request
     ngxHttpHeaders.push_back("If-Range"); //Specifies conditions for successful resource retrieval based on entity tags or modification dates
-    ngxHttpHeaders.push_back("Transfer-Encoding");  //Specifies the encoding mechanisms used to transfer the message body
+    ngxHttpHeaders.push_back("transfer-encoding");  //Specifies the encoding mechanisms used to transfer the message body
     ngxHttpHeaders.push_back("TE");  //Specifies the transfer codings that are acceptable in the response
     ngxHttpHeaders.push_back("Expect"); //Specifies expectations that need to be met by the server
     ngxHttpHeaders.push_back("Upgrade");  //Specifies additional communication protocols that the client supports
@@ -108,20 +108,20 @@ int ParseRequest::parseHeaders(std::map<std::string, std::string> &headers, std:
     if (std::find(copy.begin(), copy.end(), std::string("host")) == copy.end())
         return 400;
 
-    if (headers.find("Transfer-Encoding") != headers.end()
-        && headers["Transfer-Encoding"] != "chunked")
+    if (headers.find("transfer-encoding") != headers.end()
+        && headers["transfer-encoding"] != "chunked")
             return 501;
     
     char *end;
-    if (method == "POST" && headers.find("Transfer-Encoding") == headers.end() && (headers.find("Content-Length") == headers.end() || strtod(headers.at("Content-Length").c_str(), &end) == 0))
+    if (method == "POST" && headers.find("transfer-encoding") == headers.end() && (headers.find("content-length") == headers.end() || strtod(headers.at("content-length").c_str(), &end) == 0))
         return 411;
     return 0;
 }
 
 int ParseRequest::parseUri(std::string &uri) const {
     /*if => Request uri contain a character not allowded => bad request 400*/
-    // if (checkUriAllowedChars(uri) == false)
-    //     return 400;
+    if (checkUriAllowedChars(uri) == false)
+        return 400;
         // throw std::runtime_error("400 Bad Request : bad URI");
 
     if (uri.size() > MAX_SIZE)

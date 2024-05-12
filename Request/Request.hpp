@@ -53,7 +53,7 @@ class Request {
         int flag2;
         size_t saver_count;
         int tmp;
-        static std::ofstream file; 
+        std::ofstream file; 
         std::string filename__;
         size_t size_body;
         size_t to_de;
@@ -130,7 +130,7 @@ class Request {
         // const server &getServerInfo(void) const;
         const location &getMatchedLocation(void) const;
         void setContentLength(const std::map<std::string, std::string> &headers);
-        std::string readRequest(int &fdSocket);
+        std::string readRequest(client &);
         void cutOffBodySegment(std::string &request);
         int send_response(client &);
         int read_request(client &, infra &);

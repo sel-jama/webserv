@@ -84,11 +84,11 @@ void Request::cutOffBodySegment(std::string &request){
     }
 }
 
-std::string Request::readRequest(int &fdSocket){
+std::string Request::readRequest(client &client){
     std::stringstream buff("");
     char buffer[BUFFER_SIZE];
-    readbytes = read(fdSocket, buffer, BUFFER_SIZE - 1);
-
+    readbytes = read(client.ssocket, buffer, BUFFER_SIZE - 1);
+    client.wakt = time(NULL);
     if (readbytes < 0){
         statusCode = 500;
         throw std::runtime_error("Error reading from socket");
@@ -155,6 +155,12 @@ void Request::checkRequestLine(Request &saver, std::string &line){
 }
 
 
+void lowerHeader(std::string& key){
+    for(size_t i=0; i<key.size(); i++){
+        key[i] = tolower(key[i]);
+    }
+}
+
 // Function to parse HTTP request
 void Request::requestPartitioning(Request &saver, std::string& request) {
     std::stringstream iss(request);
@@ -173,7 +179,7 @@ void Request::requestPartitioning(Request &saver, std::string& request) {
             throw std::runtime_error("Too long headerline");
         }
         size_t pos = headerLine.find(':');
-        if (pos != std::string::npos) {
+        if (pos != std::string::npos){
             std::string key = headerLine.substr(0, pos);
             std::string value = headerLine.substr(pos + 1);
             trim(key);
@@ -182,6 +188,7 @@ void Request::requestPartitioning(Request &saver, std::string& request) {
                 saver.statusCode = 400;
                 throw std::runtime_error("bad headers format");
             }
+            lowerHeader(key);
             saver.headers[key] = value;
         }
         else {
@@ -190,11 +197,18 @@ void Request::requestPartitioning(Request &saver, std::string& request) {
         }
     }
 
-    std::map<std::string, std::string>::const_iterator it = saver.headers.find("Content-Length");
+    std::map<std::string, std::string>::const_iterator it = saver.headers.find("content-length");
     if (it != saver.headers.end()) {
         std::stringstream ss(it->second);
         std::cout << it->second << std::endl;
-        if (!(ss >> contentLength)){
+        double len;
+        char *ptr;
+        len = strtod(it->second.c_str(), &ptr);
+        if (*ptr != '\0'){
+            saver.statusCode = 400;
+            throw std::runtime_error("bad request");
+        }
+        if (it->second.empty() || it->second.at(0) == '-' || !(ss >> contentLength)){
             saver.statusCode = 400;
             throw std::runtime_error("bad request");
         }
@@ -205,8 +219,8 @@ void Request::requestPartitioning(Request &saver, std::string& request) {
         }
     }
     
-    it = saver.headers.find("Transfer-Encoding");
-    if (it != saver.headers.end() && headers["Transfer-Encoding"] == "chunked")
+    it = saver.headers.find("transfer-encoding");
+    if (it != saver.headers.end() && headers["transfer-encoding"] == "chunked")
         isChunked = 1;
 }
 
@@ -238,11 +252,10 @@ bool Request::allowedMethod(location& location) const {
 
 //start here
 int    Request::getCheckRequest(client &client, const infra &infra) {
-        client.reqq.reqStr.append(client.reqq.readRequest(client.ssocket));
+        client.reqq.reqStr.append(client.reqq.readRequest(client));
         if (!client.reqq.readBody)
             client.reqq.cutOffBodySegment(client.reqq.reqStr);
     
-        client.wakt = time(NULL);
         if (!client.reqq.headersDone)
             return 1;
         
@@ -359,7 +372,20 @@ void resetClientRequest(Request &req){
     req.flag2 = 0;
     req.filename__ = "";
     req.size_body = 0;
-    // req.filePos = 0;
+    req.getit = "";
+    req.r_s = "";
+    req.flag = 0;
+    req.filname_s = "";
+    req.saver_count = 0;
+    req.tmp = 0;
+    req.to_de = 0;
+    req.to_de2 = 0;
+    req.content_T = "";
+    req.path = "";
+    req.fileName = "";
+    req.chunked_flag = 0;
+    req.chunkPos = 0;
+
 }
 
 std::string Request::generateResponse(client &client, std::string &content){
@@ -499,9 +525,15 @@ int Request::read_request(client &client, infra & infra){
                     Post::support_upload(client.reqq);
                 if(!client.reqq.body.empty())
                 {
-                    client.reqq.file.write(client.reqq.body.c_str(), client.reqq.body.size());
-                    client.reqq.size_body += client.reqq.body.size();
-                    if(client.reqq.body.size() == client.reqq.contentLength){
+                    if (client.reqq.contentLength < client.reqq.body.size()){
+                        client.reqq.file.write(client.reqq.body.c_str(), client.reqq.contentLength);
+                        client.reqq.size_body += client.reqq.contentLength;
+                    }
+                    else{
+                        client.reqq.file.write(client.reqq.body.c_str(), client.reqq.body.size());
+                        client.reqq.size_body += client.reqq.body.size();
+                    }
+                    if(client.reqq.body.size() >= client.reqq.contentLength){
                         client.reqq.file.close();
                         client.reqq.statusCode = 201;
                         client.reqq.responseContentLen = client.reqq.body.length();

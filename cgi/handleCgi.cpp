@@ -76,7 +76,7 @@ char **handleCgi::createGetEnv(Request &req){
     mapEnv["QUERY_STRING"] = req.getQuryString();
 	mapEnv["SERVER_PROTOCOL"] = "HTTP/1.1";
 	mapEnv["SERVER_SOFTWARE"] = "Webserv/1.0";
-    mapEnv["HTTP_COOKIE"] = headers["Cookie"];
+    mapEnv["HTTP_COOKIE"] = headers["cookie"];
 
     
     char	**env = new char*[mapEnv.size() + 1];
@@ -140,8 +140,8 @@ std::string handleCgi::parseCgiRsponse(std::string &cgiOutput){
                     generateHeaders = 1;
             }
             if (!generateHeaders){
-                if (mapHeaders.find("Content-Length") == mapHeaders.end()){
-                    ss << "Content-Length: " << body.length() << "\r\n";
+                if (mapHeaders.find("content-length") == mapHeaders.end()){
+                    ss << "content-length: " << body.length() << "\r\n";
                 }
                 ss << cgiOutput;
                 ret = ss.str();     
@@ -150,8 +150,8 @@ std::string handleCgi::parseCgiRsponse(std::string &cgiOutput){
     }
     if (p == std::string::npos || generateHeaders){
         //generate response with headers
-        ss << "Content-Length: " << cgiOutput.length() << "\r\n"
-            << "Content-Type: text/plain\r\n\r\n"
+        ss << "content-length: " << cgiOutput.length() << "\r\n"
+            << "content-type: text/plain\r\n\r\n"
             << cgiOutput;
         ret = ss.str();
     }
@@ -265,11 +265,11 @@ char **handleCgi::createPostEnv(Request &req){
     oss << req.responseContentLen;
 	mapEnv["CONTENT_LENGTH"] = oss.str();
 	mapEnv["CONTENT_TYPE"] = req.responseContentType;
-	mapEnv["SERVER_NAME"] = headers["Hostname"];
+	mapEnv["SERVER_NAME"] = headers["host"];
 	mapEnv["SERVER_PORT"] = req.port;
 	mapEnv["SERVER_PROTOCOL"] = "HTTP/1.1";
     mapEnv["PATH_INFO"] = req.path;
-    mapEnv["HTTP_COOKIE"] = headers["Cookie"];
+    mapEnv["HTTP_COOKIE"] = headers["cookie"];
     
     char	**env = new char*[mapEnv.size() + 1];
 	int	j = 0;

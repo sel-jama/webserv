@@ -84,11 +84,11 @@ void Request::cutOffBodySegment(std::string &request){
     }
 }
 
-std::string Request::readRequest(int &fdSocket){
+std::string Request::readRequest(client &client){
     std::stringstream buff("");
     char buffer[BUFFER_SIZE];
-    readbytes = read(fdSocket, buffer, BUFFER_SIZE - 1);
-
+    readbytes = read(client.ssocket, buffer, BUFFER_SIZE - 1);
+    client.wakt = time(NULL);
     if (readbytes < 0){
         statusCode = 500;
         throw std::runtime_error("Error reading from socket");
@@ -238,11 +238,10 @@ bool Request::allowedMethod(location& location) const {
 
 //start here
 int    Request::getCheckRequest(client &client, const infra &infra) {
-        client.reqq.reqStr.append(client.reqq.readRequest(client.ssocket));
+        client.reqq.reqStr.append(client.reqq.readRequest(client));
         if (!client.reqq.readBody)
             client.reqq.cutOffBodySegment(client.reqq.reqStr);
     
-        client.wakt = time(NULL);
         if (!client.reqq.headersDone)
             return 1;
         
@@ -359,7 +358,20 @@ void resetClientRequest(Request &req){
     req.flag2 = 0;
     req.filename__ = "";
     req.size_body = 0;
-    // req.filePos = 0;
+    req.getit = "";
+    req.r_s = "";
+    req.flag = 0;
+    req.filname_s = "";
+    req.saver_count = 0;
+    req.tmp = 0;
+    req.to_de = 0;
+    req.to_de2 = 0;
+    req.content_T = "";
+    req.path = "";
+    req.fileName = "";
+    req.chunked_flag = 0;
+    req.chunkPos = 0;
+
 }
 
 std::string Request::generateResponse(client &client, std::string &content){

@@ -145,6 +145,7 @@ class Request {
         char *readChunk(const char* filename);
         std::string getChunk(Request &req);
         void checkRequestLine(Request &saver, std::string &line);
+        void checkSatusCode(Request &req);
 };
 
 #endif

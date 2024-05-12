@@ -35,7 +35,7 @@ void Method::validateAll(Request &req) const{
 //handle GET Method
 void Method::GetDataForClient(Request &req){
 	defineResourceType(req);
-	if (type == "file") {
+	if (type == "file"){
 		//if location does not have cgi
 		validateAll(req);
 		if (loacationHasCgi(req, cgi)){

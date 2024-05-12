@@ -112,9 +112,9 @@ int ParseRequest::parseHeaders(std::map<std::string, std::string> &headers, std:
         && headers["transfer-encoding"] != "chunked")
             return 501;
     
-    char *end;
-    if (method == "POST" && headers.find("transfer-encoding") == headers.end() && (headers.find("content-length") == headers.end() || strtod(headers.at("content-length").c_str(), &end) == 0))
-        return 411;
+    if (method == "POST" && headers.find("transfer-encoding") == headers.end()
+        && (headers.find("content-length") == headers.end()))
+            return 411;
     return 0;
 }
 

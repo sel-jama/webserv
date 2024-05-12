@@ -54,7 +54,7 @@ void handleCgi::validateCgi(const Request &req){
 }
 
 char ** handleCgi::createArr() {
-    char **arr = reinterpret_cast<char **>( malloc( 3 * sizeof( char * ) ) );
+    char **arr = reinterpret_cast<char **>( malloc( 3 * sizeof(char *)));
     arr[0] = strdup( this->cgiPath.c_str() );
     arr[1] = strdup( this->scriptName.c_str() );
     arr[2] = NULL;
@@ -158,17 +158,29 @@ std::string handleCgi::parseCgiRsponse(std::string &cgiOutput){
     return ret;
 }
 
+void cleanUp(char **const arr, char **const env) {
+    // Clean up arr
+    for (int i = 0; arr[i] != NULL; ++i) {
+        free(arr[i]);
+    }
+    free(arr);
+
+    // Clean up env
+    for (int i = 0; env[i] != NULL; ++i) {
+        delete[] env[i];
+    }
+    delete[] env;
+}
+
+
 void handleCgi::executeCgiScript(Request &req) {
     req.cgi = 1;
     scriptName = req.path;
-    // validateCgi(req);
     std::string response;
     std::string output;
     
-    // Create random file name to avoid mixing up clients' files
     random = generateRandomFileName();
 
-    // Open random file for writing
     std::ofstream outputFile(random.c_str());
     if (!outputFile.is_open()){
         req.statusCode = 500;
@@ -177,6 +189,7 @@ void handleCgi::executeCgiScript(Request &req) {
 
     pid = fork();
     if (pid == -1){
+        outputFile.close();
         req.statusCode = 500;
         throw std::runtime_error("Fork failed");
     }
@@ -189,6 +202,7 @@ void handleCgi::executeCgiScript(Request &req) {
         char **const arr = createArr();
         char **const env = createGetEnv(req);
         execve(cgiPath.c_str(), arr, env);
+        cleanUp(arr, env);
         req.statusCode = 500;
         throw std::runtime_error("Failed to execute CGI script");
         
@@ -218,13 +232,10 @@ void handleCgi::checkTimeout(Request &req){
                     req.path = req.matchedLocation.root  + random;
                     std::string output = use.readContent(req);
                     response = parseCgiRsponse(output);
-                    // std::cout << "CGI output :   \n" << response << std::endl;
                     std::remove(random.c_str());
                 }
                 else{
                     req.statusCode = 201;
-                    //set response content type
-                    //set response content len
                 } 
             }
             else {
@@ -275,11 +286,9 @@ char **handleCgi::createPostEnv(Request &req){
 void handleCgi::executeCgiBody(Request &req){
     req.cgi = 1;
     setScriptName(req.cgi_File);
-    // std::cout << "Cgi post is ready to run .. " << std::endl;
     std::string randomFile = generateRandomFileName();
     req.cgi_File2 = req.matchedLocation.upload_path + "/" + randomFile;
     
-    // std::cout << "req.cgi_File2.c_str() :" << req.cgi_File2.c_str() << std::endl;
     std::ofstream outputFile(req.cgi_File2.c_str());
     if (!outputFile.is_open()){
         req.statusCode = 500;
@@ -294,7 +303,6 @@ void handleCgi::executeCgiBody(Request &req){
 
     else if (pid == 0){
         std::string cgiBody = req.cgi_File;
-        // std::cout << "file >>> " << req.cgi_File << std::endl;
         if (freopen(cgiBody.c_str(), "r", stdin) == NULL
             || freopen(req.cgi_File2.c_str(), "w", stdout) == NULL){
             req.statusCode = 500;
@@ -304,6 +312,7 @@ void handleCgi::executeCgiBody(Request &req){
         char **const arr = createArr();
         char **const env = createPostEnv(req);
         execve(this->cgiPath.c_str(), arr, env);
+        cleanUp(arr, env);
         req.statusCode = 500;
         throw std::runtime_error("execve failed");
     } else {

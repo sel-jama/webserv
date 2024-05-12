@@ -119,9 +119,8 @@ void errorPage::setstatusMsgs(){
 std::string errorPagesConfig(Request &req){
     std::map<std::string, std::string>::iterator it = req.errorPages.begin();
     for(; it != req.errorPages.end(); ++it){
-        // return req.matchedLocation.root +"/404.html";
+        std::string pathToerrorPage = it->second;
         if (req.statusCode ==  atoi(it->first.c_str())){
-            std::string pathToerrorPage = req.matchedLocation.root + "/" + it->second;
             struct stat status;
             if (stat(pathToerrorPage.c_str(), &status) == 0 && status.st_mode &S_IRUSR) //error page file found && permission
                 return pathToerrorPage;
@@ -137,7 +136,6 @@ std::string errorPage::serveErrorPage(Request &req){
     // std::ostringstream response;
     // use.setstatusMsgs();
     errorPage err(use.statusMsgs[req.statusCode], req.statusCode);
-    std::cout << use.statusMsgs[req.statusCode] << std::endl;
 
     std::string pathToPage = errorPagesConfig(req);
     if (!pathToPage.empty()){

@@ -518,23 +518,25 @@ int Request::read_request(client &client, infra & infra){
     try{
         if (!readBody){
             getCheckRequest(client, infra);
-            if(client.reqq.flag2 == 0)
-                Post::support_upload(client.reqq);
-        // client.reqq.size_body += client.reqq.readRequest(client.ssocket).length();
-            if(!client.reqq.body.empty())
-            {
-                // std::cout << "hehe " << client.reqq.size_body << std::endl;
-                client.reqq.file.write(client.reqq.body.c_str(), client.reqq.body.size());
-                client.reqq.size_body += client.reqq.body.size();
-                if(client.reqq.body.size() == client.reqq.contentLength){
-                    std::cout << "helllllllo" << std::endl;
-                    client.reqq.file.close();
-                    client.reqq.statusCode = 201;
-                    client.reqq.responseContentLen = client.reqq.body.length();
-                    client.r_done = 1;
-                    // return;
+            if (client.reqq.method == "POST"){
+                if(client.reqq.flag2 == 0)
+                    Post::support_upload(client.reqq);
+            // client.reqq.size_body += client.reqq.readRequest(client.ssocket).length();
+                if(!client.reqq.body.empty())
+                {
+                    // std::cout << "hehe " << client.reqq.size_body << std::endl;
+                    client.reqq.file.write(client.reqq.body.c_str(), client.reqq.body.size());
+                    client.reqq.size_body += client.reqq.body.size();
+                    if(client.reqq.body.size() == client.reqq.contentLength){
+                        std::cout << "helllllllo" << std::endl;
+                        client.reqq.file.close();
+                        client.reqq.statusCode = 201;
+                        client.reqq.responseContentLen = client.reqq.body.length();
+                        client.r_done = 1;
+                        // return;
+                    }
+                    client.reqq.body = "";
                 }
-                client.reqq.body = "";
             }
             // if(static_cast<double>(client.reqq.body.length()) >= client.reqq.contentLength){
             //     client.reqq.statusCode = 201;

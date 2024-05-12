@@ -23,7 +23,7 @@
 #include <cstdlib>
 #include <ctime>
 #include <signal.h>
-#define CGI_TIMEOUT 10
+#define CGI_TIMEOUT 30
 
 class Request;
 

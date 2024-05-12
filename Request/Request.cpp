@@ -255,7 +255,7 @@ int    Request::getCheckRequest(client &client, const infra &infra) {
             client.r_done = 1;
         }
         std::cout << "hhhhhherre" << std::endl;
-        server serve = client.reqq.getMatchedServer(infra);
+        server serve = client.reqq.getMatchedServer(client.port_server, client.adress_server, infra);
         client.reqq.errorPages = serve.errorPages;
         std::cout <<"hhh "<< serve.errorPages["404"] << std::endl;
         client.reqq.retreiveRequestedResource(serve);
@@ -559,31 +559,54 @@ int Request::read_request(client &client, infra & infra){
     return 1;
 }
 
-const server &Request::getMatchedServer(const infra &infra){
-    std::map<std::string, std::string>::const_iterator it = headers.find("Host");
-    if (it != headers.end()) {
-        std::stringstream ss(it->second);
-        std::string addr, p;
-        getline(ss, addr, ':');
-        getline(ss, p);
-        char *endp;
-        this->port = strtol(p.c_str(), &endp, 10);
-        this->ip = addr;
+void lowerS(std::string& key){
+    for(size_t i=0; i<key.size(); i++){
+        key[i] = tolower(key[i]);
     }
-    else
-        return infra.getServer().at(0);
+}
+
+const server &Request::getMatchedServer(uint16_t &listenport, std::string &listenaddr, const infra &infra){
+    std::string reqServerName;
+     std::map<std::string, std::string> copy;
+    for(std::map<std::string, std::string>::iterator i = headers.begin(); i != headers.end(); ++i){
+        std::string key = i->first;
+        std::string value = i->second;
+        lowerS(key);
+        copy[key] = value;
+    }
+
+    std::map<std::string, std::string>::const_iterator it = copy.find("host");
+    if (it != copy.end()) {
+        reqServerName = it->second;
+    }
+    int found = 0;
+    std::vector<server>::const_iterator save;
+    //     std::stringstream ss(it->second);
+    //     std::string addr, p;
+    //     getline(ss, addr, ':');
+    //     getline(ss, p);
+    //     std::cout << "add " << addr << " port  " << p << std::endl;
+    //     char *endp;
+    //     this->port = strtol(p.c_str(), &endp, 10);
+    //     this->ip = addr;
+    // }
     
     std::vector<server>::const_iterator i = infra.getServer().begin();
+    save = i;
     for (; i!=infra.getServer().end(); ++i){
-        if (i->port == this->port && ((i->adress == this->ip) || (i->adress == "127.0.0.1" && this->ip == "localhost") 
-            || (i->adress == "localhost" && this->ip == "127.0.0.1")) ){//&& matchedName(i->serverName))// && this->headers["Host"] == i->serverName)
+        if (i->port == listenport && ((i->adress == listenaddr) || (i->adress == "127.0.0.1" && listenaddr == "localhost") 
+            || (i->adress == "localhost" && listenaddr == "127.0.0.1")) ){
+                if(!found){
+                    save = i;
+                    found = 1;
+                }
                 for (size_t s = 0; s < i->serverName.size(); ++s){
-                    if (i->serverName[s] == this->headers["Host"])
+                    if (i->serverName[s] == reqServerName)
                         return *i;
                 }
             }
     }
-    return *(infra.getServer().begin());
+    return *(save);
 }
 
 std::string Request::getMimeType(const std::string& fileName){

@@ -71,7 +71,7 @@ void infra::selecttoinfinity()
         {
             if (FD_ISSET((*it).ssocket, &fd_rcopy))
             {
-                (*it).accept_new_connection(fd_r, maxfd);
+                (*it).accept_new_connection(fd_r, maxfd, (*it));
             }
             else 
                 (*it).handle_old_cnx(fd_r, fd_w, fd_rcopy, fd_wcopy, maxfd, *this, 0);
@@ -141,9 +141,13 @@ void infra::checkInfraData()
     for (std::vector<server>::iterator it = servers.begin(); it != servers.end(); ++it){(*it).checkServerData();}
     for (std::vector<server>::iterator it = servers.begin(); it != servers.end() - 1; ++it)
     {
-        for (std::vector<server>::iterator it2 = servers.begin() + 1; it2 != servers.end(); ++it2)
+        for (std::vector<server>::iterator it2 = it + 1; it2 != servers.end(); ++it2)
         {
-            if ((*it).port == (*it2).port) throw(std::runtime_error("Duplicate port numbers"));
+            // if ((*it).port == (*it2).port) 
+            // {
+            //     std::cout << "port 1 :" << (*it).port << "\n prt 2 :"   << (*it2).port <<std::endl;
+            //     throw(std::runtime_error("Duplicate port numbers"));
+            //     }
         }
     }
 

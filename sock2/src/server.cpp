@@ -231,7 +231,7 @@ void server::checktime(fd_set &r, fd_set &w, int &maxfd)
 		checktime(r, w, maxfd);
 }
 
-void server::accept_new_connection(fd_set &fd_r, int &maxfd)
+void server::accept_new_connection(fd_set &fd_r, int &maxfd, server &serv)
 {
 	if (clients.size() >= 1022)
 	{
@@ -245,6 +245,8 @@ void server::accept_new_connection(fd_set &fd_r, int &maxfd)
 	if ((tmp.ssocket = accept(ssocket, (struct sockaddr *)&tmp.cdata_socket, &len)) == -1)	throw(std::runtime_error("Error: init clients : accept()"));
 	FD_SET(tmp.ssocket , &fd_r);
 	gettimeofday(&tmp.clientTime, NULL);
+	tmp.port_server = serv.port;
+	tmp.adress_server = serv.adress;
 	clients.push_back(tmp);
 	maxfd = maxfd > tmp.ssocket ? maxfd : tmp.ssocket;
 }

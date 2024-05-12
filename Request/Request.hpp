@@ -134,7 +134,7 @@ class Request {
         void cutOffBodySegment(std::string &request);
         int send_response(client &);
         int read_request(client &, infra &);
-        const server &getMatchedServer(const infra &infra);
+        const server &getMatchedServer(uint16_t &, std::string &, const infra &);
         void uriQuery(std::string &uri);
         std::string generateResponse(client &, std::string &);
         void load_extension();

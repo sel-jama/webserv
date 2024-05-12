@@ -24,6 +24,8 @@ class client
         int w_done;
         //v1.1
         time_t wakt;
+        uint16_t                            port_server;
+        std::string                         adress_server;
 
         //mid-merge
         Request reqq;

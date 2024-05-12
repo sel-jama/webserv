@@ -90,7 +90,7 @@ void Method::handleDirectory(Request &req){
 	if (isDirHasIndexFiles(req) == false)
 		autoIndexing(req);
 	else{
-		req.path += "/" + req.fileName;
+		req.path +=  req.fileName;
 		if (stat(req.path.c_str(), &status) != 0){
 			req.statusCode = 500;
 			throw std::runtime_error("stat failed");

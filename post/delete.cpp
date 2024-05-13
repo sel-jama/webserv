@@ -4,25 +4,21 @@ void Delete::check_RequestedR(Request &obj){
     struct stat buffer;
     location obj1 = obj.getMatchedLocation();
     if(obj.path.empty() || obj.method != "DELETE"){
-        //not allowed
         obj.statusCode = 405; 
         throw std::runtime_error("eror");
     }
     const char *ptr = obj.path.c_str();
     int check = access(ptr, F_OK);
     if (check  == -1) {
-        // not found 404
         obj.statusCode = 404; 
         throw std::runtime_error("eror");
     }
-
     int val = stat(ptr, &buffer);
     (void)val;
     if(S_ISDIR(buffer.st_mode))
     {
         if(obj1.root.size()  >= obj.path.size())
         {
-            //forbiden 403
             obj.statusCode = 403; 
             throw std::runtime_error("eror");
         }

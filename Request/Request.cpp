@@ -23,7 +23,7 @@ contentLength(0), readbytes(0), readBody(0), firstRead(1)
 ,headersDone(0), statusCode(0), statusMsg(""), isChunked(0), 
 cgi(0), chunkPos(0), firstChunk(1), locationHeader(""), 
 cgi_File(""), cgi_File2("") , responseDone(0) ,filePath(""), filePosition(0), responseHeaders(""),r(0), file(){
-    size_body = 0; to_de = 0 ;flag = 0; saver_count = 0; tmp = 0; chunked_flag = 0; flag2 = 0; filename__ = "";
+    size_body = 0; to_de = 0 ;flag = 0; saver_count = 0; tmp = 0; chunked_flag = 0; flag2 = 0; filename__ = ""; chunk_body_saver = 0;
 }
 
 Request::~Request(){}
@@ -279,6 +279,12 @@ int    Request::getCheckRequest(client &client, const infra &infra) {
             client.r_done = 1;
         }
         server serve = client.reqq.getMatchedServer(client.port_server, client.adress_server, infra);
+        if ((size_t)serve.clientMaxBodySize < client.reqq.contentLength)
+        {
+            client.reqq.statusCode = 413;
+            throw std::runtime_error("max body size");
+        }
+        client.reqq.maxBodySize = serve.clientMaxBodySize;
         client.reqq.errorPages = serve.errorPages;
         client.reqq.retreiveRequestedResource(serve);
         if (!client.reqq.readBody && client.reqq.headersDone && client.reqq.method == "POST"){
@@ -391,6 +397,7 @@ void resetClientRequest(Request &req){
     req.fileName = "";
     req.chunked_flag = 0;
     req.chunkPos = 0;
+    req.chunk_body_saver = 0;
 
 }
 
@@ -420,6 +427,8 @@ std::string Request::generateResponse(client &client, std::string &content){
             response << "Content-Length: 0\r\n\r\n";
             return response.str();
         }
+        if (client.reqq.headers.find("cookie") != client.reqq.headers.end())
+            response << "Cookie: " << client.reqq.headers["cookie"];
         response << "Content-Length: " << responseContentLen << "\r\n\r\n";
     }
 
@@ -504,7 +513,6 @@ int Request::send_response(client &client){
             chunk = response;
         int sret = send(client.ssocket, chunk.c_str(), chunk.length(), 0);
         if (sret == -1){
-            std::cerr << "send failed ..." << std::endl;
             return 0;
         }
         if (sret == 0){
@@ -548,12 +556,15 @@ int Request::read_request(client &client, infra & infra){
                     client.reqq.body = "";
                 }
             }
-        }
-        else if(readBody){
-            if(!client.reqq.isChunked)
-            {
-                Post::body(client);
+            if (readBody && client.reqq.isChunked){
+                Post::chunked_body2(client);
+                if(client.reqq.chunked_flag == 0)
+                    Post::chunked_body(client);
             }
+        }
+        else{
+            if(!client.reqq.isChunked)
+                Post::body(client);
             else{
                 Post::chunked_body2(client);
                 if(client.reqq.chunked_flag == 0)

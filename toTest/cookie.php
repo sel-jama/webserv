@@ -5,15 +5,15 @@
         echo "Cookie yummy_cookie  is not set!";
     }
     echo "<br>";
-    if(isset($_COOKIE['hilal'])) {
-        echo "hilal Value is: " . $_COOKIE['hilal'];
+    if(isset($_COOKIE['fohha'])) {
+        echo "fohha Value is: " . $_COOKIE['fohha'];
     } else {
-        echo "Cookie hilal  is not set!";
+        echo "Cookie fohha  is not set!";
     }
     echo "<br>";
-    if(isset($_COOKIE['hilal'])) {
-        echo "hilal Value is: " . $_COOKIE['hilal'];
+    if(isset($_COOKIE['fohha'])) {
+        echo "fohha Value is: " . $_COOKIE['fohha'];
     } else {
-        echo "Cookie hilal  is not set!";
+        echo "Cookie fohha  is not set!";
     }
 ?>

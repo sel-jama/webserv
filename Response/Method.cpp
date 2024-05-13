@@ -160,7 +160,7 @@ void Method::directoryListing(Request &req){
 		throw std::runtime_error("Error opening directory");
 	}
 
-	page << "<html><head><title>Index of " << req.path.c_str() << "</title></head><body><h1>Index of " << req.path.c_str() << "</h1><ul>" << std::endl;
+	page << "<html><head><title>Index of " << req.fileName << "</title></head><body><ul>" << std::endl;
 
 	req.fileName += (!req.fileName.empty() && req.fileName.at(req.fileName.length()-1) == '/') ? "" : "/";
 

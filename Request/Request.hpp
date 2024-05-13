@@ -89,6 +89,8 @@ class Request {
         std::streampos filePosition;
         std::string responseHeaders;
         int r;
+        long long maxBodySize;
+        int chunk_body_saver;
 
         std::ofstream *file;
         Request();

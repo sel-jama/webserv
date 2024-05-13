@@ -22,11 +22,20 @@ version(""), body(""), reqStr(""), responseContentType(""), responseContentLen(0
 contentLength(0), readbytes(0), readBody(0), firstRead(1)
 ,headersDone(0), statusCode(0), statusMsg(""), isChunked(0), 
 cgi(0), chunkPos(0), firstChunk(1), locationHeader(""), 
-cgi_File(""), cgi_File2("") , responseDone(0) ,filePath(""), filePosition(0), responseHeaders(""),r(0){
+cgi_File(""), cgi_File2("") , responseDone(0) ,filePath(""), filePosition(0), responseHeaders(""),r(0), file(){
     size_body = 0; to_de = 0 ;flag = 0; saver_count = 0; tmp = 0; chunked_flag = 0; flag2 = 0; filename__ = "";
 }
 
 Request::~Request(){}
+
+// Copy constructor
+// Request::Request(const Request& other) : file(other.file) {}
+
+//     // Copy assignment operator
+// Request& Request::operator=(const Request& other) {
+//     this->file = other
+//     return *this;
+// }
 
 const std::string& Request::getMethod() const{
     return this->method;
@@ -397,9 +406,12 @@ std::string Request::generateResponse(client &client, std::string &content){
     std::string res;
     std::stringstream response;
     errorPage msg;
-    if (!client.reqq.statusCode){
+    //check status code
+    if (!client.reqq.statusCode && client.reqq.method == "GET"){
         client.reqq.statusCode = 200;
     }
+    else if (client.reqq.method == "POST" && !client.reqq.statusCode)
+        client.reqq.statusCode = 201;
     response << "HTTP/1.1 " << client.reqq.statusCode << " " << msg.statusMsgs[client.reqq.statusCode] << "\r\n";
     if (!client.reqq.cgi || client.reqq.statusCode >= 300){
         response << "Content-Type: " << responseContentType << "\r\n";
@@ -520,15 +532,15 @@ int Request::read_request(client &client, infra & infra){
                 if(!client.reqq.body.empty())
                 {
                     if (client.reqq.contentLength < client.reqq.body.size()){
-                        client.reqq.file.write(client.reqq.body.c_str(), client.reqq.contentLength);
+                        client.reqq.file->write(client.reqq.body.c_str(), client.reqq.contentLength);
                         client.reqq.size_body += client.reqq.contentLength;
                     }
                     else{
-                        client.reqq.file.write(client.reqq.body.c_str(), client.reqq.body.size());
+                        client.reqq.file->write(client.reqq.body.c_str(), client.reqq.body.size());
                         client.reqq.size_body += client.reqq.body.size();
                     }
                     if(client.reqq.body.size() >= client.reqq.contentLength){
-                        client.reqq.file.close();
+                        client.reqq.file->close();
                         client.reqq.statusCode = 201;
                         client.reqq.responseContentLen = client.reqq.body.length();
                         client.r_done = 1;

@@ -24,7 +24,8 @@ client::client(const client &other) :
     w_done(other.w_done),
     wakt(other.wakt),
     port_server(other.port_server),
-    adress_server(other.adress_server)
+    adress_server(other.adress_server),
+    reqq(other.reqq)
 {}
 
   
@@ -39,7 +40,9 @@ client& client::operator=(const client &other)
         w_done = other.w_done;
         wakt = other.wakt;
         adress_server = other.adress_server;
-        port_server = other.port_server;
+        port_server = other.port_server; 
+        reqq = other.reqq;
+
     }
     return *this;
 }

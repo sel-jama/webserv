@@ -9,6 +9,8 @@ class client;
 
 class server
 {
+	std::map<int, std::ofstream*> save_fds;
+
 	public:
 		uint16_t                            port;
 		std::string                         adress;

@@ -50,7 +50,8 @@ class Request {
         int flag2;
         size_t saver_count;
         int tmp;
-        std::ofstream file; 
+        //file 
+        
         std::string filename__;
         size_t size_body;
         size_t to_de;
@@ -88,8 +89,13 @@ class Request {
         std::streampos filePosition;
         std::string responseHeaders;
         int r;
+
+        std::ofstream *file;
         Request();
         ~Request();
+
+        // Request(const Request&);
+        // Request &operator=(const Request &);
 
         //getters
         const std::string& getMethod(void) const;

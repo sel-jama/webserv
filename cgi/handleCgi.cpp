@@ -253,8 +253,8 @@ char **handleCgi::createPostEnv(Request &req){
     std::map<std::string, std::string> mapEnv;
     
 	std::map<std::string, std::string>	headers = req.getHeaders();
-	if (headers.find("Auth-Scheme") != headers.end() && headers["Auth-Scheme"] != "")
-		mapEnv["AUTH_TYPE"] = headers["Authorization"];
+	if (headers.find("suth-scheme") != headers.end() && headers["auth-scheme"] != "")
+		mapEnv["AUTH_TYPE"] = headers["authorization"];
 
 	mapEnv["REDIRECT_STATUS"] = "201";
 	mapEnv["SCRIPT_NAME"] = req.path;
@@ -322,5 +322,6 @@ void handleCgi::executeCgiBody(Request &req){
         checkTimeout(req);
     }
 }
+
 
 

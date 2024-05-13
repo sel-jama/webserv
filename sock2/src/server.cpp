@@ -174,6 +174,8 @@ void server::clientdown(client &bclient, fd_set &r, fd_set &w,int &maxfd)
 {
 	FD_CLR(bclient.ssocket, &r);
 	FD_CLR(bclient.ssocket, &w);
+	save_fds[bclient.ssocket]->close();
+	save_fds.erase(bclient.ssocket);
 	close(bclient.ssocket);
 	for (std::vector<client>::iterator it = clients.begin(); it != clients.end(); ++it)
 	{
@@ -215,6 +217,8 @@ void server::accept_new_connection(fd_set &fd_r, int &maxfd, server &serv)
 	gettimeofday(&tmp.clientTime, NULL);
 	tmp.port_server = serv.port;
 	tmp.adress_server = serv.adress;
+	save_fds[tmp.ssocket] = new std::ofstream();
+	tmp.reqq.file = save_fds[tmp.ssocket];
 	clients.push_back(tmp);
 	maxfd = maxfd > tmp.ssocket ? maxfd : tmp.ssocket;
 }

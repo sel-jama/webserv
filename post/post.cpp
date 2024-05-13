@@ -143,7 +143,7 @@ void Post::support_upload(Request &obj)
 
                     obj.filename__ =  obj.getMatchedLocation().upload_path + obj.filename__;
                     // std::ofstream file(filename.c_str());
-                    obj.file.open(obj.filename__.c_str());
+                    obj.file->open(obj.filename__.c_str());
                     obj.cgi_File = obj.filename__; 
                     obj.cgi_File2 = obj.path;
                     obj.path = obj.filename__; //
@@ -181,11 +181,11 @@ void Post::body(client &obj){
         // // obj.reqq.size_body += obj.reqq.readRequest(obj.ssocket).length();
         // if(!obj.reqq.body.empty())
         // {
-        //     obj.reqq.file.write(obj.reqq.body.c_str(), obj.reqq.body.size());
+        //     obj.reqq.file->write(obj.reqq.body.c_str(), obj.reqq.body.size());
         //     obj.reqq.size_body += obj.reqq.body.size();
         //     if(obj.reqq.size_body >= obj.reqq.contentLength){
         //         std::cout << "helllllllo" << std::endl;
-        //         obj.reqq.file.close();
+        //         obj.reqq.file->close();
         //         obj.reqq.statusCode = 201;
         //         obj.reqq.responseContentLen = obj.reqq.body.length();
         //         obj.r_done = 1;
@@ -194,7 +194,7 @@ void Post::body(client &obj){
         //     obj.reqq.body = "";
         // }
         std::stringstream ss(obj.reqq.readRequest(obj));
-        obj.reqq.file.write(ss.str().c_str(), ss.str().size());
+        obj.reqq.file->write(ss.str().c_str(), ss.str().size());
         obj.reqq.size_body += ss.str().size();
         std::cout << "size tmp : " << obj.reqq.size_body << std::endl;
         std::cout << "content lenght: " << obj.reqq.contentLength << std::endl;
@@ -204,7 +204,7 @@ void Post::body(client &obj){
 
         // Post::support_upload(obj.reqq , (obj.reqq.readRequest(obj.ssocket)));
         std::cout << "helllllllo" << std::endl;
-        obj.reqq.file.close();
+        obj.reqq.file->close();
         Work_with_file(obj.reqq);
         obj.reqq.statusCode = 201;
         obj.reqq.responseContentLen = obj.reqq.body.length();
@@ -250,7 +250,7 @@ void Post::chunked_body(client &obj){
             std::cout << "my file : " << filename << std::endl;
             // std::ofstream file2(filename.c_str());
 
-            obj.reqq.file.open(filename.c_str());
+            obj.reqq.file->open(filename.c_str());
             
             std::cout << "hello" << std::endl;
             obj.reqq.cgi_File = filename; 
@@ -277,9 +277,9 @@ void Post::chunked_body(client &obj){
             }
             if(obj.reqq.body.size() >= obj.reqq.to_de)
             {
-                    obj.reqq.file.write(obj.reqq.body.c_str(), obj.reqq.to_de);
+                    obj.reqq.file->write(obj.reqq.body.c_str(), obj.reqq.to_de);
                     obj.reqq.body = obj.reqq.body.substr(obj.reqq.to_de, obj.reqq.body.length());
-                    obj.reqq.file.flush();
+                    obj.reqq.file->flush();
                     obj.reqq.saver_count = 0;
                 }
             if(obj.reqq.body.find("\r\n0\r\n\r\n") != std::string::npos)
@@ -288,10 +288,10 @@ void Post::chunked_body(client &obj){
                     if (obj.reqq.body[0] == '\r' && obj.reqq.body[1] == '\n')
                         obj.reqq.body = obj.reqq.body.substr(2, obj.reqq.body.length());
                     obj.reqq.body = obj.reqq.body.substr(obj.reqq.body.find("\r\n") + 2 , obj.reqq.body.size());
-                    obj.reqq.file.write(obj.reqq.body.c_str(), obj.reqq.body.size() - 5);
-                    obj.reqq.file.flush();
+                    obj.reqq.file->write(obj.reqq.body.c_str(), obj.reqq.body.size() - 5);
+                    obj.reqq.file->flush();
                     std::cout << "Done" << std::endl;
-                    obj.reqq.file.close();
+                    obj.reqq.file->close();
                     obj.reqq.statusCode = 201;
                     obj.r_done = 1;
 
@@ -328,7 +328,7 @@ void Post::chunked_body2(client &obj){
                     filename = "/" + obj2.generateRandomFileName() + ".txt";
                 }
                 filename = obj3.upload_path+ filename;
-                obj.reqq.file.open(filename.c_str());
+                obj.reqq.file->open(filename.c_str());
                 obj.reqq.cgi_File = filename;
                 obj.reqq.cgi_File2 = obj.reqq.path;
                 obj.reqq.flag = 1;
@@ -350,16 +350,16 @@ void Post::chunked_body2(client &obj){
             }
             if(obj.reqq.body.size() >= obj.reqq.to_de)
             {
-                    obj.reqq.file.write(obj.reqq.body.c_str(), obj.reqq.to_de);
+                    obj.reqq.file->write(obj.reqq.body.c_str(), obj.reqq.to_de);
                     obj.reqq.body = obj.reqq.body.substr(obj.reqq.to_de, obj.reqq.body.length());
-                    obj.reqq.file.flush();
+                    obj.reqq.file->flush();
                     obj.reqq.saver_count = 0;
             }
             if(obj.reqq.body.find("\r\n0\r\n\r\n") != std::string::npos)
             {
-                obj.reqq.file.write(obj.reqq.body.c_str(), obj.reqq.body.size() - 5);
+                obj.reqq.file->write(obj.reqq.body.c_str(), obj.reqq.body.size() - 5);
                 std::cout << obj.reqq.body << std::endl;
-                obj.reqq.file.flush();
+                obj.reqq.file->flush();
                 std::cout << "salit <---" << std::endl;
                 obj.reqq.statusCode = 201;
                 obj.reqq.responseContentLen = obj.reqq.to_de2;

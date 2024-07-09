@@ -279,7 +279,8 @@ int    Request::getCheckRequest(client &client, const infra &infra) {
             client.r_done = 1;
         }
         server serve = client.reqq.getMatchedServer(client.port_server, client.adress_server, infra);
-        if ((size_t)serve.clientMaxBodySize < client.reqq.contentLength)
+        client.reqq.port = client.port_server;
+        if ((size_t)serve.clientMaxBodySize < client.reqq.contentLength && !client.reqq.isChunked)
         {
             client.reqq.statusCode = 413;
             throw std::runtime_error("max body size");
@@ -398,7 +399,6 @@ void resetClientRequest(Request &req){
     req.chunked_flag = 0;
     req.chunkPos = 0;
     req.chunk_body_saver = 0;
-
 }
 
 std::string Request::generateResponse(client &client, std::string &content){
@@ -473,7 +473,7 @@ int Request::send_response(client &client){
                     throw std::runtime_error("Request reading failed");
                 content = Response::handleMethod(client);
             }
-            if (client.reqq.cgi){
+            if (client.reqq.cgi && client.reqq.statusCode != 201){
                 client.reqq.get.cgi.checkTimeout(client.reqq);
                 if (!client.reqq.get.cgi.response.empty())
                     content = client.reqq.get.cgi.response;
@@ -549,6 +549,7 @@ int Request::read_request(client &client, infra & infra){
                     }
                     if(client.reqq.body.size() >= client.reqq.contentLength){
                         client.reqq.file->close();
+                        Post::Work_with_file(client.reqq);
                         client.reqq.statusCode = 201;
                         client.reqq.responseContentLen = client.reqq.body.length();
                         client.r_done = 1;

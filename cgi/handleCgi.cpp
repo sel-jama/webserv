@@ -250,7 +250,6 @@ void handleCgi::checkTimeout(Request &req){
 //POST CGI >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
 
 char **handleCgi::createPostEnv(Request &req){
-    std::cout << req.path.substr(0, req.path.find_last_of('/')) << std::endl;
     std::map<std::string, std::string> mapEnv;
     
 	std::map<std::string, std::string>	headers = req.getHeaders();
@@ -258,18 +257,17 @@ char **handleCgi::createPostEnv(Request &req){
 		mapEnv["AUTH_TYPE"] = headers["authorization"];
 
 	mapEnv["REDIRECT_STATUS"] = "201";
-	mapEnv["SCRIPT_NAME"] = req.path;
+	mapEnv["SCRIPT_NAME"] = req.cgi_File2;
 	mapEnv["SCRIPT_FILENAME"] = scriptName;
 	mapEnv["REQUEST_METHOD"] = "POST";
     std::ostringstream oss;
     oss << req.responseContentLen;
 	mapEnv["CONTENT_LENGTH"] = oss.str();
-    std::cout << req.headers["content-type"] << std::endl;
 	mapEnv["CONTENT_TYPE"] = req.headers["content-type"];
 	mapEnv["SERVER_NAME"] = headers["host"];
 	mapEnv["SERVER_PORT"] = req.port;
 	mapEnv["SERVER_PROTOCOL"] = "HTTP/1.1";
-    mapEnv["PATH_INFO"] = req.path.substr(0, req.path.find_last_of('/'));
+    mapEnv["PATH_INFO"] = req.cgi_File2;
     mapEnv["HTTP_COOKIE"] = headers["cookie"];
     
     char	**env = new char*[mapEnv.size() + 1];
@@ -288,15 +286,15 @@ void handleCgi::executeCgiBody(Request &req){
     req.cgi = 1;
     setScriptName(req.cgi_File);
     std::string randomFile = generateRandomFileName();
-    req.cgi_File2 = req.matchedLocation.upload_path +"/Cgi_"+ randomFile;
+    std::string cgiOutput = req.matchedLocation.upload_path +"/Cgi_"+ randomFile;
     
-    std::ofstream outputFile(req.cgi_File2.c_str());
+    std::ofstream outputFile(cgiOutput.c_str());
     if (!outputFile.is_open()){
         req.statusCode = 500;
         throw std::runtime_error("failed to open file ...");
     }
 
-    pid_t pid = fork();
+    pid = fork();
     if (pid == -1){
         std::remove(random.c_str());
         req.statusCode = 500;
@@ -305,7 +303,7 @@ void handleCgi::executeCgiBody(Request &req){
 
     else if (pid == 0){
         if (freopen(req.cgi_File.c_str(), "r", stdin) == NULL
-            || freopen(req.cgi_File2.c_str(), "w", stdout) == NULL){
+            || freopen(cgiOutput.c_str(), "w", stdout) == NULL){
             req.statusCode = 500;
             throw std::runtime_error("failed to redirect input..");
         }

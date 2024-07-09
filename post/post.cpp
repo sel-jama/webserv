@@ -288,6 +288,7 @@ void Post::chunked_body2(client &obj){
             {
                 obj.reqq.file->write(obj.reqq.body.c_str(), obj.reqq.body.size() - 5);
                 obj.reqq.file->flush();
+                obj.reqq.file->close();
                 obj.reqq.statusCode = 201;
                 obj.reqq.responseContentLen = obj.reqq.to_de2;
                 obj.r_done = 1;
